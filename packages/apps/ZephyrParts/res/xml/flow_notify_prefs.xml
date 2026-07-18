@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    FlowNotify — 流光通知偏好设置
+    原创功能：智能分组、横幅时长、通知历史、智能免打扰、紧凑样式
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/flow_notify_title">
+
+    <PreferenceCategory android:title="@string/flow_notify_title">
+
+        <SwitchPreference
+            android:key="flow_notify_smart_group"
+            android:title="@string/flow_notify_smart_group"
+            android:defaultValue="true" />
+
+        <SeekBarPreference
+            android:key="flow_notify_heads_up_duration"
+            android:title="@string/flow_notify_heads_up_duration"
+            android:max="10"
+            android:defaultValue="3" />
+
+        <SwitchPreference
+            android:key="flow_notify_history"
+            android:title="@string/flow_notify_history"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="flow_notify_quiet_hours"
+            android:title="@string/flow_notify_quiet_hours"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="flow_notify_compact_style"
+            android:title="@string/flow_notify_compact_style"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

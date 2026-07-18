@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.zephyr.wallpapers"
+    android:sharedUserId="android.uid.system">
+
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
+
+    <application
+        android:label="@string/zephyr_wallpapers_title"
+        android:icon="@drawable/ic_zephyr_wallpapers"
+        android:theme="@style/Theme.Zephyr.Wallpapers"
+        android:supportsRtl="true">
+
+        <!-- 壁纸选择主入口 -->
+        <activity
+            android:name=".WallpaperPickerActivity"
+            android:label="@string/zephyr_wallpapers_title"
+            android:exported="true"
+            android:permission="android.permission.SET_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.APP_WALLPAPER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SET_WALLPAPER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- 壁纸预览 Activity -->
+        <activity
+            android:name=".WallpaperPreviewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Zephyr.Wallpapers.Fullscreen" />
+
+    </application>
+
+</manifest>

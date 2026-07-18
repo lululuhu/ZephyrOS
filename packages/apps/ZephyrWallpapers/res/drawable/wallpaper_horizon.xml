@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS Original Wallpaper #5: "地平线"
+    上半白下半深绿, 极简对半分割
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1080dp"
+    android:height="1920dp"
+    android:viewportWidth="1080"
+    android:viewportHeight="1920">
+
+    <!-- 上半 -->
+    <path android:fillColor="#FFFAFCFA" android:pathData="M0,0 H1080 V960 H0 Z" />
+
+    <!-- 下半 -->
+    <path android:fillColor="#FF1E8F56" android:pathData="M0,960 H1080 V1920 H0 Z" />
+
+    <!-- 地平线高光 -->
+    <path android:fillColor="#FF9CE5C5" android:pathData="M0,960 H1080 V968 H0 Z" />
+
+</vector>

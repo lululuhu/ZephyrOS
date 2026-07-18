@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrParts — Arrays
+    各 ListPreference 的下拉选项（中文）。
+-->
+<resources>
+
+    <!-- 电池图标样式 -->
+    <string-array name="battery_style_entries">
+        <item>横向条</item>
+        <item>圆形</item>
+        <item>隐藏</item>
+    </string-array>
+    <string-array name="battery_style_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <!-- 时钟位置 -->
+    <string-array name="clock_pos_entries">
+        <item>左</item>
+        <item>中</item>
+        <item>右</item>
+    </string-array>
+    <string-array name="clock_pos_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <!-- 手势条样式 -->
+    <string-array name="pill_style_entries">
+        <item>细</item>
+        <item>粗</item>
+        <item>隐藏</item>
+    </string-array>
+    <string-array name="pill_style_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <!-- 底角滑动动作 -->
+    <string-array name="corner_swipe_entries">
+        <item>无</item>
+        <item>截图</item>
+        <item>分屏</item>
+        <item>切换应用</item>
+    </string-array>
+    <string-array name="corner_swipe_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <!-- 清风色板 -->
+    <string-array name="palette_entries">
+        <item>清风绿（默认）</item>
+        <item>薄荷青</item>
+        <item>湖蓝</item>
+        <item>琥珀</item>
+        <item>玫瑰</item>
+    </string-array>
+    <string-array name="palette_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <!-- 字体 -->
+    <string-array name="font_entries">
+        <item>清风默认</item>
+        <item>清风黑体</item>
+        <item>清风圆体</item>
+    </string-array>
+    <string-array name="font_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <!-- 图标包 -->
+    <string-array name="icon_pack_entries">
+        <item>清风原生</item>
+        <item>清风线性</item>
+        <item>清风圆角</item>
+    </string-array>
+    <string-array name="icon_pack_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+</resources>

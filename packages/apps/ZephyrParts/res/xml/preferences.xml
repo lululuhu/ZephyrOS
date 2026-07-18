@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrParts — Main Preferences
+    8 大原创功能模块的入口卡片。点击进入对应子面板。
+    使用 PreferenceScreen + header 布局，遵循 AOSP 设置风格。
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/zephyr_parts_title">
+
+    <!-- 顶部纯净承诺 -->
+    <Preference
+        android:key="zephyr_pure_promise"
+        android:title="@string/zephyr_pure_promise"
+        android:summary="@string/zephyr_pure_promise_text"
+        android:selectable="false" />
+
+    <!-- 1. 清风状态栏 -->
+    <Preference
+        android:key="zephyr_status"
+        android:title="@string/zephyr_status_title"
+        android:summary="@string/zephyr_status_summary"
+        android:fragment="com.android.zephyr.parts.StatusBarSettings" />
+
+    <!-- 2. 流光通知 -->
+    <Preference
+        android:key="flow_notify"
+        android:title="@string/flow_notify_title"
+        android:summary="@string/flow_notify_summary"
+        android:fragment="com.android.zephyr.parts.FlowNotifySettings" />
+
+    <!-- 3. 清风手势 -->
+    <Preference
+        android:key="zephyr_gesture"
+        android:title="@string/zephyr_gesture_title"
+        android:summary="@string/zephyr_gesture_summary"
+        android:fragment="com.android.zephyr.parts.ZephyrGestureSettings" />
+
+    <!-- 4. 全面屏手势 -->
+    <Preference
+        android:key="immersive_flow"
+        android:title="@string/immersive_flow_title"
+        android:summary="@string/immersive_flow_summary"
+        android:fragment="com.android.zephyr.parts.ImmersiveFlowSettings" />
+
+    <!-- 5. 应用管家 -->
+    <Preference
+        android:key="app_vault"
+        android:title="@string/app_vault_title"
+        android:summary="@string/app_vault_summary"
+        android:fragment="com.android.zephyr.parts.AppVaultSettings" />
+
+    <!-- 6. 续航引擎 -->
+    <Preference
+        android:key="power_core"
+        android:title="@string/power_core_title"
+        android:summary="@string/power_core_summary"
+        android:fragment="com.android.zephyr.parts.PowerCoreSettings" />
+
+    <!-- 7. 隐私卫士 -->
+    <Preference
+        android:key="privacy_guard"
+        android:title="@string/privacy_guard_title"
+        android:summary="@string/privacy_guard_summary"
+        android:fragment="com.android.zephyr.parts.PrivacyGuardSettings" />
+
+    <!-- 8. 主题工坊 -->
+    <Preference
+        android:key="theme_studio"
+        android:title="@string/theme_studio_title"
+        android:summary="@string/theme_studio_summary"
+        android:fragment="com.android.zephyr.parts.ThemeStudioSettings" />
+
+    <!-- 关于清风 -->
+    <Preference
+        android:key="zephyr_about"
+        android:title="@string/zephyr_about_title" />
+
+</PreferenceScreen>

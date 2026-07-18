@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS Original Wallpaper #6: "薄荷"
+    同心圆, 薄荷色调
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1080dp"
+    android:height="1920dp"
+    android:viewportWidth="1080"
+    android:viewportHeight="1920">
+
+    <path
+        android:fillColor="#FFE8F5EE"
+        android:pathData="M0,0 H1080 V1920 H0 Z" />
+
+    <!-- 同心圆 -->
+    <path android:strokeColor="#FF9CE5C5" android:strokeWidth="3"
+          android:fillColor="@android:color/transparent"
+          android:pathData="M540,960 m-700,0 a700,700 0,1,0,1400,0 a700,700 0,1,0,-1400,0" />
+
+    <path android:strokeColor="#FF2EB872" android:strokeWidth="3"
+          android:fillColor="@android:color/transparent"
+          android:pathData="M540,960 m-500,0 a500,500 0,1,0,1000,0 a500,500 0,1,0,-1000,0" />
+
+    <path android:strokeColor="#FF1E8F56" android:strokeWidth="3"
+          android:fillColor="@android:color/transparent"
+          android:pathData="M540,960 m-300,0 a300,300 0,1,0,600,0 a300,300 0,1,0,-600,0" />
+
+    <path android:fillColor="#FF2EB872"
+          android:pathData="M540,960 m-30,0 a30,30 0,1,0,60,0 a30,30 0,1,0,-60,0" />
+
+</vector>

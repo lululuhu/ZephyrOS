@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    ZephyrOS Local Manifest
+
+    将 ZephyrOS 自定义层挂入 AOSP 源码树.
+
+    资源策略:
+      icons       : 使用 PixelOS 项目开源图标 (Apache 2.0)
+                    来源: https://github.com/PixelOS-AOSP
+                    许可证: Apache License 2.0 (兼容 AOSP)
+      bootanim    : ZephyrOS 原创设计
+      wallpapers  : ZephyrOS 原创几何壁纸
+      fonts       : 基于开源字体 (OFL) 集成, 不使用 Roboto/思源默认
+      launcher    : Lawnchair (Apache 2.0), 替换 AOSP 默认 Launcher3
+                    来源: https://github.com/LawnchairLauncher/lawnchair
+
+    使用前请先在 GitHub 创建以下空仓库并填入 fetch 路径, 再取消注释.
+-->
+<manifest>
+
+    <!-- ZephyrOS 远程仓库统一入口 (占位, 请替换为你的 GitHub 组织) -->
+    <remote name="zephyr"
+            fetch="https://github.com/ZephyrOS-Project/"
+            revision="main" />
+
+    <!-- PixelOS 远程入口: 用于引入图标资源 -->
+    <remote name="pixelos"
+            fetch="https://github.com/PixelOS-AOSP/"
+            revision="thirteen" />
+
+    <!-- Lawnchair 远程入口: 替换 AOSP 默认 Launcher3 -->
+    <remote name="lawnchair"
+            fetch="https://github.com/LawnchairLauncher/"
+            revision="14" />
+
+    <!-- 1. 图标资源 来自 PixelOS (Apache 2.0)
+         仅引入图标 drawable, 不引入 PixelOS 的 SystemUI 代码 -->
+
+    <!--
+    <project path="vendor/zephyr/icons"
+             name="android_vendor_pixelos-icons"
+             remote="pixelos"
+             revision="main" />
+    -->
+
+    <!-- 2. 原创资源 ZephyrOS 项目维护
+         开机动画 / 壁纸 / 字体 均为原创, 不依赖任何现有 ROM -->
+
+    <!--
+    <project path="vendor/zephyr/bootanimation"
+             name="android_vendor_zephyr_bootanimation"
+             remote="zephyr" />
+
+    <project path="vendor/zephyr/wallpapers"
+             name="android_vendor_zephyr_wallpapers"
+             remote="zephyr" />
+
+    <project path="vendor/zephyr/fonts"
+             name="android_vendor_zephyr_fonts"
+             remote="zephyr" />
+    -->
+
+    <!-- 3. 桌面启动器 Lawnchair (Apache 2.0)
+         替换 AOSP 默认 Launcher3, 提供更丰富的桌面自定义能力
+         分支 14 对应 Android 14 -->
+
+    <project path="packages/apps/Lawnchair"
+             name="lawnchair"
+             remote="lawnchair"
+             revision="14" />
+
+</manifest>

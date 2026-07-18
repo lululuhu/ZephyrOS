@@ -1,0 +1,51 @@
+ZephyrOS — 第三方资源许可证汇总
+================================
+
+本文件汇总 ZephyrOS 集成的所有第三方开源资源及其许可证.
+ZephyrOS 自有原创资源 (开机动画 / 壁纸 / ZephyrParts 应用 / SystemUI 钩子)
+遵循 Apache License 2.0, 版权归 ZephyrOS Project 所有.
+
+1. Android Open Source Project (AOSP)
+   来源: https://android.googlesource.com
+   许可证: Apache License 2.0
+   用途: 系统基线
+
+2. PixelOS 图标资源
+   来源: https://github.com/PixelOS-AOSP
+   许可证: Apache License 2.0
+   用途: 系统状态栏 / 系统应用图标
+
+3. Roboto 字体
+   来源: https://github.com/googlefonts/roboto
+   许可证: Apache License 2.0
+   用途: ZephyrSans-* (无衬线英文字体)
+
+4. Varela Round 字体
+   来源: https://fonts.google.com/specimen/Varela+Round
+   许可证: SIL Open Font License 1.1
+   用途: ZephyrRound-* (圆体英文字体)
+
+5. Noto Sans CJK SC 字体
+   来源: https://github.com/notofonts/noto-cjk
+   许可证: SIL Open Font License 1.1
+   用途: ZephyrCJK-* (中文字体)
+
+6. Lawnchair 桌面启动器
+   来源: https://github.com/LawnchairLauncher/lawnchair
+   许可证: Apache License 2.0
+   用途: 默认桌面启动器 (替换 AOSP Launcher3)
+
+完整许可证文本:
+  /system/etc/licenses/APACHE-LICENSE.txt
+  /system/etc/licenses/OFL-LICENSE.txt
+
+ZephyrOS 原创资源版权:
+  Copyright (c) 2024-2026 ZephyrOS Project Contributors
+  许可证: Apache License 2.0
+
+纯净系统承诺:
+  - 无任何形式的商业广告
+  - 不内置第三方商业推广内容
+  - 不上传任何用户隐私数据
+  - 不预装任何非自由 / 闭源商业应用
+  - 所有功能均为原创实现

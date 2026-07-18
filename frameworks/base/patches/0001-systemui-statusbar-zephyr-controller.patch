@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ZephyrOS Project <ci@zephyros.local>
+Date: Fri, 18 Jul 2026 00:00:00 +0800
+Subject: [PATCH 1/2] systemui: inject ZephyrStatusBarController into CentralSurfaces
+
+注入 ZephyrOS 原创状态栏控制器到 SystemUI CentralSurfaces.
+- 在 startCoreServices() 中初始化 ZephyrStatusBarController
+- 不修改原生 StatusBar 类, 仅追加 controller 调用
+- 通过 SettingsObserver 响应 ZephyrParts 设置变化
+
+ZephyrOS 原创实现, 不抄袭任何现有 ROM.
+
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfaces.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfaces.java
+index 0000000..1111111 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfaces.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfaces.java
+@@ -XX,XX +XX,XX @@ public class CentralSurfaces implements CoreStartable, Dumpable {
+     // ============ ZephyrOS 原创状态栏控制器 ============
+     // 注入 ZephyrStatusBarController, 监听 zephyr_status_* 设置变化
++    @Inject
++    @Nullable
++    private com.android.systemui.zephyr.ZephyrStatusBarController mZephyrStatusBarController;
+
+     @Override
+     public void start() {
+         // ... existing code ...
+
++        // ZephyrOS: 启动状态栏自定义控制器
++        if (mZephyrStatusBarController != null) {
++            try {
++                mZephyrStatusBarController.start();
++            } catch (Throwable t) {
++                android.util.Log.w("ZephyrStatusBar",
++                        "Failed to start ZephyrStatusBarController", t);
++            }
++        }
+     }
+ }
+--
+2.43.0

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS Original Wallpaper #1: "微风"
+    极简白底 + 三条清风曲线, 与系统图标呼应
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1080dp"
+    android:height="1920dp"
+    android:viewportWidth="1080"
+    android:viewportHeight="1920">
+
+    <path
+        android:fillColor="#FFFAFCFA"
+        android:pathData="M0,0 H1080 V1920 H0 Z" />
+
+    <!-- 三条风纹 -->
+    <path
+        android:strokeColor="#FF2EB872"
+        android:strokeWidth="14"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M180,820 Q540,720 900,820" />
+
+    <path
+        android:strokeColor="#FF9CE5C5"
+        android:strokeWidth="10"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M180,960 Q540,860 900,960" />
+
+    <path
+        android:strokeColor="#FF1E8F56"
+        android:strokeWidth="8"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M180,1100 Q540,1000 900,1100" />
+
+</vector>

@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ZephyrOS Project <ci@zephyros.local>
+Date: Fri, 18 Jul 2026 00:00:00 +0800
+Subject: [PATCH 2/2] systemui: inject ZephyrGestureController
+
+注入 ZephyrOS 原创手势控制器到 SystemUI.
+- 在 startCoreServices() 中初始化 ZephyrGestureController
+- 应用边缘滑动灵敏度 / 三指截屏 / 单手模式设置
+
+ZephyrOS 原创实现, 不抄袭任何现有 ROM.
+
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfaces.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfaces.java
+index 1111111..2222222 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfaces.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfaces.java
+@@ -XX,XX +XX,XX @@ public class CentralSurfaces implements CoreStartable, Dumpable {
++    @Inject
++    @Nullable
++    private com.android.systemui.zephyr.ZephyrGestureController mZephyrGestureController;
+
+     @Override
+     public void start() {
++        // ZephyrOS: 启动手势控制器
++        if (mZephyrGestureController != null) {
++            try {
++                mZephyrGestureController.start();
++            } catch (Throwable t) {
++                android.util.Log.w("ZephyrGesture",
++                        "Failed to start ZephyrGestureController", t);
++            }
++        }
+     }
+ }
+--
+2.43.0

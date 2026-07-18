@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    AppVault — 应用管家偏好设置
+    原创功能：应用锁、隐藏、分身、冻结、安装来源追踪
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/app_vault_title">
+
+    <PreferenceCategory android:title="@string/app_vault_title">
+
+        <SwitchPreference
+            android:key="app_vault_locker"
+            android:title="@string/app_vault_locker"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="app_vault_hide"
+            android:title="@string/app_vault_hide"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="app_vault_dual"
+            android:title="@string/app_vault_dual"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="app_vault_freezer"
+            android:title="@string/app_vault_freezer"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="app_vault_install_source"
+            android:title="@string/app_vault_install_source"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

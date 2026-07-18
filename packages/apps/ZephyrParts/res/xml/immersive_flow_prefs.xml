@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ImmersiveFlow — 全面屏手势偏好设置
+    原创功能：手势条样式、底角滑动、下滑拉通知
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/immersive_flow_title">
+
+    <PreferenceCategory android:title="@string/immersive_flow_title">
+
+        <ListPreference
+            android:key="immersive_flow_pill_style"
+            android:title="@string/immersive_flow_pill_style"
+            android:entries="@array/pill_style_entries"
+            android:entryValues="@array/pill_style_values"
+            android:defaultValue="0" />
+
+        <ListPreference
+            android:key="immersive_flow_corner_swipe"
+            android:title="@string/immersive_flow_corner_swipe"
+            android:entries="@array/corner_swipe_entries"
+            android:entryValues="@array/corner_swipe_values"
+            android:defaultValue="0" />
+
+        <SwitchPreference
+            android:key="immersive_flow_swipe_down_pill"
+            android:title="@string/immersive_flow_swipe_down_pill"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

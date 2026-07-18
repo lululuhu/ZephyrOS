@@ -1,0 +1,20 @@
+ZephyrOS (清风系统) — 社区版
+================================
+
+Copyright (c) 2024-2026 ZephyrOS Project Contributors
+
+纯净系统承诺：
+  - 无任何形式的商业广告
+  - 不内置第三方商业推广内容
+  - 不上传任何用户隐私数据
+  - 不预装任何非自由 / 闭源商业应用
+  - 所有功能均为原创实现
+
+本系统基于 Android Open Source Project (AOSP) 衍生，
+遵循 Apache License 2.0 开源协议发布。
+
+所有原创功能模块（ZephyrStatus / FlowNotify / ZephyrGesture /
+ImmersiveFlow / AppVault / PowerCore / PrivacyGuard / ThemeStudio）
+的源码与设计均由 ZephyrOS 项目原创，未抄袭任何现有 ROM。
+
+详细许可证见 /system/etc/licenses/

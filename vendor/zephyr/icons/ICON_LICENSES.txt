@@ -1,0 +1,25 @@
+Copyright (c) 2024-2026 ZephyrOS Project
+
+ZephyrOS 图标包归属声明
+========================
+
+ZephyrOS 系统图标资源 (状态栏 / 系统应用图标) 使用 PixelOS 项目
+开源图标, 特此声明并致谢.
+
+来源:
+  https://github.com/PixelOS-AOSP
+
+许可证:
+  Apache License 2.0
+  https://www.apache.org/licenses/LICENSE-2.0
+
+PixelOS 项目保留其原始版权. ZephyrOS 仅引用其图标资源, 不修改其内容,
+不声称对其拥有版权.
+
+ZephyrOS 自有原创资源 (开机动画 / 壁纸 / 字体集成 / 应用图标) 与 PixelOS
+无任何关联, 版权归 ZephyrOS Project 所有.
+
+完整 Apache 2.0 许可证文本见: /system/etc/licenses/APACHE-LICENSE.txt
+
+致谢:
+  感谢 PixelOS 项目为 Android 社区提供的优质开源资源.

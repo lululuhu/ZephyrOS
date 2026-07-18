@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="zephyr_wallpapers_title">清风壁纸</string>
+    <string name="zephyr_wallpaper_apply">应用壁纸</string>
+    <string name="zephyr_wallpaper_preview">预览</string>
+
+    <!-- 原创壁纸名称 -->
+    <string name="wallpaper_breeze">微风</string>
+    <string name="wallpaper_grove">林间</string>
+    <string name="wallpaper_steam">流光</string>
+    <string name="wallpaper_dewdrop">晨露</string>
+    <string name="wallpaper_horizon">地平线</string>
+    <string name="wallpaper_mint">薄荷</string>
+
+</resources>

@@ -1,0 +1,27 @@
+Copyright (c) 2024-2026 ZephyrOS Project
+
+ZephyrOS 字体集成许可证
+=========================
+
+ZephyrOS 集成以下开源字体, 遵循其原始许可证:
+
+1. Roboto (ZephyrSans-*.ttf)
+   来源: https://github.com/googlefonts/roboto
+   许可证: Apache License 2.0
+   版权: Copyright (c) 2011 Google Inc.
+
+2. Varela Round (ZephyrRound-Regular.ttf)
+   来源: https://fonts.google.com/specimen/Varela+Round
+   许可证: SIL Open Font License 1.1
+   版权: Copyright (c) 2011 Joe Prince
+
+3. Noto Sans CJK SC (ZephyrCJK-*.otf)
+   来源: https://github.com/notofonts/noto-cjk
+   许可证: SIL Open Font License 1.1
+   版权: Copyright (c) 2014-2024 Google Inc.
+
+集成方式为原创 (字体族命名 / weight 映射 / fonts.xml 配置),
+但字体文件本体遵循上述原始许可证, 不可移除本声明.
+
+完整 OFL 许可证文本见: /system/etc/licenses/OFL-LICENSE.txt
+完整 Apache 2.0 许可证文本见: /system/etc/licenses/APACHE-LICENSE.txt

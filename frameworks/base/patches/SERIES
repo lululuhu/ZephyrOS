@@ -1,0 +1,113 @@
+# ============================================================================
+# ZephyrOS Framework Patches — Series
+# ----------------------------------------------------------------------------
+# ZephyrOS 对 AOSP 14 framework / SystemUI 的补丁列表.
+# 实现 8 大原创功能模块的"框架层钩子", 使 ZephyrParts 设置生效.
+#
+# 应用方式 (CI 自动执行):
+#   cd /mnt/aosp
+#   for p in frameworks/base/patches/*.patch; do
+#       git apply --verbose "$p" || echo "WARN: $p failed"
+#   done
+#
+# 状态:
+#   [DONE]    — 已实现并已生成补丁文件
+#   [PARTIAL] — 已实现 controller 类, 补丁待补
+#   [TODO]    — 待实现
+# ============================================================================
+
+# ---------- ZephyrStatus 清风状态栏 ----------
+[DONE]    0001-systemui-statusbar-zephyr-controller.patch
+          - ZephyrStatusBarController 类已创建 (src/com/android/systemui/zephyr/)
+          - 注入 CentralSurfaces.java 补丁已就绪
+          - 监听 Settings.System.zephyr_status_* 变化并应用
+          - TODO: 网速胶囊 / 清风胶囊的具体 UI 注入 (StatusBarIconController)
+
+[PARTIAL] 0002-systemui-battery-style-switch.patch
+           - ZephyrStatusBarController 已读取 battery_style 设置
+           - TODO: BatteryMeterView drawable 切换实现
+
+[PARTIAL] 0003-systemui-clock-position.patch
+           - ZephyrStatusBarController 已读取 clock_pos 设置
+           - TODO: ClockController LayoutGravity 调整
+
+# ---------- FlowNotify 流光通知 ----------
+[TODO]    0004-systemui-notify-smart-group.patch
+          - 通知按应用类别智能分组
+
+[TODO]    0005-systemui-notify-heads-up-duration.patch
+          - 横幅通知停留时长可调
+
+# ---------- ZephyrGesture 清风手势 ----------
+[DONE]    0002-systemui-gesture-zephyr-controller.patch (注: 序号已用 0002)
+          - ZephyrGestureController 类已创建
+          - 注入 CentralSurfaces.java 补丁已就绪
+          - 5 档边缘灵敏度映射到 persist.zephyr.edge_swipe_width_dp
+          - TODO: EdgeBackGestureHandler 读取该 SystemProperty
+
+[PARTIAL] 0007-frameworks-input-three-finger-screenshot.patch
+           - ZephyrGestureController 已读取三指截屏开关
+           - TODO: InputManagerService 三指手势识别钩子
+
+# ---------- ImmersiveFlow 全面屏手势 ----------
+[TODO]    0008-systemui-navbar-pill-style.patch
+          - 手势条样式: 细 / 粗 / 隐藏
+
+[TODO]    0009-frameworks-input-corner-swipe.patch
+          - 底角滑动动作映射
+
+# ---------- AppVault 应用管家 ----------
+[TODO]    0010-frameworks-app-locker.patch
+          - 应用锁 (指纹/密码) 拦截 Activity 启动
+
+[TODO]    0011-frameworks-app-freezer.patch
+          - 应用冻结 (PackageManager 隐藏)
+
+[TODO]    0012-frameworks-app-dual.patch
+          - 应用分身 (多用户机制扩展)
+
+# ---------- PowerCore 续航引擎 ----------
+[TODO]    0013-frameworks-doze-policy.patch
+          - 深度休眠策略增强
+
+[TODO]    0014-frameworks-wakelock-monitor.patch
+          - Wakelock 持有监控与告警
+
+# ---------- PrivacyGuard 隐私卫士 ----------
+[TODO]    0015-frameworks-permission-dashboard.patch
+          - 权限使用记录仪表盘
+
+[TODO]    0016-frameworks-clipboard-access-alert.patch
+          - 剪贴板访问 Toast 提醒
+
+[TODO]    0017-frameworks-network-firewall.patch
+          - 应用级网络防火墙 (基于 NetworkPolicyManager)
+
+# ---------- ThemeStudio 主题工坊 ----------
+[TODO]    0018-frameworks-theme-overlay-runtime.patch
+          - 运行时切换主题色板 (Runtime Resource Overlay)
+
+[TODO]    0019-frameworks-icon-pack-loader.patch
+          - PixelOS 图标包加载器
+
+# ============================================================================
+# 已完成的 SystemUI 钩子源码
+# ----------------------------------------------------------------------------
+# frameworks/base/packages/SystemUI/src/com/android/systemui/zephyr/
+#   ZephyrStatusBarController.java   — 状态栏设置应用
+#   ZephyrGestureController.java     — 手势设置应用
+#
+# frameworks/base/packages/SystemUI/ZephyrHooks/
+#   Android.bp                       — 编译目标 (ZephyrSystemUIHooks)
+#   zephyr_hooks.mk                  — vendor 引入配置
+# ============================================================================
+
+# ============================================================================
+# 实现策略
+# ----------------------------------------------------------------------------
+# 1. 所有补丁均使用 Zephyr 前缀的类名/包名, 避免与 AOSP 原生类冲突
+# 2. 配置统一走 Settings.System.zephyr_* 命名空间
+# 3. ZephyrBootService 在开机时读取 SharedPreferences 并写入 Settings.System
+# 4. SystemUI 通过 SettingsObserver 监听变化并实时应用
+# 5. 框架层钩子优先使用 SystemServiceRegistry 注册, 而非修改核心类
+# ============================================================================

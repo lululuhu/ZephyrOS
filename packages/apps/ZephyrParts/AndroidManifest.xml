@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrParts — AndroidManifest.xml
+    采用单一 Activity + Fragment 导航模式，符合 AOSP 现代设置风格。
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.zephyr.parts"
+    android:sharedUserId="android.uid.system">
+
+    <!-- 原创功能所需权限（均为系统签名权限） -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application
+        android:label="@string/zephyr_parts_title"
+        android:icon="@drawable/ic_zephyr"
+        android:theme="@style/Theme.Zephyr"
+        android:supportsRtl="true"
+        android:directBootAware="true"
+        android:persistent="false">
+
+        <!-- 主入口：承载主菜单与子 Fragment -->
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/zephyr_parts_title"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.action.APPLICATION_PREFERENCES" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+            </intent-filter>
+        </activity>
+
+        <!-- 启动服务：应用 ZephyrParts 配置到 SystemUI -->
+        <service
+            android:name=".ZephyrBootService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".ZephyrBootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

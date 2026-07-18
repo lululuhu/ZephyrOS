@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Zephyr.Wallpapers" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorPrimary">@color/zephyr_primary</item>
+        <item name="android:colorAccent">@color/zephyr_primary</item>
+        <item name="android:windowBackground">@color/zephyr_background</item>
+    </style>
+
+    <style name="Theme.Zephyr.Wallpapers.Fullscreen" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
+</resources>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Original Font Family Configuration
+    替换 AOSP 默认 fonts.xml, 引入清风字体族.
+
+    字体族结构:
+      sans-serif    -> ZephyrSans (默认无衬线)
+      sans-serif-rounded -> ZephyrRound (圆体)
+      serif         -> 保留 AOSP 默认 Noto Serif
+      monospace     -> 保留 AOSP 默认 DroidSansMono
+
+    ZephyrParts ThemeStudio 可在运行时通过 Runtime Resource Overlay 切换.
+-->
+<familyset>
+
+    <!-- 清风无衬线 (默认) -->
+    <family name="sans-serif">
+        <font weight="100" style="normal">ZephyrSans-Regular.ttf</font>
+        <font weight="400" style="normal">ZephyrSans-Regular.ttf</font>
+        <font weight="500" style="normal">ZephyrSans-Medium.ttf</font>
+        <font weight="700" style="normal">ZephyrSans-Bold.ttf</font>
+    </family>
+
+    <!-- 清风圆体 -->
+    <family name="sans-serif-rounded">
+        <font weight="400" style="normal">ZephyrRound-Regular.ttf</font>
+    </family>
+
+    <!-- 清风中文字体 (CJK) -->
+    <family name="sans-serif-zephyr-cjk">
+        <font weight="400" style="normal">ZephyrCJK-Regular.otf</font>
+        <font weight="700" style="normal">ZephyrCJK-Bold.otf</font>
+    </family>
+
+    <!-- 保留 AOSP 默认 serif / monospace -->
+    <family name="serif">
+        <font weight="400" style="normal">NotoSerif-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSerif-Bold.ttf</font>
+    </family>
+
+    <family name="monospace">
+        <font weight="400" style="normal">DroidSansMono.ttf</font>
+    </family>
+
+</familyset>

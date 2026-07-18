@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS Original Wallpaper #2: "林间"
+    纵向渐变绿 + 圆点光斑
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1080dp"
+    android:height="1920dp"
+    android:viewportWidth="1080"
+    android:viewportHeight="1920">
+
+    <!-- 渐变背景 -->
+    <path
+        android:fillColor="#FFE8F5EE"
+        android:pathData="M0,0 H1080 V1920 H0 Z" />
+
+    <!-- 林间光斑 (随机分布的圆) -->
+    <path android:fillColor="#FF2EB872" android:pathData="M200,300 a80,80 0,1,0,160,0 a80,80 0,1,0,-160,0" />
+    <path android:fillColor="#FF9CE5C5" android:pathData="M700,200 a50,50 0,1,0,100,0 a50,50 0,1,0,-100,0" />
+    <path android:fillColor="#FF1E8F56" android:pathData="M850,500 a120,120 0,1,0,240,0 a120,120 0,1,0,-240,0" />
+    <path android:fillColor="#FF2EB872" android:pathData="M120,1200 a60,60 0,1,0,120,0 a60,60 0,1,0,-120,0" />
+    <path android:fillColor="#FF9CE5C5" android:pathData="M500,1500 a90,90 0,1,0,180,0 a90,90 0,1,0,-180,0" />
+    <path android:fillColor="#FF1E8F56" android:pathData="M800,1700 a40,40 0,1,0,80,0 a40,40 0,1,0,-80,0" />
+
+</vector>

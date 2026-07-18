@@ -1,0 +1,4 @@
+# ZephyrParts ProGuard rules
+# 保留系统 API 入口与 Fragment 类
+-keep class com.android.zephyr.parts.** { *; }
+-keep class com.android.zephyr.parts.* { *; }

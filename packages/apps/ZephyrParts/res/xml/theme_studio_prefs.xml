@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ThemeStudio — 主题工坊偏好设置
+    原创功能：清风色板、字体、图标包、圆角半径
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/theme_studio_title">
+
+    <PreferenceCategory android:title="@string/theme_studio_title">
+
+        <Preference
+            android:key="theme_studio_wallpapers"
+            android:title="@string/zephyr_wallpapers_entry_title"
+            android:summary="@string/zephyr_wallpapers_entry_summary" />
+
+        <ListPreference
+            android:key="theme_studio_palette"
+            android:title="@string/theme_studio_palette"
+            android:entries="@array/palette_entries"
+            android:entryValues="@array/palette_values"
+            android:defaultValue="0" />
+
+        <ListPreference
+            android:key="theme_studio_font"
+            android:title="@string/theme_studio_font"
+            android:entries="@array/font_entries"
+            android:entryValues="@array/font_values"
+            android:defaultValue="0" />
+
+        <ListPreference
+            android:key="theme_studio_icons"
+            android:title="@string/theme_studio_icons"
+            android:entries="@array/icon_pack_entries"
+            android:entryValues="@array/icon_pack_values"
+            android:defaultValue="0" />
+
+        <SeekBarPreference
+            android:key="theme_studio_corner_radius"
+            android:title="@string/theme_studio_corner_radius"
+            android:max="32"
+            android:defaultValue="12" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

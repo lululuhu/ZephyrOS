@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrStatus — 清风状态栏偏好设置
+    原创功能：图标拖拽重排、网速胶囊、天气芯片、清风胶囊、电池样式、时钟位置
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/zephyr_status_title">
+
+    <PreferenceCategory android:title="@string/zephyr_status_title">
+
+        <SwitchPreference
+            android:key="zephyr_status_icon_reorder"
+            android:title="@string/zephyr_status_icon_reorder"
+            android:defaultValue="true" />
+
+        <SwitchPreference
+            android:key="zephyr_status_net_speed"
+            android:title="@string/zephyr_status_net_speed"
+            android:summary="@string/zephyr_status_summary"
+            android:defaultValue="true" />
+
+        <SwitchPreference
+            android:key="zephyr_status_weather_chip"
+            android:title="@string/zephyr_status_weather_chip"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="zephyr_status_capsule"
+            android:title="@string/zephyr_status_capsule"
+            android:defaultValue="true" />
+
+        <ListPreference
+            android:key="zephyr_status_battery_style"
+            android:title="@string/zephyr_status_battery_style"
+            android:entries="@array/battery_style_entries"
+            android:entryValues="@array/battery_style_values"
+            android:defaultValue="0" />
+
+        <ListPreference
+            android:key="zephyr_status_clock_pos"
+            android:title="@string/zephyr_status_clock_pos"
+            android:entries="@array/clock_pos_entries"
+            android:entryValues="@array/clock_pos_values"
+            android:defaultValue="1" />
+
+        <EditTextPreference
+            android:key="zephyr_status_carrier_label"
+            android:title="@string/zephyr_status_carrier_label" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,35 @@
+// =============================================================================
+// ZephyrParts — Android.bp
+// -----------------------------------------------------------------------------
+// 清风系统自定义设置应用，统一管理 8 大原创功能模块：
+//   ZephyrStatus / FlowNotify / ZephyrGesture / ImmersiveFlow /
+//   AppVault / PowerCore / PrivacyGuard / ThemeStudio
+// =============================================================================
+
+android_app {
+    name: "ZephyrParts",
+
+    srcs: [
+        "src/com/android/zephyr/parts/*.java",
+    ],
+
+    resource_dirs: [
+        "res",
+    ],
+
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: false,
+
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+    },
+
+    required: [
+        "ZephyrParts-permissions.xml",
+    ],
+
+    // 必须随 system 分区发布（GSI 一部分）
+    system_module: true,
+}

@@ -1,0 +1,27 @@
+// =============================================================================
+// ZephyrWallpapers — Original Wallpaper Application
+// -----------------------------------------------------------------------------
+// 提供原创几何壁纸. 壁纸以矢量 drawable 形式内置, 不依赖任何外部图库.
+// 用户可在 ZephyrParts 主题工坊中选择应用.
+// =============================================================================
+
+android_app {
+    name: "ZephyrWallpapers",
+
+    srcs: [
+        "src/com/android/zephyr/wallpapers/*.java",
+    ],
+
+    resource_dirs: [
+        "res",
+    ],
+
+    platform_apis: true,
+    certificate: "platform",
+    privileged: false,
+    system_module: true,
+
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+    },
+}

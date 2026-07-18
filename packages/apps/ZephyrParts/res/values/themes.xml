@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrParts — Theme
+    极简白绿调，原生 Material 主题基础上微调。
+-->
+<resources>
+
+    <style name="Theme.Zephyr" parent="@android:style/Theme.DeviceDefault.Settings">
+        <item name="android:colorPrimary">@color/zephyr_primary</item>
+        <item name="android:colorPrimaryDark">@color/zephyr_primary_dark</item>
+        <item name="android:colorAccent">@color/zephyr_primary</item>
+        <item name="android:windowBackground">@color/zephyr_background</item>
+        <item name="android:statusBarColor">@color/zephyr_primary_dark</item>
+    </style>
+
+</resources>

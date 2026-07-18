@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS Original Wallpaper #3: "流光"
+    斜向光带, 极简抽象
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1080dp"
+    android:height="1920dp"
+    android:viewportWidth="1080"
+    android:viewportHeight="1920">
+
+    <path
+        android:fillColor="#FF0F1418"
+        android:pathData="M0,0 H1080 V1920 H0 Z" />
+
+    <!-- 三条斜向光带 -->
+    <path android:fillColor="#FF2EB872" android:pathData="M-200,400 L1200,200 L1200,260 L-200,460 Z" />
+    <path android:fillColor="#FF9CE5C5" android:pathData="M-200,1000 L1200,800 L1200,840 L-200,1040 Z" />
+    <path android:fillColor="#FF2EB872" android:pathData="M-200,1600 L1200,1400 L1200,1420 L-200,1620 Z" />
+
+</vector>

@@ -1,0 +1,25 @@
+# ============================================================================
+# ZephyrOS — Original Boot Animation
+# ----------------------------------------------------------------------------
+# 设计理念: "清风拂过"
+#   - 极简白绿调, 与系统主题一致
+#   - 三条曲线代表风的流动 (与 ZephyrParts 应用图标呼应)
+#   - 渐显 + 平移动画, 体现"清风拂过"的轻盈感
+#   - 无任何商业 logo, 仅显示 ZephyrOS 字样
+#
+# 产物: /system/media/bootanimation.zip
+#   结构:
+#     desc.txt                  动画播放序列描述
+#     part0/                    渐显阶段 (30 帧)
+#       frame_0001.png ... frame_0030.png
+#     part1/                    平移阶段 (45 帧)
+#       frame_0001.png ... frame_0045.png
+#
+# 生成方式:
+#   cd vendor/zephyr/bootanimation
+#   python3 generate_bootanimation.py
+#   产出: bootanimation.zip
+# ============================================================================
+
+# 该目录由 generate_bootanimation.py 在构建前生成 PNG 帧
+# 详见同目录 generate_bootanimation.py

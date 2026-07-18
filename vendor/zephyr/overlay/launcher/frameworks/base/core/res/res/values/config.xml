@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Launcher Overlay
+    覆盖 AOSP framework 配置, 指向 Lawnchair 作为默认桌面.
+-->
+<resources>
+
+    <!-- 默认桌面组件包名 (Lawnchair) -->
+    <string name="config_default_launcher">ch.deletescape.lawnchair.plah</string>
+
+    <!-- 默认桌面 Activity -->
+    <string name="config_default_launcher_activity">ch.deletescape.lawnchair.LawnchairLauncher</string>
+
+    <!-- 启用 recents 功能 (由 Lawnchair 自身处理, 不依赖 AOSP OverviewService) -->
+    <bool name="config_recentsInterfaceForLegacyApps">true</bool>
+
+    <!-- 关闭 AOSP 默认 Launcher3 的图标包支持 (避免与 Lawnchair 冲突) -->
+    <bool name="config_enableDefaultLauncherIconPack">false</bool>
+
+</resources>

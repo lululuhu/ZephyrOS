@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS Original Wallpaper #4: "晨露"
+    浅绿底 + 水滴形
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1080dp"
+    android:height="1920dp"
+    android:viewportWidth="1080"
+    android:viewportHeight="1920">
+
+    <path
+        android:fillColor="#FFF0F8F4"
+        android:pathData="M0,0 H1080 V1920 H0 Z" />
+
+    <!-- 大水滴 -->
+    <path
+        android:fillColor="#FF2EB872"
+        android:pathData="M540,600 C540,500 460,400 540,300 C620,400 540,500 540,600 Z" />
+    <path
+        android:fillColor="#FF9CE5C5"
+        android:pathData="M540,800 C540,750 510,700 540,650 C570,700 540,750 540,800 Z" />
+
+    <!-- 反射光点 -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M520,400 a8,8 0,1,0,16,0 a8,8 0,1,0,-16,0" />
+
+</vector>

@@ -1,0 +1,24 @@
+Copyright (c) 2024-2026 ZephyrOS Project
+
+ZephyrOS 桌面启动器归属声明
+============================
+
+ZephyrOS 默认桌面启动器使用 Lawnchair 项目, 特此声明并致谢.
+
+来源:
+  https://github.com/LawnchairLauncher/lawnchair
+
+许可证:
+  Apache License 2.0
+  https://www.apache.org/licenses/LICENSE-2.0
+
+Lawnchair 项目保留其原始版权. ZephyrOS 仅集成其编译产物, 不修改其源码,
+不声称对其拥有版权.
+
+ZephyrOS 自有原创资源 (开机动画 / 壁纸 / 字体集成 / 应用图标 / ZephyrParts
+/ SystemUI 钩子) 与 Lawnchair 无任何关联, 版权归 ZephyrOS Project 所有.
+
+完整 Apache 2.0 许可证文本见: /system/etc/licenses/APACHE-LICENSE.txt
+
+致谢:
+  感谢 Lawnchair 项目为 Android 社区提供的优质开源桌面启动器.

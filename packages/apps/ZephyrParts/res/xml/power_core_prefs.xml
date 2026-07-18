@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    PowerCore — 续航引擎偏好设置
+    原创功能：深度休眠、wakelock 监控、充电调度、应用待机限制
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/power_core_title">
+
+    <PreferenceCategory android:title="@string/power_core_title">
+
+        <SwitchPreference
+            android:key="power_core_doze"
+            android:title="@string/power_core_doze"
+            android:defaultValue="true" />
+
+        <SwitchPreference
+            android:key="power_core_wakelock"
+            android:title="@string/power_core_wakelock"
+            android:defaultValue="true" />
+
+        <SwitchPreference
+            android:key="power_core_charge_schedule"
+            android:title="@string/power_core_charge_schedule"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="power_core_app_standby"
+            android:title="@string/power_core_app_standby"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

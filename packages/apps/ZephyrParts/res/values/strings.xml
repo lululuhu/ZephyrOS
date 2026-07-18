@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrParts — Strings
+    全部为中文（清风系统面向国内用户）。
+-->
+<resources>
+
+    <!-- 应用标题 -->
+    <string name="zephyr_parts_title">清风设置</string>
+    <string name="zephyr_parts_summary">深度自定义你的系统体验</string>
+
+    <!-- ============== ZephyrStatus 状态栏 ============== -->
+    <string name="zephyr_status_title">清风状态栏</string>
+    <string name="zephyr_status_summary">图标排列、网速胶囊、天气芯片</string>
+    <string name="zephyr_status_icon_reorder">图标拖拽重排</string>
+    <string name="zephyr_status_net_speed">网速胶囊</string>
+    <string name="zephyr_status_weather_chip">天气芯片</string>
+    <string name="zephyr_status_capsule">清风胶囊通知预览</string>
+    <string name="zephyr_status_battery_style">电池图标样式</string>
+    <string name="zephyr_status_clock_pos">时钟位置</string>
+    <string name="zephyr_status_carrier_label">自定义运营商文字</string>
+
+    <!-- ============== FlowNotify 通知 ============== -->
+    <string name="flow_notify_title">流光通知</string>
+    <string name="flow_notify_summary">智能分组、横幅时长、历史记录</string>
+    <string name="flow_notify_smart_group">智能分组</string>
+    <string name="flow_notify_heads_up_duration">横幅停留时长</string>
+    <string name="flow_notify_history">通知历史</string>
+    <string name="flow_notify_quiet_hours">智能免打扰时段</string>
+    <string name="flow_notify_compact_style">紧凑样式</string>
+
+    <!-- ============== ZephyrGesture 手势 ============== -->
+    <string name="zephyr_gesture_title">清风手势</string>
+    <string name="zephyr_gesture_summary">边缘滑动、三指截屏、单手模式</string>
+    <string name="zephyr_gesture_edge_swipe">边缘滑动灵敏度</string>
+    <string name="zephyr_gesture_three_finger_screenshot">三指截屏</string>
+    <string name="zephyr_gesture_long_press_pill">长按手势条切换应用</string>
+    <string name="zephyr_gesture_one_handed">单手模式</string>
+    <string name="zephyr_gesture_one_handed_left">左侧触发</string>
+    <string name="zephyr_gesture_one_handed_right">右侧触发</string>
+
+    <!-- ============== ImmersiveFlow 全面屏手势 ============== -->
+    <string name="immersive_flow_title">全面屏手势</string>
+    <string name="immersive_flow_summary">手势条样式、底角动作、单手下滑</string>
+    <string name="immersive_flow_pill_style">手势条样式</string>
+    <string name="immersive_flow_pill_thin">细</string>
+    <string name="immersive_flow_pill_thick">粗</string>
+    <string name="immersive_flow_pill_hidden">隐藏</string>
+    <string name="immersive_flow_corner_swipe">底角滑动动作</string>
+    <string name="immersive_flow_swipe_down_pill">下滑手势条拉通知</string>
+
+    <!-- ============== AppVault 应用管家 ============== -->
+    <string name="app_vault_title">应用管家</string>
+    <string name="app_vault_summary">应用锁、隐藏、分身、冻结</string>
+    <string name="app_vault_locker">应用锁</string>
+    <string name="app_vault_hide">应用隐藏</string>
+    <string name="app_vault_dual">应用分身</string>
+    <string name="app_vault_freezer">应用冻结</string>
+    <string name="app_vault_install_source">安装来源追踪</string>
+
+    <!-- ============== PowerCore 续航引擎 ============== -->
+    <string name="power_core_title">续航引擎</string>
+    <string name="power_core_summary">深度休眠、wakelock 监控、充电调度</string>
+    <string name="power_core_doze">深度休眠策略</string>
+    <string name="power_core_wakelock">Wakelock 监控</string>
+    <string name="power_core_charge_schedule">充电调度（保护电池）</string>
+    <string name="power_core_app_standby">应用待机分组限制</string>
+
+    <!-- ============== PrivacyGuard 隐私卫士 ============== -->
+    <string name="privacy_guard_title">隐私卫士</string>
+    <string name="privacy_guard_summary">权限仪表盘、摄像头/麦克风指示、剪贴板提醒</string>
+    <string name="privacy_guard_dashboard">权限使用仪表盘</string>
+    <string name="privacy_guard_cam_indicator">摄像头/麦克风实时指示</string>
+    <string name="privacy_guard_clipboard_alert">剪贴板访问提醒</string>
+    <string name="privacy_guard_firewall">应用网络防火墙</string>
+    <string name="privacy_guard_location_spoof">位置伪装</string>
+
+    <!-- ============== ThemeStudio 主题工坊 ============== -->
+    <string name="theme_studio_title">主题工坊</string>
+    <string name="theme_studio_summary">清风主题色板、字体、图标、圆角</string>
+    <string name="theme_studio_palette">清风色板</string>
+    <string name="theme_studio_font">字体切换</string>
+    <string name="theme_studio_icons">图标包</string>
+    <string name="theme_studio_corner_radius">圆角半径</string>
+
+    <!-- ============== 关于 ============== -->
+    <string name="zephyr_about_title">关于清风</string>
+    <string name="zephyr_version">清风版本</string>
+    <string name="zephyr_android_version">Android 基线</string>
+    <string name="zephyr_pure_promise">纯净承诺</string>
+    <string name="zephyr_pure_promise_text">清风系统承诺：无广告、无第三方商业推广、无远程遥测。所有功能均为原创实现。</string>
+
+    <!-- ============== 壁纸入口（ThemeStudio 内） ============== -->
+    <string name="zephyr_wallpapers_entry_title">清风壁纸</string>
+    <string name="zephyr_wallpapers_entry_summary">原创几何壁纸（微风 / 林间 / 流光 / 晨露 / 地平线 / 薄荷）</string>
+
+</resources>

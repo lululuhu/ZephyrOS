@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    PrivacyGuard — 隐私卫士偏好设置
+    原创功能：权限仪表盘、摄像头/麦克风指示、剪贴板提醒、防火墙、位置伪装
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/privacy_guard_title">
+
+    <PreferenceCategory android:title="@string/privacy_guard_title">
+
+        <Preference
+            android:key="privacy_guard_dashboard"
+            android:title="@string/privacy_guard_dashboard" />
+
+        <SwitchPreference
+            android:key="privacy_guard_cam_indicator"
+            android:title="@string/privacy_guard_cam_indicator"
+            android:defaultValue="true" />
+
+        <SwitchPreference
+            android:key="privacy_guard_clipboard_alert"
+            android:title="@string/privacy_guard_clipboard_alert"
+            android:defaultValue="true" />
+
+        <SwitchPreference
+            android:key="privacy_guard_firewall"
+            android:title="@string/privacy_guard_firewall"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="privacy_guard_location_spoof"
+            android:title="@string/privacy_guard_location_spoof"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

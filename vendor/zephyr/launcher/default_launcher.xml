@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Default Launcher Configuration
+    通过 persistent preferred activity 让 Lawnchair 成为默认 HOME.
+    系统启动时 PackageManagerService 会读取此文件并设置默认桌面.
+
+    注意: 实际包名需与 Lawnchair 14 分支编译产物一致,
+          若不同请修改下方 packageName / name 字段.
+-->
+<preferred-activities>
+    <preferred-activity>
+        <action name="android.intent.action.MAIN" />
+        <cat name="android.intent.category.HOME" />
+        <cat name="android.intent.category.DEFAULT" />
+        <pkg name="ch.deletescape.lawnchair.plah" />
+        <cls name="ch.deletescape.lawnchair.LawnchairLauncher" />
+    </preferred-activity>
+</preferred-activities>

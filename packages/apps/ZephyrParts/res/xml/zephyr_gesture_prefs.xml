@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrGesture — 清风手势偏好设置
+    原创功能：边缘滑动灵敏度、三指截屏、长按手势条、单手模式
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/zephyr_gesture_title">
+
+    <PreferenceCategory android:title="@string/zephyr_gesture_title">
+
+        <SeekBarPreference
+            android:key="zephyr_gesture_edge_swipe"
+            android:title="@string/zephyr_gesture_edge_swipe"
+            android:max="4"
+            android:defaultValue="2" />
+
+        <SwitchPreference
+            android:key="zephyr_gesture_three_finger_screenshot"
+            android:title="@string/zephyr_gesture_three_finger_screenshot"
+            android:defaultValue="true" />
+
+        <SwitchPreference
+            android:key="zephyr_gesture_long_press_pill"
+            android:title="@string/zephyr_gesture_long_press_pill"
+            android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="zephyr_gesture_one_handed"
+            android:title="@string/zephyr_gesture_one_handed"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="zephyr_gesture_one_handed_left"
+            android:title="@string/zephyr_gesture_one_handed_left"
+            android:dependency="zephyr_gesture_one_handed"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="zephyr_gesture_one_handed_right"
+            android:title="@string/zephyr_gesture_one_handed_right"
+            android:dependency="zephyr_gesture_one_handed"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Theme Colors
+    清风系统主题色：极简白绿调
+-->
+<resources>
+
+    <!-- 主色：清风绿 -->
+    <color name="zephyr_primary">#FF2EB872</color>
+    <!-- 深色变体 -->
+    <color name="zephyr_primary_dark">#FF1E8F56</color>
+    <!-- 强调色：浅薄荷 -->
+    <color name="zephyr_accent">#FF9CE5C5</color>
+    <!-- 背景：纯白 -->
+    <color name="zephyr_background">#FFFFFFFF</color>
+    <!-- 深色模式背景 -->
+    <color name="zephyr_background_dark">#FF101418</color>
+    <!-- 文字主色 -->
+    <color name="zephyr_text_primary">#FF1A1A1A</color>
+    <color name="zephyr_text_secondary">#FF666666</color>
+    <!-- 分割线 -->
+    <color name="zephyr_divider">#FFE5E5E5</color>
+
+</resources>

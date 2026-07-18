@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — App Icon
+    清风系统应用图标（矢量）：简化风纹符号，绿色调。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- 圆角背景 -->
+    <path
+        android:fillColor="#FF2EB872"
+        android:pathData="M8,2 L40,2 C44.4,2 48,5.6 48,10 L48,40 C48,44.4 44.4,48 40,48 L8,48 C3.6,48 0,44.4 0,40 L0,10 C0,5.6 3.6,2 8,2 Z" />
+
+    <!-- 风纹符号：三条曲线表示清风流动 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,16 C18,14 24,18 30,16 C33,15 36,16 38,18 L38,20 C36,18 33,17 30,18 C24,20 18,16 12,18 Z" />
+
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,24 C18,22 24,26 30,24 C33,23 36,24 38,26 L38,28 C36,26 33,25 30,26 C24,28 18,24 12,26 Z" />
+
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,32 C18,30 24,34 30,32 C33,31 36,32 38,34 L38,36 C36,34 33,33 30,34 C24,36 18,32 12,34 Z" />
+
+</vector>

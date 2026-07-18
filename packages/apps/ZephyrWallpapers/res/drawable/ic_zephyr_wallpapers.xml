@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <path
+        android:fillColor="#FF2EB872"
+        android:pathData="M8,2 L40,2 C44.4,2 48,5.6 48,10 L48,40 C48,44.4 44.4,48 40,48 L8,48 C3.6,48 0,44.4 0,40 L0,10 C0,5.6 3.6,2 8,2 Z" />
+
+    <!-- 壁纸图标: 山形 + 太阳 -->
+    <path android:fillColor="#FFFFFFFF"
+          android:pathData="M10,32 L20,20 L28,28 L38,16 L38,32 Z" />
+    <path android:fillColor="#FFFFFFFF"
+          android:pathData="M30,14 a4,4 0,1,0,8,0 a4,4 0,1,0,-8,0" />
+
+</vector>

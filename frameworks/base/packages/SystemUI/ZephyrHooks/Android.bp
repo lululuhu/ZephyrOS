@@ -1,0 +1,41 @@
+// =============================================================================
+// ZephyrOS SystemUI Hooks — Android.bp
+// -----------------------------------------------------------------------------
+// 编译 ZephyrStatusBarController + ZephyrGestureController 为 SystemUI 静态库.
+// 通过 SystemUI 的 dependency 引入, 不污染原生 SystemUI 模块.
+// =============================================================================
+
+android_library {
+    name: "ZephyrSystemUIHooks",
+
+    srcs: [
+        "src/com/android/systemui/zephyr/*.java",
+    ],
+
+    resource_dirs: ["res"],
+
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    system_module: true,
+
+    libs: [
+        "SystemUI-core",
+    ],
+}
+
+// 同时注册为 SystemUI 可选模块 (GSI 内置)
+android_app {
+    name: "ZephyrSystemUIHooksApp",
+
+    srcs: [
+        "src/com/android/systemui/zephyr/*.java",
+    ],
+
+    resource_dirs: ["res"],
+
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    system_module: true,
+}

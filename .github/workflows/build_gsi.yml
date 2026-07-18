@@ -1,0 +1,190 @@
+name: Build ZephyrOS GSI
+
+on:
+  workflow_dispatch:
+    inputs:
+      android_version:
+        description: 'AOSP tag (default android-14.0.0_r74)'
+        required: false
+        default: 'android-14.0.0_r74'
+      target:
+        description: 'Build target (aosp_arm64-ab-userdebug / aosp_x86_64-ab-userdebug)'
+        required: false
+        default: 'aosp_arm64-ab-userdebug'
+      enable_ccache:
+        description: 'Use ccache (recommended)'
+        required: false
+        default: 'true'
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'vendor/zephyr/**'
+      - 'packages/apps/ZephyrParts/**'
+      - 'manifest/**'
+      - '.github/workflows/build_gsi.yml'
+      - 'build/**'
+
+env:
+  CCACHE_DIR: /mnt/ccache
+  CCACHE_MAXSIZE: 5G
+  USE_CCACHE: 1
+  TZ: Asia/Shanghai
+
+concurrency:
+  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build GSI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout ZephyrOS overlay
+        uses: actions/checkout@v4
+        with:
+          path: zephyr-overlay
+
+      - name: Show runner resources
+        run: |
+          echo "=== CPU ==="
+          nproc
+          echo "=== Memory ==="
+          free -h
+          echo "=== Disk (before) ==="
+          df -h /
+          df -h /mnt
+
+      - name: Free up disk space
+        run: |
+          bash zephyr-overlay/build/optimize_disk.sh
+          df -h /
+          df -h /mnt
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            git-core gnupg flex bison gperf build-essential \
+            zip curl zlib1g-dev gcc-multilib g++-multilib \
+            libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev \
+            libx11-dev lib32z-dev ccache libgl1-mesa-dev \
+            libxml2-utils xsltproc unzip python3 python3-pip \
+            repo rsync libncurses5 libtinfo5
+          sudo ln -sf /usr/bin/python3 /usr/bin/python
+
+      - name: Configure git
+        run: |
+          git config --global user.name "ZephyrOS CI"
+          git config --global user.email "ci@zephyros.local"
+          git config --global color.ui false
+
+      - name: Restore ccache
+        if: ${{ github.event.inputs.enable_ccache != 'false' }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-
+
+      - name: Setup build environment
+        run: |
+          mkdir -p /mnt/aosp /mnt/ccache
+          bash zephyr-overlay/build/setup_env.sh \
+            "${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}" \
+            /mnt/aosp \
+            "$GITHUB_WORKSPACE/zephyr-overlay/manifest/zephyr.xml"
+
+      - name: Apply ZephyrOS overlay
+        run: |
+          # 把当前仓库的内容铺到 AOSP 树对应路径
+          # 注意: packages/apps/Lawnchair 由 repo sync 拉取, 不覆盖
+          rsync -a --exclude='.git' --exclude='Lawnchair' \
+            zephyr-overlay/packages/apps/ /mnt/aosp/packages/apps/
+          rsync -a --exclude='.git' zephyr-overlay/vendor/zephyr/ /mnt/aosp/vendor/zephyr/
+          rsync -a --exclude='.git' zephyr-overlay/frameworks/ /mnt/aosp/frameworks/ 2>/dev/null || true
+          echo "ZephyrOS overlay applied:"
+          ls -la /mnt/aosp/vendor/zephyr/
+          echo "Lawnchair source:"
+          ls /mnt/aosp/packages/apps/Lawnchair/ 2>/dev/null | head -5 || echo "WARN: Lawnchair not synced"
+
+      - name: Generate original boot animation
+        run: |
+          # ZephyrOS 原创开机动画: 通过 Python 生成 PNG 帧并打包 zip
+          pip install Pillow --quiet
+          cd /mnt/aosp/vendor/zephyr/bootanimation
+          python3 generate_bootanimation.py
+          ls -lh bootanimation.zip
+
+      - name: Download OFL fonts
+        run: |
+          # 下载 OFL 开源字体 (Roboto / Varela Round / Noto Sans CJK)
+          bash /mnt/aosp/vendor/zephyr/fonts/download_fonts.sh
+
+      - name: Apply framework patches
+        run: |
+          # 应用 ZephyrOS framework 补丁 (status bar + gesture controller)
+          cd /mnt/aosp
+          for p in frameworks/base/patches/*.patch; do
+            echo "[PATCH] Applying: $p"
+            git apply --verbose "$p" 2>&1 | tail -3 || \
+              echo "[WARN] $p failed to apply (may already be applied or context differs)"
+          done
+
+      - name: Lunch target
+        working-directory: /mnt/aosp
+        run: |
+          source build/envsetup.sh
+          lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
+          echo "TARGET_PRODUCT=$TARGET_PRODUCT"
+          echo "TARGET_BUILD_VARIANT=$TARGET_BUILD_VARIANT"
+
+      - name: Build GSI system image
+        working-directory: /mnt/aosp
+        run: |
+          source build/envsetup.sh
+          lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
+          bash $GITHUB_WORKSPACE/zephyr-overlay/build/build_gsi.sh
+        timeout-minutes: 300
+
+      - name: Sign GSI
+        working-directory: /mnt/aosp
+        run: |
+          bash $GITHUB_WORKSPACE/zephyr-overlay/build/sign_gsi.sh
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts
+          BUILD_OUT=/mnt/aosp/out/target/product/*/system.img
+          for f in $BUILD_OUT; do
+            [ -f "$f" ] && cp -v "$f" artifacts/$(basename "$f")
+          done
+          # 附带构建信息
+          cat > artifacts/build_info.txt <<EOF
+          ZephyrOS GSI Build
+          ==================
+          Android: ${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}
+          Target:  ${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
+          Commit:  ${{ github.sha }}
+          Branch:  ${{ github.ref }}
+          Built:   $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          EOF
+          ls -la artifacts/
+
+      - name: Upload GSI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}-${{ github.sha }}
+          path: artifacts/*
+          retention-days: 14
+          compression-level: 0
+
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          sudo rm -rf /mnt/aosp/out 2>/dev/null || true
+          df -h /mnt
