@@ -69,8 +69,12 @@ repo version
 # ------------------------------------------------------------------
 if [ ! -d ".repo" ]; then
     echo "[INFO] Initializing AOSP repo from $AOSP_MIRROR (shallow, depth=1)..."
+    # -g default: 只配置 default group, 跳过设备树(device/*)、非 Linux 平台
+    #   工具链(darwin/windows prebuilts)等 GSI 不需要的项目
+    #   (避免撑爆 GitHub runner 107GB 磁盘)
     repo init -u "$MANIFEST_URL" \
         -b "$ANDROID_TAG" \
+        -g default \
         --depth=1 \
         --current-branch
 else
@@ -102,9 +106,8 @@ fi
 #    并发数根据镜像选择:
 #      - tuna (清华): 官方建议 -j4 避免触发 503
 #      - google: 降到 -j2, 避免 GitHub runner I/O/内存峰值崩溃
-#    -g default: 只同步 default group, 跳过设备树(device/*)、非 Linux
-#      平台工具链(darwin/windows prebuilts)等 GSI 不需要的项目
-#      (Run #7/10/12 撑爆 107GB 磁盘的根因)
+#    group 过滤在 repo init 阶段已通过 -g default 完成 (repo sync
+#      本身不支持 -g 选项)
 #    --no-tags 节省空间; --no-clone-bundle 避免 CDN 缓存命中失败
 #    -c 仅同步当前分支; -f 容忍部分非关键项目失败
 # ------------------------------------------------------------------
@@ -127,22 +130,22 @@ echo "::endgroup::"
 MONITOR_PID=$!
 trap "kill $MONITOR_PID 2>/dev/null || true" EXIT
 
-repo sync -c -j"$SYNC_JOBS" \
-    -g default \
-    --no-tags \
-    --no-clone-bundle \
-    --prune \
-    --force-sync \
-    -f || SYNC_EXIT=$?
+if ! repo sync -c -j"$SYNC_JOBS" \
+        --no-tags \
+        --no-clone-bundle \
+        --prune \
+        --force-sync \
+        -f; then
+    kill $MONITOR_PID 2>/dev/null || true
+    trap - EXIT
+    echo "[ERROR] repo sync failed. AOSP source not available, cannot continue."
+    echo "[INFO] Disk status after failed sync:"
+    df -h "$AOSP_ROOT"
+    exit 1
+fi
 
 kill $MONITOR_PID 2>/dev/null || true
 trap - EXIT
-
-if [ "${SYNC_EXIT:-0}" -ne 0 ]; then
-    echo "[WARN] repo sync exited with code $SYNC_EXIT (some projects may have failed)"
-    echo "[INFO] Disk status after sync:"
-    df -h "$AOSP_ROOT"
-fi
 
 # ------------------------------------------------------------------
 # 5. 显示同步后磁盘占用
