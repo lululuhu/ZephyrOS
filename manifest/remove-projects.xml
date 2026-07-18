@@ -1,39 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    ZephyrOS — AOSP Source Slimming Manifest (v2, verified project names)
+    ZephyrOS — AOSP Source Slimming Manifest (v3, aggressive)
+    Generated from android-14.0.0_r74/default.xml.
 
-    移除 GSI 系统镜像构建不需要的大型项目, 节省 ~12GB 磁盘空间。
-    所有项目名称已对照 android-14.0.0_r74/default.xml 验证存在。
+    Goal: fit AOSP source + build output within GitHub Actions
+    runner disk (~84 GB after cleanup). Removes ~25 GB of
+    device/kernel/trusty/hardware trees that GSI builds do not need.
 
-    背景: repo 的 -g default 是空操作 (所有项目默认都在 default 组, 除非
-    标记 notdefault). 只有 2 个 darwin 项目标记了 notdefault. 所以
-    -g default 实际同步了全部 1367 个项目 (~28GB). 必须用 <remove-project>
-    显式移除不需要的项目。
-
-    移除清单 (均为 GSI 构建无关项目, 已验证名称存在):
-      测试套件   (~5GB)  cts, vts, vts-testcase/*, framework, catbox, mts 等
-      PDK        (~1GB)  platform/pdk, platform_testing
-      模拟器     (~3GB)  android-emulator, qemu-kernel
-      开发工具   (~2GB)  cmdline-tools, devtools, abi-dumps/* 等
-      文档/示例  (~0.5GB) developers/build, demos, samples/android
-
-    保留 (GSI 构建必需):
-      - prebuilts/clang/host/linux-x86  (编译器 ~3GB)
-      - prebuilts/build-tools           (构建工具 ~2GB)
-      - prebuilts/jdk/jdk17             (Java ~1GB)
-      - prebuilts/rust                  (Rust ~1.5GB)
-      - prebuilts/sdk                   (AndroidX stubs ~3GB)
-      - prebuilts/ndk                   (NDK ~1GB)
-      - frameworks/, packages/, system/, art/  (系统源码)
-      - external/                       (第三方依赖)
+    KEEP (whitelisted):
+      device/generic/{arm64,armv7-a-neon,car,uml,x86_64}
+      device/google/{gs-common,trout}
+      hardware/{interfaces,libhardware,libhardware_legacy,ril}
+      All framework/packages/system/art/libcore projects
 -->
 <manifest>
 
-    <!-- ========== 1. 测试套件 (GSI 不需要, ~5GB) ========== -->
+    <!-- ===== A. Testing suites (~5 GB) ===== -->
     <remove-project name="platform/cts" />
-    <remove-project name="platform/test/cts-root" />
+    <remove-project name="platform/platform_testing" />
+    <remove-project name="platform/test/app_compat/csuite" />
     <remove-project name="platform/test/catbox" />
+    <remove-project name="platform/test/cts-root" />
+    <remove-project name="platform/test/dittosuite" />
+    <remove-project name="platform/test/framework" />
+    <remove-project name="platform/test/mlts/benchmark" />
+    <remove-project name="platform/test/mlts/models" />
     <remove-project name="platform/test/mts" />
+    <remove-project name="platform/test/robolectric-extensions" />
     <remove-project name="platform/test/vts" />
     <remove-project name="platform/test/vts-testcase/hal" />
     <remove-project name="platform/test/vts-testcase/hal-trace" />
@@ -42,41 +35,186 @@
     <remove-project name="platform/test/vts-testcase/performance" />
     <remove-project name="platform/test/vts-testcase/security" />
     <remove-project name="platform/test/vts-testcase/vndk" />
-    <remove-project name="platform/test/framework" />
-    <remove-project name="platform/test/dittosuite" />
-    <remove-project name="platform/test/app_compat/csuite" />
-    <remove-project name="platform/test/mlts/benchmark" />
-    <remove-project name="platform/test/mlts/models" />
-    <remove-project name="platform/test/robolectric-extensions" />
-    <remove-project name="platform/platform_testing" />
 
-    <!-- ========== 2. PDK (平台开发套件, GSI 不需要, ~1GB) ========== -->
+    <!-- ===== B. PDK (~1 GB) ===== -->
     <remove-project name="platform/pdk" />
 
-    <!-- ========== 3. 模拟器 (GSI 在真机运行, 不需要模拟器, ~3GB) ========== -->
+    <!-- ===== C. Emulator prebuilts (~3 GB) ===== -->
     <remove-project name="platform/prebuilts/android-emulator" />
     <remove-project name="platform/prebuilts/qemu-kernel" />
 
-    <!-- ========== 4. SDK/开发工具 (系统构建不需要, ~2GB) ========== -->
-    <remove-project name="platform/prebuilts/cmdline-tools" />
-    <remove-project name="platform/prebuilts/devtools" />
-    <remove-project name="platform/prebuilts/bundletool" />
-    <remove-project name="platform/prebuilts/checkstyle" />
-    <remove-project name="platform/prebuilts/ktlint" />
-    <remove-project name="platform/prebuilts/manifest-merger" />
-    <remove-project name="platform/prebuilts/checkcolor" />
-    <remove-project name="platform/prebuilts/gradle-plugin" />
+    <!-- ===== D. SDK / dev tools prebuilts (~2 GB) ===== -->
     <remove-project name="platform/prebuilts/abi-dumps/ndk" />
     <remove-project name="platform/prebuilts/abi-dumps/platform" />
     <remove-project name="platform/prebuilts/abi-dumps/vndk" />
+    <remove-project name="platform/prebuilts/bundletool" />
+    <remove-project name="platform/prebuilts/checkcolor" />
+    <remove-project name="platform/prebuilts/checkstyle" />
+    <remove-project name="platform/prebuilts/cmdline-tools" />
+    <remove-project name="platform/prebuilts/devtools" />
+    <remove-project name="platform/prebuilts/gradle-plugin" />
+    <remove-project name="platform/prebuilts/ktlint" />
+    <remove-project name="platform/prebuilts/manifest-merger" />
 
-    <!-- ========== 5. Trade Federation / 测试工具 ========== -->
-    <remove-project name="platform/tools/tradefederation/prebuilts" />
+    <!-- ===== E. Trade Federation / misc test tools ===== -->
     <remove-project name="platform/tools/external/fat32lib" />
+    <remove-project name="platform/tools/tradefederation/prebuilts" />
 
-    <!-- ========== 6. 文档与示例 (~0.5GB) ========== -->
+    <!-- ===== F. Docs & samples (~0.5 GB) ===== -->
     <remove-project name="platform/developers/build" />
     <remove-project name="platform/developers/demos" />
     <remove-project name="platform/developers/samples/android" />
 
+    <!-- ================================================================ -->
+    <!-- ===== G. NEW (v3): Device trees — Pixel & vendor-specific ===== -->
+    <!--      GSI does not need device-specific trees.                  -->
+    <!-- ================================================================ -->
+
+    <!-- Google Pixel devices (akita..zumapro) (57 projects) -->
+    <remove-project name="device/google/akita" />
+    <remove-project name="device/google/akita-kernel" />
+    <remove-project name="device/google/akita-sepolicy" />
+    <remove-project name="device/google/atv" />
+    <remove-project name="device/google/barbet" />
+    <remove-project name="device/google/barbet-sepolicy" />
+    <remove-project name="device/google/bluejay" />
+    <remove-project name="device/google/bluejay-kernel" />
+    <remove-project name="device/google/bluejay-sepolicy" />
+    <remove-project name="device/google/bramble" />
+    <remove-project name="device/google/bramble-sepolicy" />
+    <remove-project name="device/google/caimito" />
+    <remove-project name="device/google/caimito-kernels/6.1" />
+    <remove-project name="device/google/caimito-sepolicy" />
+    <remove-project name="device/google/comet" />
+    <remove-project name="device/google/comet-kernels/6.1" />
+    <remove-project name="device/google/comet-sepolicy" />
+    <remove-project name="device/google/contexthub" />
+    <remove-project name="device/google/coral" />
+    <remove-project name="device/google/coral-kernel" />
+    <remove-project name="device/google/coral-sepolicy" />
+    <remove-project name="device/google/cuttlefish" />
+    <remove-project name="device/google/cuttlefish_prebuilts" />
+    <remove-project name="device/google/cuttlefish_vmm" />
+    <remove-project name="device/google/felix" />
+    <remove-project name="device/google/felix-kernel" />
+    <remove-project name="device/google/felix-sepolicy" />
+    <remove-project name="device/google/gs101" />
+    <remove-project name="device/google/gs101-sepolicy" />
+    <remove-project name="device/google/gs201" />
+    <remove-project name="device/google/gs201-sepolicy" />
+    <remove-project name="device/google/lynx" />
+    <remove-project name="device/google/lynx-kernel" />
+    <remove-project name="device/google/lynx-sepolicy" />
+    <remove-project name="device/google/pantah" />
+    <remove-project name="device/google/pantah-kernel" />
+    <remove-project name="device/google/pantah-sepolicy" />
+    <remove-project name="device/google/raviole" />
+    <remove-project name="device/google/raviole-kernel" />
+    <remove-project name="device/google/redbull" />
+    <remove-project name="device/google/redbull-kernel" />
+    <remove-project name="device/google/redbull-sepolicy" />
+    <remove-project name="device/google/redfin" />
+    <remove-project name="device/google/redfin-sepolicy" />
+    <remove-project name="device/google/shusky" />
+    <remove-project name="device/google/shusky-kernel" />
+    <remove-project name="device/google/shusky-sepolicy" />
+    <remove-project name="device/google/sunfish" />
+    <remove-project name="device/google/sunfish-kernel" />
+    <remove-project name="device/google/sunfish-sepolicy" />
+    <remove-project name="device/google/tangorpro" />
+    <remove-project name="device/google/tangorpro-kernel" />
+    <remove-project name="device/google/tangorpro-sepolicy" />
+    <remove-project name="device/google/zuma" />
+    <remove-project name="device/google/zuma-sepolicy" />
+    <remove-project name="device/google/zumapro" />
+    <remove-project name="device/google/zumapro-sepolicy" />
+
+    <!-- Dev boards (amlogic, linaro, ti, samsung, etc.) (8 projects) -->
+    <remove-project name="device/amlogic/yukawa" />
+    <remove-project name="device/amlogic/yukawa-kernel" />
+    <remove-project name="device/linaro/dragonboard" />
+    <remove-project name="device/linaro/dragonboard-kernel" />
+    <remove-project name="device/linaro/hikey" />
+    <remove-project name="device/linaro/hikey-kernel" />
+    <remove-project name="device/linaro/poplar" />
+    <remove-project name="device/linaro/poplar-kernel" />
+
+    <!-- Emulator device configs (goldfish, mini-emulator, vulkan-cereal, qemu) (6 projects) -->
+    <remove-project name="device/generic/goldfish" />
+    <remove-project name="device/generic/mini-emulator-arm64" />
+    <remove-project name="device/generic/mini-emulator-armv7-a-neon" />
+    <remove-project name="device/generic/mini-emulator-x86" />
+    <remove-project name="device/generic/mini-emulator-x86_64" />
+    <remove-project name="device/generic/vulkan-cereal" />
+
+    <!-- ================================================================ -->
+    <!-- ===== H. Kernel prebuilts (GSI uses device kernel) =========== -->
+    <!-- ================================================================ -->
+    <!-- kernel/prebuilts/* and kernel/tests (28 projects) -->
+    <remove-project name="kernel/prebuilts/4.19/arm64" />
+    <remove-project name="kernel/prebuilts/5.10/arm64" />
+    <remove-project name="kernel/prebuilts/5.10/x86-64" />
+    <remove-project name="kernel/prebuilts/5.15/arm64" />
+    <remove-project name="kernel/prebuilts/5.15/x86-64" />
+    <remove-project name="kernel/prebuilts/5.4/arm64" />
+    <remove-project name="kernel/prebuilts/5.4/x86-64" />
+    <remove-project name="kernel/prebuilts/6.1/arm64" />
+    <remove-project name="kernel/prebuilts/6.1/x86-64" />
+    <remove-project name="kernel/prebuilts/6.6/arm64" />
+    <remove-project name="kernel/prebuilts/6.6/x86-64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/4.19/arm64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/4.19/x86-64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.10/arm64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.10/x86-64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.15/arm64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.15/x86-64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.4/arm64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.4/x86-64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/6.1/arm64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/6.1/x86-64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/6.6/arm64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/6.6/x86-64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/mainline/arm64" />
+    <remove-project name="kernel/prebuilts/common-modules/virtual-device/mainline/x86-64" />
+    <remove-project name="kernel/prebuilts/mainline/arm64" />
+    <remove-project name="kernel/prebuilts/mainline/x86-64" />
+    <remove-project name="kernel/tests" />
+
+    <!-- ================================================================ -->
+    <!-- ===== I. Trusty TEE OS (device-specific) ===================== -->
+    <!-- ================================================================ -->
+    <!-- trusty/* (24 projects) -->
+    <remove-project name="trusty/app/avb" />
+    <remove-project name="trusty/app/cast-auth" />
+    <remove-project name="trusty/app/confirmationui" />
+    <remove-project name="trusty/app/gatekeeper" />
+    <remove-project name="trusty/app/keymaster" />
+    <remove-project name="trusty/app/keymint" />
+    <remove-project name="trusty/app/sample" />
+    <remove-project name="trusty/app/secretkeeper" />
+    <remove-project name="trusty/app/storage" />
+    <remove-project name="trusty/device/arm/generic-arm64" />
+    <remove-project name="trusty/device/arm/vexpress-a15" />
+    <remove-project name="trusty/device/nxp/imx7d" />
+    <remove-project name="trusty/device/x86/generic-x86_64" />
+    <remove-project name="trusty/external/headers" />
+    <remove-project name="trusty/external/musl" />
+    <remove-project name="trusty/external/trusted-firmware-a" />
+    <remove-project name="trusty/external/trusty" />
+    <remove-project name="trusty/host/common" />
+    <remove-project name="trusty/interfaces" />
+    <remove-project name="trusty/lib" />
+    <remove-project name="trusty/lk/common" />
+    <remove-project name="trusty/lk/nxp" />
+    <remove-project name="trusty/lk/trusty" />
+    <remove-project name="trusty/vendor/google/aosp" />
+
+    <!-- ================================================================ -->
+    <!-- ===== J. Vendor HALs (device-specific) ======================= -->
+    <!-- ================================================================ -->
+    <!-- NOTE: AOSP 14 default manifest does NOT include hardware/qcom/*, -->
+    <!-- hardware/broadcom/*, etc. as separate projects. Those live in    -->
+    <!-- device vendor manifests, so there is nothing to remove here.     -->
+    <!-- Kept: hardware/{interfaces,libhardware,libhardware_legacy,ril}   -->
+    <!--       (framework dependencies required by GSI build)             -->
 </manifest>
