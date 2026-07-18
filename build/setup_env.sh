@@ -101,7 +101,10 @@ fi
 # 4. 同步源码
 #    并发数根据镜像选择:
 #      - tuna (清华): 官方建议 -j4 避免触发 503
-#      - google: 无并发限制, 用满 CPU
+#      - google: 降到 -j2, 避免 GitHub runner I/O/内存峰值崩溃
+#    -g default: 只同步 default group, 跳过设备树(device/*)、非 Linux
+#      平台工具链(darwin/windows prebuilts)等 GSI 不需要的项目
+#      (Run #7/10/12 撑爆 107GB 磁盘的根因)
 #    --no-tags 节省空间; --no-clone-bundle 避免 CDN 缓存命中失败
 #    -c 仅同步当前分支; -f 容忍部分非关键项目失败
 # ------------------------------------------------------------------
@@ -125,6 +128,7 @@ MONITOR_PID=$!
 trap "kill $MONITOR_PID 2>/dev/null || true" EXIT
 
 repo sync -c -j"$SYNC_JOBS" \
+    -g default \
     --no-tags \
     --no-clone-bundle \
     --prune \
