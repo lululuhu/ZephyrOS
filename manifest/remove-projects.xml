@@ -1,69 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    ZephyrOS — AOSP Source Slimming Manifest
+    ZephyrOS — AOSP Source Slimming Manifest (v2, verified project names)
 
-    移除 GSI 系统镜像构建不需要的大型项目, 节省 ~15-20GB 磁盘空间。
-    (GitHub Actions ubuntu-22.04 runner 清理后仅 ~84GB 可用, AOSP 全量
-     源码 ~28GB + .repo 元数据 ~8GB + 构建产物 ~40GB 会撑爆磁盘)
+    移除 GSI 系统镜像构建不需要的大型项目, 节省 ~12GB 磁盘空间。
+    所有项目名称已对照 android-14.0.0_r74/default.xml 验证存在。
 
-    移除清单 (均为 GSI 构建无关项目):
-      - cts                  (~2GB)  兼容性测试套件
-      - pdk                  (~1GB)  平台开发套件
-      - platform_testing     (~0.5GB) 测试框架
-      - prebuilts/androidx   (~5GB)  AndroidX 库 (仅 App 开发需要)
-      - prebuilts/maven_repo (~2GB)  Maven 仓库
-      - prebuilts/gradle-plugin     Gradle 插件
-      - prebuilts/checkcolor        颜色检查工具
-      - prebuilts/devel             开发工具
-      - tools/adt/idea      (~1GB)  Android Studio IDE
-      - tools/studio        (~1GB)  Android Studio
-      - tools/base          (~0.5GB) SDK 基础工具
-      - tools/tradefed              Trade Federation 测试框架
-      - test/vts            (~0.5GB) VTS 测试
-      - test/vts-testcase   (~0.5GB) VTS 测试用例
-      - test/framework              测试框架
-      - docs/source         (~0.5GB) 文档源码
-      - developers/build            开发者构建
-      - developers/demos            示例代码
-      - developers/samples          示例代码
+    背景: repo 的 -g default 是空操作 (所有项目默认都在 default 组, 除非
+    标记 notdefault). 只有 2 个 darwin 项目标记了 notdefault. 所以
+    -g default 实际同步了全部 1367 个项目 (~28GB). 必须用 <remove-project>
+    显式移除不需要的项目。
+
+    移除清单 (均为 GSI 构建无关项目, 已验证名称存在):
+      测试套件   (~5GB)  cts, vts, vts-testcase/*, framework, catbox, mts 等
+      PDK        (~1GB)  platform/pdk, platform_testing
+      模拟器     (~3GB)  android-emulator, qemu-kernel
+      开发工具   (~2GB)  cmdline-tools, devtools, abi-dumps/* 等
+      文档/示例  (~0.5GB) developers/build, demos, samples/android
 
     保留 (GSI 构建必需):
-      - prebuilts/clang, jdk, rust, build-tools  (编译器/工具链)
-      - frameworks/, packages/, system/, art/     (系统源码)
-      - external/                                 (第三方库, 部分构建依赖)
+      - prebuilts/clang/host/linux-x86  (编译器 ~3GB)
+      - prebuilts/build-tools           (构建工具 ~2GB)
+      - prebuilts/jdk/jdk17             (Java ~1GB)
+      - prebuilts/rust                  (Rust ~1.5GB)
+      - prebuilts/sdk                   (AndroidX stubs ~3GB)
+      - prebuilts/ndk                   (NDK ~1GB)
+      - frameworks/, packages/, system/, art/  (系统源码)
+      - external/                       (第三方依赖)
 -->
 <manifest>
 
-    <!-- ========== 测试套件 (GSI 不需要) ========== -->
+    <!-- ========== 1. 测试套件 (GSI 不需要, ~5GB) ========== -->
     <remove-project name="platform/cts" />
-    <remove-project name="platform/pdk" />
-    <remove-project name="platform/platform_testing" />
+    <remove-project name="platform/test/cts-root" />
+    <remove-project name="platform/test/catbox" />
+    <remove-project name="platform/test/mts" />
     <remove-project name="platform/test/vts" />
-    <remove-project name="platform/test/vts-testcase" />
+    <remove-project name="platform/test/vts-testcase/hal" />
+    <remove-project name="platform/test/vts-testcase/hal-trace" />
+    <remove-project name="platform/test/vts-testcase/kernel" />
+    <remove-project name="platform/test/vts-testcase/nbu" />
+    <remove-project name="platform/test/vts-testcase/performance" />
+    <remove-project name="platform/test/vts-testcase/security" />
+    <remove-project name="platform/test/vts-testcase/vndk" />
     <remove-project name="platform/test/framework" />
-    <remove-project name="platform/tools/tradefed" />
+    <remove-project name="platform/test/dittosuite" />
+    <remove-project name="platform/test/app_compat/csuite" />
+    <remove-project name="platform/test/mlts/benchmark" />
+    <remove-project name="platform/test/mlts/models" />
+    <remove-project name="platform/test/robolectric-extensions" />
+    <remove-project name="platform/platform_testing" />
 
-    <!-- ========== AndroidX / Maven / Gradle (仅 App 开发需要) ========== -->
-    <remove-project name="platform/prebuilts/androidx" />
-    <remove-project name="platform/prebuilts/maven_repo" />
-    <remove-project name="platform/prebuilts/maven_repo/androidx" />
-    <remove-project name="platform/prebuilts/gradle-plugin" />
+    <!-- ========== 2. PDK (平台开发套件, GSI 不需要, ~1GB) ========== -->
+    <remove-project name="platform/pdk" />
+
+    <!-- ========== 3. 模拟器 (GSI 在真机运行, 不需要模拟器, ~3GB) ========== -->
+    <remove-project name="platform/prebuilts/android-emulator" />
+    <remove-project name="platform/prebuilts/qemu-kernel" />
+
+    <!-- ========== 4. SDK/开发工具 (系统构建不需要, ~2GB) ========== -->
+    <remove-project name="platform/prebuilts/cmdline-tools" />
+    <remove-project name="platform/prebuilts/devtools" />
+    <remove-project name="platform/prebuilts/bundletool" />
+    <remove-project name="platform/prebuilts/checkstyle" />
+    <remove-project name="platform/prebuilts/ktlint" />
+    <remove-project name="platform/prebuilts/manifest-merger" />
     <remove-project name="platform/prebuilts/checkcolor" />
-    <remove-project name="platform/prebuilts/devel" />
+    <remove-project name="platform/prebuilts/gradle-plugin" />
+    <remove-project name="platform/prebuilts/abi-dumps/ndk" />
+    <remove-project name="platform/prebuilts/abi-dumps/platform" />
+    <remove-project name="platform/prebuilts/abi-dumps/vndk" />
 
-    <!-- ========== Android Studio IDE (系统构建不需要) ========== -->
-    <remove-project name="platform/tools/adt/idea" />
-    <remove-project name="platform/tools/studio" />
-    <remove-project name="platform/tools/studio.cloud" />
-    <remove-project name="platform/tools/base" />
-    <remove-project name="platform/tools/motodev" />
-    <remove-project name="platform/tools/external/gradle" />
+    <!-- ========== 5. Trade Federation / 测试工具 ========== -->
+    <remove-project name="platform/tools/tradefederation/prebuilts" />
     <remove-project name="platform/tools/external/fat32lib" />
 
-    <!-- ========== 文档与示例 (不需要) ========== -->
-    <remove-project name="platform/docs/source" />
+    <!-- ========== 6. 文档与示例 (~0.5GB) ========== -->
     <remove-project name="platform/developers/build" />
     <remove-project name="platform/developers/demos" />
-    <remove-project name="platform/developers/samples" />
+    <remove-project name="platform/developers/samples/android" />
 
 </manifest>
