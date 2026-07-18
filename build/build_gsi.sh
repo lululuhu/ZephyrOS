@@ -23,9 +23,10 @@ if [ "${USE_CCACHE:-1}" = "1" ]; then
 fi
 
 # 后台磁盘监控（每 5 分钟输出一次）
+# workspace 在 / 上, 不在 /mnt (runner 对 /mnt 无写权限)
 (
     while true; do
-        echo "[MONITOR] $(date +%H:%M:%S) disk: $(df -h /mnt 2>/dev/null | tail -1 | awk '{print $4" free"}')"
+        echo "[MONITOR] $(date +%H:%M:%S) disk: $(df -h / 2>/dev/null | tail -1 | awk '{print $4" free / "$5" used"}')"
         sleep 300
     done
 ) &

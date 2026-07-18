@@ -16,6 +16,8 @@ set -euo pipefail
 ANDROID_TAG="${1:-android-14.0.0_r74}"
 AOSP_ROOT="${2:-/mnt/aosp}"
 ZEPHYR_MANIFEST="${3:-}"
+# remove-projects.xml 与 zephyr.xml 位于同一目录
+ZEPHYR_MANIFEST_DIR="$(dirname "$ZEPHYR_MANIFEST" 2>/dev/null || echo "")"
 
 echo "[INFO] Android tag : $ANDROID_TAG"
 echo "[INFO] AOSP root   : $AOSP_ROOT"
@@ -93,12 +95,21 @@ fi
 
 # ------------------------------------------------------------------
 # 3. 应用 ZephyrOS local manifest（在 sync 前完成, 以便拉取 Lawnchair 等）
+#    同时应用 remove-projects.xml 移除 GSI 不需要的大型项目
+#    (cts, androidx, maven_repo, Android Studio 等, 节省 ~12GB)
 # ------------------------------------------------------------------
 LOCAL_MANIFEST_DIR=".repo/local_manifests"
 mkdir -p "$LOCAL_MANIFEST_DIR"
 if [ -n "$ZEPHYR_MANIFEST" ] && [ -f "$ZEPHYR_MANIFEST" ]; then
     cp -f "$ZEPHYR_MANIFEST" "$LOCAL_MANIFEST_DIR/zephyr.xml"
     echo "[INFO] ZephyrOS local manifest applied: $ZEPHYR_MANIFEST"
+fi
+# 应用项目移除清单 (移除 cts/pdk/androidx/studio 等不需要的大型项目)
+REMOVE_MANIFEST="$ZEPHYR_MANIFEST_DIR/remove-projects.xml"
+if [ -n "$ZEPHYR_MANIFEST_DIR" ] && [ -f "$REMOVE_MANIFEST" ]; then
+    cp -f "$REMOVE_MANIFEST" "$LOCAL_MANIFEST_DIR/remove-projects.xml"
+    echo "[INFO] AOSP source slimming manifest applied: $REMOVE_MANIFEST"
+    echo "[INFO]   (removes cts, pdk, androidx, maven_repo, tools/studio, etc.)"
 fi
 
 # ------------------------------------------------------------------
@@ -135,6 +146,7 @@ if ! repo sync -c -j"$SYNC_JOBS" \
         --no-clone-bundle \
         --prune \
         --force-sync \
+        --optimized-fetch \
         -f; then
     kill $MONITOR_PID 2>/dev/null || true
     trap - EXIT
@@ -146,6 +158,20 @@ fi
 
 kill $MONITOR_PID 2>/dev/null || true
 trap - EXIT
+
+# ------------------------------------------------------------------
+# 4.1 清理 .repo 元数据 (释放 5-10GB 磁盘给构建用)
+#     repo sync 完成后, .repo/projects 和 .repo/project-objects 中的
+#     git 元数据不再需要 (CI 一次性构建, 不需要再次 sync)。
+#     保留 .repo/manifest*.xml (构建脚本读取版本信息用)
+# ------------------------------------------------------------------
+echo "[INFO] Cleaning .repo git metadata to free disk for build..."
+REPO_META_SIZE=$(du -sh .repo 2>/dev/null | awk '{print $1}' || echo "unknown")
+echo "[INFO] .repo size before cleanup: $REPO_META_SIZE"
+rm -rf .repo/projects .repo/project-objects 2>/dev/null || true
+# 保留 .repo/manifests 目录 (包含 manifest 定义) 和 .repo/manifest.xml
+echo "[INFO] .repo metadata cleanup done."
+df -h "$AOSP_ROOT"
 
 # ------------------------------------------------------------------
 # 5. 显示同步后磁盘占用

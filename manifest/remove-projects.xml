@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    ZephyrOS — AOSP Source Slimming Manifest
+
+    移除 GSI 系统镜像构建不需要的大型项目, 节省 ~15-20GB 磁盘空间。
+    (GitHub Actions ubuntu-22.04 runner 清理后仅 ~84GB 可用, AOSP 全量
+     源码 ~28GB + .repo 元数据 ~8GB + 构建产物 ~40GB 会撑爆磁盘)
+
+    移除清单 (均为 GSI 构建无关项目):
+      - cts                  (~2GB)  兼容性测试套件
+      - pdk                  (~1GB)  平台开发套件
+      - platform_testing     (~0.5GB) 测试框架
+      - prebuilts/androidx   (~5GB)  AndroidX 库 (仅 App 开发需要)
+      - prebuilts/maven_repo (~2GB)  Maven 仓库
+      - prebuilts/gradle-plugin     Gradle 插件
+      - prebuilts/checkcolor        颜色检查工具
+      - prebuilts/devel             开发工具
+      - tools/adt/idea      (~1GB)  Android Studio IDE
+      - tools/studio        (~1GB)  Android Studio
+      - tools/base          (~0.5GB) SDK 基础工具
+      - tools/tradefed              Trade Federation 测试框架
+      - test/vts            (~0.5GB) VTS 测试
+      - test/vts-testcase   (~0.5GB) VTS 测试用例
+      - test/framework              测试框架
+      - docs/source         (~0.5GB) 文档源码
+      - developers/build            开发者构建
+      - developers/demos            示例代码
+      - developers/samples          示例代码
+
+    保留 (GSI 构建必需):
+      - prebuilts/clang, jdk, rust, build-tools  (编译器/工具链)
+      - frameworks/, packages/, system/, art/     (系统源码)
+      - external/                                 (第三方库, 部分构建依赖)
+-->
+<manifest>
+
+    <!-- ========== 测试套件 (GSI 不需要) ========== -->
+    <remove-project name="platform/cts" />
+    <remove-project name="platform/pdk" />
+    <remove-project name="platform/platform_testing" />
+    <remove-project name="platform/test/vts" />
+    <remove-project name="platform/test/vts-testcase" />
+    <remove-project name="platform/test/framework" />
+    <remove-project name="platform/tools/tradefed" />
+
+    <!-- ========== AndroidX / Maven / Gradle (仅 App 开发需要) ========== -->
+    <remove-project name="platform/prebuilts/androidx" />
+    <remove-project name="platform/prebuilts/maven_repo" />
+    <remove-project name="platform/prebuilts/maven_repo/androidx" />
+    <remove-project name="platform/prebuilts/gradle-plugin" />
+    <remove-project name="platform/prebuilts/checkcolor" />
+    <remove-project name="platform/prebuilts/devel" />
+
+    <!-- ========== Android Studio IDE (系统构建不需要) ========== -->
+    <remove-project name="platform/tools/adt/idea" />
+    <remove-project name="platform/tools/studio" />
+    <remove-project name="platform/tools/studio.cloud" />
+    <remove-project name="platform/tools/base" />
+    <remove-project name="platform/tools/motodev" />
+    <remove-project name="platform/tools/external/gradle" />
+    <remove-project name="platform/tools/external/fat32lib" />
+
+    <!-- ========== 文档与示例 (不需要) ========== -->
+    <remove-project name="platform/docs/source" />
+    <remove-project name="platform/developers/build" />
+    <remove-project name="platform/developers/demos" />
+    <remove-project name="platform/developers/samples" />
+
+</manifest>

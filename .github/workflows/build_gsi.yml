@@ -30,7 +30,8 @@ env:
   # GitHub Actions runner 用户对 /mnt 无写权限, 改用 workspace 子目录
   CCACHE_DIR: ${{ github.workspace }}/ccache
   AOSP_ROOT: ${{ github.workspace }}/aosp
-  CCACHE_MAXSIZE: 5G
+  # 降到 3G (从 5G) — 首次构建无缓存命中, ccache 反而占磁盘
+  CCACHE_MAXSIZE: 3G
   USE_CCACHE: 1
   TZ: Asia/Shanghai
 
@@ -188,4 +189,4 @@ jobs:
         if: always()
         run: |
           sudo rm -rf ${{ env.AOSP_ROOT }}/out 2>/dev/null || true
-          df -h /mnt
+          df -h /
