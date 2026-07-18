@@ -105,12 +105,37 @@ fi
 echo "[INFO] Syncing AOSP source with -j$SYNC_JOBS ($AOSP_MIRROR mirror)..."
 echo "[INFO] Estimated source size: ~28 GB (shallow)"
 
+# sync 前打印磁盘/内存状态 (用于诊断 runner 崩溃)
+echo "::group::Resource status before sync"
+df -h "$AOSP_ROOT"
+free -h
+echo "::endgroup::"
+
+# 后台磁盘/内存监控 (每 60s 输出一次, 便于诊断 OOM/disk full)
+(
+    while true; do
+        echo "[MONITOR] $(date -u +%H:%M:%S) disk=$(df -h "$AOSP_ROOT" | tail -1 | awk '{print $4" free / "$5" used"}') mem=$(free -h | awk '/^Mem:/{print $7" avail"}')"
+        sleep 60
+    done
+) &
+MONITOR_PID=$!
+trap "kill $MONITOR_PID 2>/dev/null || true" EXIT
+
 repo sync -c -j"$SYNC_JOBS" \
     --no-tags \
     --no-clone-bundle \
     --prune \
     --force-sync \
-    -f
+    -f || SYNC_EXIT=$?
+
+kill $MONITOR_PID 2>/dev/null || true
+trap - EXIT
+
+if [ "${SYNC_EXIT:-0}" -ne 0 ]; then
+    echo "[WARN] repo sync exited with code $SYNC_EXIT (some projects may have failed)"
+    echo "[INFO] Disk status after sync:"
+    df -h "$AOSP_ROOT"
+fi
 
 # ------------------------------------------------------------------
 # 5. 显示同步后磁盘占用
