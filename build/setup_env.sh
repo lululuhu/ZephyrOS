@@ -47,7 +47,10 @@ if [ "$AOSP_MIRROR" = "tuna" ]; then
 else
     MANIFEST_URL="https://android.googlesource.com/platform/manifest"
     REPO_URL="https://storage.googleapis.com/git-repo-downloads/repo"
-    SYNC_JOBS=$(nproc)  # Google 源无并发限制, 用满 CPU
+    # Google 源速度极快, 但 GitHub Actions runner (15GB RAM, 共享磁盘 I/O)
+    # 在 -j4 下两次都在 ~13 分钟崩溃 (日志为空, 疑似 I/O/OOM)。
+    # 降到 -j2 减少同时运行的 git 进程数, 降低内存和磁盘峰值压力。
+    SYNC_JOBS=2
 fi
 
 # ------------------------------------------------------------------
