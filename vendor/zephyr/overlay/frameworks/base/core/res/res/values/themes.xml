@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Framework Theme Overlay (PixelOS Style)
+    应用 PixelOS 风格的全局 framework 主题.
+-->
+<resources>
+
+    <!-- 系统级 Material You 主题色 -->
+    <color name="system_accent1_0">#FF2EB872</color>
+    <color name="system_accent1_100">#FF9CE5C5</color>
+    <color name="system_accent1_200">#FF6FDB9E</color>
+    <color name="system_accent1_400">#FF2EB872</color>
+    <color name="system_accent1_500">#FF1E8F56</color>
+    <color name="system_accent1_700">#FF0F5C36</color>
+
+    <!-- 中性色 (PixelOS 风格的灰阶) -->
+    <color name="system_neutral1_0">#FFFFFFFF</color>
+    <color name="system_neutral1_100">#FFF5F5F5</color>
+    <color name="system_neutral1_200">#FFE0E0E0</color>
+    <color name="system_neutral1_500">#FF8E8E8E</color>
+    <color name="system_neutral1_700">#FF454545</color>
+    <color name="system_neutral1_900">#FF1A1A1A</color>
+
+    <!-- 圆角 -->
+    <dimen name="rounded_corner_radius">16dp</dimen>
+    <dimen name="rounded_corner_radius_top">16dp</dimen>
+    <dimen name="rounded_corner_radius_bottom">16dp</dimen>
+
+    <!-- 对话框圆角 -->
+    <dimen name="config_dialogCornerRadius">24dp</dimen>
+
+    <!-- 按钮圆角 -->
+    <dimen name="config_buttonCornerRadius">12dp</dimen>
+
+    <!-- 卡片圆角 -->
+    <dimen name="config_cardCornerRadius">16dp</dimen>
+
+</resources>

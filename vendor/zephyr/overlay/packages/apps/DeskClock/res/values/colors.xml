@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — DeskClock Overlay (PixelOS Style)
+-->
+<resources>
+
+    <color name="clock_theme_color">#FF2EB872</color>
+    <color name="clock_theme_color_dark">#FF1E8F56</color>
+
+</resources>

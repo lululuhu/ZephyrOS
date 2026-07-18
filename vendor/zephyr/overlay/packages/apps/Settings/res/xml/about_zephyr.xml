@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS Settings About Page Overlay
+    在 关于手机 页面注入 ZephyrOS 自有版本信息.
+    通过 PreferenceScreen overlay 替换默认关于页面布局.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/about_phone_title">
+
+    <!-- ZephyrOS 品牌 Logo -->
+    <Preference
+        android:key="zephyr_brand_header"
+        android:layout="@layout/zephyr_about_header"
+        android:selectable="false" />
+
+    <!-- ZephyrOS 版本 -->
+    <Preference
+        android:key="zephyr_version"
+        android:title="@string/zephyr_version_title"
+        android:summary="ZephyrOS 1.0" />
+
+    <!-- 代号 -->
+    <Preference
+        android:key="zephyr_codename"
+        android:title="@string/zephyr_codename_title"
+        android:summary="Breeze (清风)" />
+
+    <!-- 发布类型 -->
+    <Preference
+        android:key="zephyr_release_type"
+        android:title="@string/zephyr_release_type_title"
+        android:summary="社区版 (Community)" />
+
+    <!-- 构建日期 -->
+    <Preference
+        android:key="zephyr_build_date"
+        android:title="@string/zephyr_build_date_title"
+        android:summary="$(date -u +%Y-%m-%d)" />
+
+    <!-- 纯净承诺 -->
+    <Preference
+        android:key="zephyr_pure_promise"
+        android:title="@string/zephyr_pure_promise_title"
+        android:summary="无广告 · 无遥测 · 无商业推广 · 全原创实现"
+        android:selectable="false" />
+
+    <!-- Android 版本 (保留) -->
+    <Preference
+        android:key="android_version"
+        android:title="@string/firmware_version"
+        android:summary="Android 14 (ZephyrOS 1.0)" />
+
+    <!-- 开源许可证 -->
+    <Preference
+        android:key="zephyr_licenses"
+        android:title="@string/open_source_licenses">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="file:///system/etc/licenses/LICENSES.txt" />
+    </Preference>
+
+</PreferenceScreen>

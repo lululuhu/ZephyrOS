@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS SystemUI Theme Overlay (PixelOS Style)
+    将 SystemUI 主题改为 PixelOS 风格:
+      Material You 配色 / 圆角对话框 / 圆角快捷设置磁贴 /
+      圆角通知卡片 / Pixel 风格的图标
+-->
+<resources>
+
+    <!-- ========== 颜色 (PixelOS 配色, 清风绿调) ========== -->
+    <color name="system_accent1_0">#FF2EB872</color>
+    <color name="system_accent1_100">#FF9CE5C5</color>
+    <color name="system_accent1_200">#FF6FDB9E</color>
+    <color name="system_accent1_400">#FF2EB872</color>
+    <color name="system_accent1_500">#FF1E8F56</color>
+    <color name="system_accent1_700">#FF0F5C36</color>
+
+    <!-- Secondary: 浅薄荷 -->
+    <color name="system_neutral1_0">#FFFFFFFF</color>
+    <color name="system_neutral1_100">#FFF5F5F5</color>
+    <color name="system_neutral1_200">#FFE0E0E0</color>
+    <color name="system_neutral1_500">#FF8E8E8E</color>
+    <color name="system_neutral1_700">#FF454545</color>
+    <color name="system_neutral1_900">#FF1A1A1A</color>
+
+    <!-- ========== 圆角 (PixelOS 风格, 较大圆角) ========== -->
+    <dimen name="qs_corner_radius">28dp</dimen>
+    <dimen name="dialog_corner_radius">24dp</dimen>
+    <dimen name="notification_corner_radius">20dp</dimen>
+    <dimen name="controls_corner_radius">20dp</dimen>
+
+    <!-- ========== 快捷设置磁贴 ========== -->
+    <dimen name="qs_tile_padding">16dp</dimen>
+    <dimen name="qs_tile_margin_horizontal">12dp</dimen>
+    <dimen name="qs_tile_margin_vertical">8dp</dimen>
+    <dimen name="qs_tile_label_size">14sp</dimen>
+
+    <!-- ========== 通知 ========== -->
+    <dimen name="notification_panel_padding_horizontal">12dp</dimen>
+    <dimen name="notification_header_shrink_height">44dp</dimen>
+    <dimen name="notification_min_height">88dp</dimen>
+    <dimen name="notification_expanded_height">176dp</dimen>
+
+    <!-- ========== 状态栏 ========== -->
+    <dimen name="status_bar_height">28dp</dimen>
+    <dimen name="status_bar_icon_size">16dp</dimen>
+    <dimen name="status_bar_icon_spacing">4dp</dimen>
+
+</resources>

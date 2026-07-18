@@ -1,34 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    ZephyrOS — Framework Resources Overlay
-    ======================================
-    覆盖 AOSP 默认 framework 配置，开启清风原创功能。
-    所有覆盖项均使用 zephyr_ 前缀以避免与现有 ROM 冲突。
+    ZephyrOS — SystemUI Framework Config Overlay
+    应用 PixelOS 风格的全局开关.
 -->
 <resources>
 
-    <!-- 启用清风原创 status bar 自定义 -->
-    <bool name="config_zephyr_status_bar_custom">true</bool>
+    <!-- 启用 Material You 主题动态取色 -->
+    <bool name="config_use_material_you">true</bool>
 
-    <!-- 启用三指截屏 -->
-    <bool name="config_zephyr_three_finger_screenshot">true</bool>
+    <!-- 启用圆角系统图标 -->
+    <bool name="config_use_rounded_icons">true</bool>
 
-    <!-- 启用清风胶囊（通知预览条） -->
-    <bool name="config_zephyr_capsule_notify">true</bool>
+    <!-- 启用 Pixel 风格的电源菜单 -->
+    <bool name="config_enablePowerMenuOverlay">true</bool>
 
-    <!-- 启用单手模式 -->
-    <bool name="config_zephyr_one_handed_mode">true</bool>
+    <!-- 启用圆角音量条 -->
+    <bool name="config_volumeRounded">true</bool>
 
-    <!-- 默认时区（中文用户） -->
+    <!-- 启用 Pixel 风格的锁屏时钟 -->
+    <bool name="config_usePixelLockScreenClock">true</bool>
+
+    <!-- 状态栏时钟双行显示 (Pixel 风格) -->
+    <bool name="config_clock_dual_line">false</bool>
+
+    <!-- 默认时区 (中文用户) -->
     <string name="config_default_timezone">Asia/Shanghai</string>
 
     <!-- 关闭 AOSP 默认遥测 -->
     <bool name="config_default_enable_telemetry">false</bool>
 
-    <!-- 清风手势：边缘滑动灵敏度（0-4，默认 2 中档） -->
+    <!-- 清风原创功能开关 -->
+    <bool name="config_zephyr_status_bar_custom">true</bool>
+    <bool name="config_zephyr_three_finger_screenshot">true</bool>
+    <bool name="config_zephyr_capsule_notify">true</bool>
+    <bool name="config_zephyr_one_handed_mode">true</bool>
+
+    <!-- 边缘滑动灵敏度 (0-4) -->
     <integer name="config_zephyr_edge_swipe_sensitivity">2</integer>
 
-    <!-- 清风手势：手势条样式（0=细 / 1=粗 / 2=隐藏） -->
+    <!-- 手势条样式 (0=细 / 1=粗 / 2=隐藏) -->
     <integer name="config_zephyr_gesture_pill_style">0</integer>
 
 </resources>

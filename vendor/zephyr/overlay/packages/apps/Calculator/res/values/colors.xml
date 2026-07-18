@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Calculator Overlay (PixelOS Style)
+-->
+<resources>
+
+    <color name="calculator_theme_color">#FF2EB872</color>
+    <color name="calculator_theme_color_dark">#FF1E8F56</color>
+
+    <!-- 数字键 -->
+    <color name="calculator_digit_button_color">#FFFFFFFF</color>
+    <!-- 运算符键 -->
+    <color name="calculator_operator_button_color">#FF9CE5C5</color>
+    <!-- 等号键 -->
+    <color name="calculator_equals_button_color">#FF2EB872</color>
+
+</resources>

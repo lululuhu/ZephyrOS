@@ -5,14 +5,14 @@
     将 ZephyrOS 自定义层挂入 AOSP 源码树.
 
     资源策略:
-      icons       : 使用 PixelOS 项目开源图标 (Apache 2.0)
-                    来源: https://github.com/PixelOS-AOSP
-                    许可证: Apache License 2.0 (兼容 AOSP)
+      launcher    : Lawnchair (Apache 2.0), 替换 AOSP 默认 Launcher3
+      settings    : ZephyrOS 自有 overlay 改造 AOSP Settings (PixelOS 风格)
+      systemui    : ZephyrOS overlay 改造 SystemUI 为 PixelOS 风格
+      apps        : 保留 AOSP 原生应用, 通过 overlay 应用 PixelOS 风格
+      icons       : PixelOS 风格图标 (Apache 2.0)
       bootanim    : ZephyrOS 原创设计
       wallpapers  : ZephyrOS 原创几何壁纸
-      fonts       : 基于开源字体 (OFL) 集成, 不使用 Roboto/思源默认
-      launcher    : Lawnchair (Apache 2.0), 替换 AOSP 默认 Launcher3
-                    来源: https://github.com/LawnchairLauncher/lawnchair
+      fonts       : 基于开源字体 (OFL) 集成
 
     使用前请先在 GitHub 创建以下空仓库并填入 fetch 路径, 再取消注释.
 -->
@@ -23,7 +23,7 @@
             fetch="https://github.com/ZephyrOS-Project/"
             revision="main" />
 
-    <!-- PixelOS 远程入口: 用于引入图标资源 -->
+    <!-- PixelOS 远程入口: 图标与应用层风格参考 -->
     <remote name="pixelos"
             fetch="https://github.com/PixelOS-AOSP/"
             revision="thirteen" />
@@ -33,18 +33,14 @@
             fetch="https://github.com/LawnchairLauncher/"
             revision="14" />
 
-    <!-- 1. 图标资源 来自 PixelOS (Apache 2.0)
-         仅引入图标 drawable, 不引入 PixelOS 的 SystemUI 代码 -->
+    <!-- ========== 1. 桌面启动器 (Lawnchair, Apache 2.0) ========== -->
+    <project path="packages/apps/Lawnchair"
+             name="lawnchair"
+             remote="lawnchair"
+             revision="14" />
 
-    <!--
-    <project path="vendor/zephyr/icons"
-             name="android_vendor_pixelos-icons"
-             remote="pixelos"
-             revision="main" />
-    -->
-
-    <!-- 2. 原创资源 ZephyrOS 项目维护
-         开机动画 / 壁纸 / 字体 均为原创, 不依赖任何现有 ROM -->
+    <!-- ========== 2. 原创资源 (ZephyrOS 项目维护) ========== -->
+    <!-- 取消注释前需在 GitHub 创建对应仓库 -->
 
     <!--
     <project path="vendor/zephyr/bootanimation"
@@ -60,13 +56,13 @@
              remote="zephyr" />
     -->
 
-    <!-- 3. 桌面启动器 Lawnchair (Apache 2.0)
-         替换 AOSP 默认 Launcher3, 提供更丰富的桌面自定义能力
-         分支 14 对应 Android 14 -->
-
-    <project path="packages/apps/Lawnchair"
-             name="lawnchair"
-             remote="lawnchair"
-             revision="14" />
+    <!-- ========== 3. PixelOS 风格图标包 (Apache 2.0) ========== -->
+    <!-- 仅引入图标 drawable, 不引入 PixelOS 的应用代码 -->
+    <!--
+    <project path="vendor/zephyr/icons/pixelos"
+             name="android_vendor_pixelos-icons"
+             remote="pixelos"
+             revision="main" />
+    -->
 
 </manifest>

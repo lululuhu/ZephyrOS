@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Settings Theme Overlay
+    应用 PixelOS 风格的 Material 主题到 Settings 应用.
+-->
+<resources>
+
+    <style name="Theme.Settings" parent="@android:style/Theme.DeviceDefault.Settings">
+        <item name="android:colorPrimary">@color/zephyr_primary</item>
+        <item name="android:colorPrimaryDark">@color/zephyr_primary_dark</item>
+        <item name="android:colorAccent">@color/zephyr_primary</item>
+        <item name="android:statusBarColor">@color/zephyr_primary_dark</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+</resources>

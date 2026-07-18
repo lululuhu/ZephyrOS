@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Dialer Overlay (PixelOS Style)
+    让 AOSP Dialer 应用 PixelOS 风格主题色.
+-->
+<resources>
+
+    <color name="dialer_theme_color">#FF2EB872</color>
+    <color name="dialer_theme_color_dark">#FF1E8F56</color>
+
+    <!-- 来电界面背景 -->
+    <color name="incoming_call_background_color">#FFFAFCFA</color>
+
+    <!-- 拨号盘背景 -->
+    <color name="dialpad_background_color">#FFFFFFFF</color>
+
+</resources>

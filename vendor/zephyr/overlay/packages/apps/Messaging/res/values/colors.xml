@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Messaging Overlay (PixelOS Style)
+    让 AOSP Messaging 应用 PixelOS 风格主题色.
+-->
+<resources>
+
+    <color name="messaging_theme_color">#FF2EB872</color>
+    <color name="messaging_theme_color_dark">#FF1E8F56</color>
+
+    <!-- 对话气泡 -->
+    <color name="message_bubble_color_outgoing">#FF2EB872</color>
+    <color name="message_bubble_color_incoming">#FFE8F5EE</color>
+
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS Settings App Overlay
+    覆盖 AOSP Settings 应用, 让 关于手机 页面显示 ZephyrOS 品牌.
+    替换:
+      设备名称 -> ZephyrOS 1.0
+      设置标题 -> ZephyrOS 设置
+      关于手机页面的所有品牌字段
+-->
+<resources>
+
+    <!-- 设置应用主标题 -->
+    <string name="settings_label">ZephyrOS 设置</string>
+    <string name="settings_label_workspace">ZephyrOS</string>
+
+    <!-- 关于手机页面 -->
+    <string name="about_settings">关于 ZephyrOS</string>
+    <string name="about_phone">关于 ZephyrOS</string>
+    <string name="about_phone_title">关于 ZephyrOS</string>
+
+    <!-- 设备名称 -->
+    <string name="device_name">ZephyrOS</string>
+    <string name="device_model">ZephyrOS 1.0</string>
+    <string name="device_brand">ZephyrOS</string>
+    <string name="device_manufacturer">ZephyrOS Project</string>
+
+    <!-- 系统版本号显示 -->
+    <string name="model_number">ZephyrOS 1.0 (Breeze)</string>
+    <string name="firmware_version">ZephyrOS 1.0</string>
+    <string name="system_version">ZephyrOS 1.0 - Android 14</string>
+    <string name="security_patch">ZephyrOS Build</string>
+
+    <!-- 法律信息 -->
+    <string name="legal_information">ZephyrOS 法律信息</string>
+    <string name="copyright">Copyright (c) 2024-2026 ZephyrOS Project</string>
+    <string name="open_source_licenses">开源许可证 (ZephyrOS + AOSP + Lawnchair + PixelOS)</string>
+
+    <!-- 设置面板顶部副标题 -->
+    <string name="summary_placeholder">清风系统 · 纯净流畅</string>
+
+    <!-- 系统更新 (GSI 不内置 OTA, 改为版本说明) -->
+    <string name="system_update_settings_list_item_title">ZephyrOS 版本</string>
+    <string name="system_update_settings_list_item_summary">ZephyrOS 1.0 - 查看版本信息</string>
+
+    <!-- 开发者选项顶部 -->
+    <string name="development_settings_title">ZephyrOS 开发者选项</string>
+
+    <!-- ZephyrOS 自有字段 -->
+    <string name="zephyr_version_title">ZephyrOS 版本</string>
+    <string name="zephyr_codename_title">ZephyrOS 代号</string>
+    <string name="zephyr_release_type_title">发布类型</string>
+    <string name="zephyr_build_date_title">构建日期</string>
+    <string name="zephyr_pure_promise_title">纯净承诺</string>
+
+</resources>
