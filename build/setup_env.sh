@@ -25,11 +25,11 @@ mkdir -p "$AOSP_ROOT"
 cd "$AOSP_ROOT"
 
 # ------------------------------------------------------------------
-# 1. 安装 repo 工具
+# 1. 安装 repo 工具（清华大学镜像，国内访问更快）
 # ------------------------------------------------------------------
 if ! command -v repo >/dev/null 2>&1; then
-    echo "[INFO] Installing repo tool..."
-    curl -sSL https://storage.googleapis.com/git-repo-downloads/repo \
+    echo "[INFO] Installing repo tool (from TUNA mirror)..."
+    curl -sSL https://mirrors.tuna.tsinghua.edu.cn/git/git-repo \
         -o /tmp/repo
     chmod +x /tmp/repo
     sudo mv /tmp/repo /usr/local/bin/repo
@@ -37,17 +37,32 @@ fi
 repo version
 
 # ------------------------------------------------------------------
-# 2. 初始化 AOSP 仓库（浅克隆 + 仅当前分支，节省 ~60% 磁盘）
+# 2. 初始化 AOSP 仓库（使用清华大学镜像 + 浅克隆，节省 ~60% 磁盘）
+#    清华镜像地址: https://aosp.tuna.tsinghua.edu.cn/platform/manifest
 # ------------------------------------------------------------------
+TUNA_MANIFEST_URL="https://aosp.tuna.tsinghua.edu.cn/platform/manifest"
+
 if [ ! -d ".repo" ]; then
-    echo "[INFO] Initializing AOSP repo (shallow clone, depth=1)..."
-    repo init -u https://android.googlesource.com/platform/manifest \
+    echo "[INFO] Initializing AOSP repo from TUNA mirror (shallow, depth=1)..."
+    repo init -u "$TUNA_MANIFEST_URL" \
         -b "$ANDROID_TAG" \
         --depth=1 \
         --current-branch
 else
     echo "[INFO] .repo already exists, skipping init."
 fi
+
+# ------------------------------------------------------------------
+# 2.1 配置 git 使用清华镜像作为 AOSP 源 url 替换
+# ------------------------------------------------------------------
+# repo 工具会通过 .repo/manifests.xml 中的 url 拉取每个子项目,
+# 清华镜像需要在 .repo/manifests.git/config 中重写 url,
+# 或者通过 git config --global url.<替代>.insteadOf 实现。
+git config --global url."https://aosp.tuna.tsinghua.edu.cn/".insteadOf \
+    "https://android.googlesource.com/"
+git config --global url."https://mirrors.tuna.tsinghua.edu.cn/git/android.googlesource.com/".insteadOf \
+    "android.googlesource.com:"
+echo "[INFO] Configured git url.insteadOf for TUNA AOSP mirror."
 
 # ------------------------------------------------------------------
 # 3. 应用 ZephyrOS local manifest（在 sync 前完成, 以便拉取 Lawnchair 等）
