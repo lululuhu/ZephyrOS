@@ -38,9 +38,10 @@ repo version
 
 # ------------------------------------------------------------------
 # 2. 初始化 AOSP 仓库（使用清华大学镜像 + 浅克隆，节省 ~60% 磁盘）
-#    清华镜像地址: https://aosp.tuna.tsinghua.edu.cn/platform/manifest
+#    清华镜像官方文档: https://mirrors.tuna.tsinghua.edu.cn/help/AOSP/
+#    正确 URL: https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/manifest
 # ------------------------------------------------------------------
-TUNA_MANIFEST_URL="https://aosp.tuna.tsinghua.edu.cn/platform/manifest"
+TUNA_MANIFEST_URL="https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/platform/manifest"
 
 if [ ! -d ".repo" ]; then
     echo "[INFO] Initializing AOSP repo from TUNA mirror (shallow, depth=1)..."
@@ -54,14 +55,10 @@ fi
 
 # ------------------------------------------------------------------
 # 2.1 配置 git 使用清华镜像作为 AOSP 源 url 替换
+#     这样 manifest 中引用的 android.googlesource.com 也会走清华镜像
 # ------------------------------------------------------------------
-# repo 工具会通过 .repo/manifests.xml 中的 url 拉取每个子项目,
-# 清华镜像需要在 .repo/manifests.git/config 中重写 url,
-# 或者通过 git config --global url.<替代>.insteadOf 实现。
-git config --global url."https://aosp.tuna.tsinghua.edu.cn/".insteadOf \
+git config --global url."https://mirrors.tuna.tsinghua.edu.cn/git/AOSP/".insteadOf \
     "https://android.googlesource.com/"
-git config --global url."https://mirrors.tuna.tsinghua.edu.cn/git/android.googlesource.com/".insteadOf \
-    "android.googlesource.com:"
 echo "[INFO] Configured git url.insteadOf for TUNA AOSP mirror."
 
 # ------------------------------------------------------------------
@@ -76,15 +73,15 @@ fi
 
 # ------------------------------------------------------------------
 # 4. 同步源码
-#    使用 -j 取决于 CPU 数；--no-tags 节省空间；--no-clone-bundle 避免 CDN
-#    缓存命中失败。-c 仅同步当前分支。
+#    清华 TUNA 官方建议: 并发数不宜太高, 否则会出现 503 错误
+#    文档明确推荐 -j4, 这里强制使用 -j4 以保证稳定同步
+#    --no-tags 节省空间; --no-clone-bundle 避免 CDN 缓存命中失败
+#    -c 仅同步当前分支; -f 容忍部分非关键项目失败
 # ------------------------------------------------------------------
-JOBS=$(nproc)
-echo "[INFO] Syncing AOSP source with -j$JOBS..."
+JOBS=4
+echo "[INFO] Syncing AOSP source with -j$JOBS (TUNA recommended to avoid 503)..."
 echo "[INFO] Estimated source size: ~28 GB (shallow)"
 
-# 同步核心项目；跳过大量设备树（GSI 不需要）
-# 通过 -f 容忍部分非关键项目失败
 repo sync -c -j"$JOBS" \
     --no-tags \
     --no-clone-bundle \
