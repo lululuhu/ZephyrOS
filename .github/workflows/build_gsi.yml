@@ -101,6 +101,15 @@ jobs:
             "${{ env.AOSP_ROOT }}" \
             "$GITHUB_WORKSPACE/zephyr-overlay/manifest/zephyr.xml"
 
+      - name: Upload setup log (for debugging runner crashes)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-log-${{ github.sha }}
+          path: /tmp/setup_env.log
+          if-no-files-found: warn
+          retention-days: 7
+
       - name: Apply ZephyrOS overlay
         run: |
           # 把当前仓库的内容铺到 AOSP 树对应路径

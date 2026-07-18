@@ -13,6 +13,10 @@
 # ============================================================================
 set -euo pipefail
 
+# 启用命令追踪 (便于诊断 runner 崩溃原因), 同时写入日志文件
+exec > >(tee -a /tmp/setup_env.log) 2>&1
+set -x
+
 ANDROID_TAG="${1:-android-14.0.0_r74}"
 AOSP_ROOT="${2:-/mnt/aosp}"
 ZEPHYR_MANIFEST="${3:-}"
@@ -49,10 +53,10 @@ if [ "$AOSP_MIRROR" = "tuna" ]; then
 else
     MANIFEST_URL="https://android.googlesource.com/platform/manifest"
     REPO_URL="https://storage.googleapis.com/git-repo-downloads/repo"
-    # Google 源速度极快, 但 GitHub Actions runner (15GB RAM, 共享磁盘 I/O)
-    # 在 -j4 下两次都在 ~13 分钟崩溃 (日志为空, 疑似 I/O/OOM)。
-    # 降到 -j2 减少同时运行的 git 进程数, 降低内存和磁盘峰值压力。
-    SYNC_JOBS=2
+    # Google 源: 降到 -j1, 逐项目同步。
+    # -j2/-j4 下 runner 多次在 13-33 分钟崩溃 (无日志, BlobNotFound)。
+    # -j1 最大限度降低内存/磁盘峰值, 虽然 慢但能完成。
+    SYNC_JOBS=1
 fi
 
 # ------------------------------------------------------------------
@@ -145,7 +149,6 @@ if ! repo sync -c -j"$SYNC_JOBS" \
         --no-tags \
         --no-clone-bundle \
         --prune \
-        --force-sync \
         --optimized-fetch \
         -f; then
     kill $MONITOR_PID 2>/dev/null || true
