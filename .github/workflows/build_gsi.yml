@@ -27,7 +27,9 @@ on:
       - 'build/**'
 
 env:
-  CCACHE_DIR: /mnt/ccache
+  # GitHub Actions runner 用户对 /mnt 无写权限, 改用 workspace 子目录
+  CCACHE_DIR: ${{ github.workspace }}/ccache
+  AOSP_ROOT: ${{ github.workspace }}/aosp
   CCACHE_MAXSIZE: 5G
   USE_CCACHE: 1
   TZ: Asia/Shanghai
@@ -93,10 +95,9 @@ jobs:
 
       - name: Setup build environment
         run: |
-          mkdir -p /mnt/aosp /mnt/ccache
           bash zephyr-overlay/build/setup_env.sh \
             "${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}" \
-            /mnt/aosp \
+            "${{ env.AOSP_ROOT }}" \
             "$GITHUB_WORKSPACE/zephyr-overlay/manifest/zephyr.xml"
 
       - name: Apply ZephyrOS overlay
@@ -104,31 +105,31 @@ jobs:
           # 把当前仓库的内容铺到 AOSP 树对应路径
           # 注意: packages/apps/Lawnchair 由 repo sync 拉取, 不覆盖
           rsync -a --exclude='.git' --exclude='Lawnchair' \
-            zephyr-overlay/packages/apps/ /mnt/aosp/packages/apps/
-          rsync -a --exclude='.git' zephyr-overlay/vendor/zephyr/ /mnt/aosp/vendor/zephyr/
-          rsync -a --exclude='.git' zephyr-overlay/frameworks/ /mnt/aosp/frameworks/ 2>/dev/null || true
+            zephyr-overlay/packages/apps/ ${{ env.AOSP_ROOT }}/packages/apps/
+          rsync -a --exclude='.git' zephyr-overlay/vendor/zephyr/ ${{ env.AOSP_ROOT }}/vendor/zephyr/
+          rsync -a --exclude='.git' zephyr-overlay/frameworks/ ${{ env.AOSP_ROOT }}/frameworks/ 2>/dev/null || true
           echo "ZephyrOS overlay applied:"
-          ls -la /mnt/aosp/vendor/zephyr/
+          ls -la ${{ env.AOSP_ROOT }}/vendor/zephyr/
           echo "Lawnchair source:"
-          ls /mnt/aosp/packages/apps/Lawnchair/ 2>/dev/null | head -5 || echo "WARN: Lawnchair not synced"
+          ls ${{ env.AOSP_ROOT }}/packages/apps/Lawnchair/ 2>/dev/null | head -5 || echo "WARN: Lawnchair not synced"
 
       - name: Generate original boot animation
         run: |
           # ZephyrOS 原创开机动画: 通过 Python 生成 PNG 帧并打包 zip
           pip install Pillow --quiet
-          cd /mnt/aosp/vendor/zephyr/bootanimation
+          cd ${{ env.AOSP_ROOT }}/vendor/zephyr/bootanimation
           python3 generate_bootanimation.py
           ls -lh bootanimation.zip
 
       - name: Download OFL fonts
         run: |
           # 下载 OFL 开源字体 (Roboto / Varela Round / Noto Sans CJK)
-          bash /mnt/aosp/vendor/zephyr/fonts/download_fonts.sh
+          bash ${{ env.AOSP_ROOT }}/vendor/zephyr/fonts/download_fonts.sh
 
       - name: Apply framework patches
         run: |
           # 应用 ZephyrOS framework 补丁 (status bar + gesture controller)
-          cd /mnt/aosp
+          cd ${{ env.AOSP_ROOT }}
           for p in frameworks/base/patches/*.patch; do
             echo "[PATCH] Applying: $p"
             git apply --verbose "$p" 2>&1 | tail -3 || \
@@ -136,7 +137,7 @@ jobs:
           done
 
       - name: Lunch target
-        working-directory: /mnt/aosp
+        working-directory: ${{ env.AOSP_ROOT }}
         run: |
           source build/envsetup.sh
           lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
@@ -144,7 +145,7 @@ jobs:
           echo "TARGET_BUILD_VARIANT=$TARGET_BUILD_VARIANT"
 
       - name: Build GSI system image
-        working-directory: /mnt/aosp
+        working-directory: ${{ env.AOSP_ROOT }}
         run: |
           source build/envsetup.sh
           lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
@@ -152,14 +153,14 @@ jobs:
         timeout-minutes: 300
 
       - name: Sign GSI
-        working-directory: /mnt/aosp
+        working-directory: ${{ env.AOSP_ROOT }}
         run: |
           bash $GITHUB_WORKSPACE/zephyr-overlay/build/sign_gsi.sh
 
       - name: Collect artifacts
         run: |
           mkdir -p artifacts
-          BUILD_OUT=/mnt/aosp/out/target/product/*/system.img
+          BUILD_OUT=${{ env.AOSP_ROOT }}/out/target/product/*/system.img
           for f in $BUILD_OUT; do
             [ -f "$f" ] && cp -v "$f" artifacts/$(basename "$f")
           done
@@ -186,5 +187,5 @@ jobs:
       - name: Cleanup workspace
         if: always()
         run: |
-          sudo rm -rf /mnt/aosp/out 2>/dev/null || true
+          sudo rm -rf ${{ env.AOSP_ROOT }}/out 2>/dev/null || true
           df -h /mnt
