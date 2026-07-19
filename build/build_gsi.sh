@@ -4,13 +4,25 @@
 # ----------------------------------------------------------------------------
 # 前置条件:
 #   - 当前工作目录为 AOSP 根
-#   - 已执行 source build/envsetup.sh && lunch <target>
 #   - ZephyrOS overlay 已铺到 vendor/zephyr / packages/apps/ZephyrParts
 #
-# 本脚本构建 GSI system image，并在构建过程中实时监控磁盘。
+# 本脚本会自行 source build/envsetup.sh + lunch, 因为 m 是 shell 函数,
+# 无法跨进程传递 (CI 中 bash 调用脚本会启动新 shell, 函数丢失).
+#
 # 目标产物: out/target/product/<device>/system.img
 # ============================================================================
 set -euo pipefail
+
+# ------------------------------------------------------------------
+# 0. 重新初始化 AOSP 构建环境 (m/soong_ui 等是 shell 函数, 不跨进程)
+# ------------------------------------------------------------------
+BUILD_TARGET_LUNCH="${TARGET_LUNCH:-aosp_arm64-trunk_staging-userdebug}"
+
+if ! command -v m >/dev/null 2>&1; then
+    echo "[INFO] Sourcing build/envsetup.sh + lunch (m function not available)..."
+    source build/envsetup.sh
+    lunch "$BUILD_TARGET_LUNCH"
+fi
 
 # 启用 ccache（若环境变量已设置）
 if [ "${USE_CCACHE:-1}" = "1" ]; then
@@ -57,7 +69,9 @@ START_TS=$(date +%s)
 
 # 使用 m 命令（自动处理依赖与并行度），限制并行度避免 OOM
 # AOSP 14 推荐使用 m 而非 make
-m -j"$(nproc)" "${BUILD_TARGETS[@]}"
+# GitHub Actions runner 只有 4 核, 降到 -j2 避免 OOM (15GB RAM)
+BUILD_JOBS="${BUILD_JOBS:-2}"
+m -j"$BUILD_JOBS" "${BUILD_TARGETS[@]}"
 
 END_TS=$(date +%s)
 DURATION=$((END_TS - START_TS))
