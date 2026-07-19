@@ -164,7 +164,11 @@
     <remove-project name="device/linaro/poplar-kernel" />
 
     <!-- Emulator device configs (goldfish, mini-emulator, vulkan-cereal, qemu) (6 projects) -->
-    <remove-project name="device/generic/goldfish" />
+    <!-- NOTE: device/generic/goldfish 已从移除清单中恢复.
+         device/google/cuttlefish 的 sensors/multihal/Android.bp 引用了
+         goldfish 的 soong_namespace, 移除会导致 Soong 报
+         "namespace device/generic/goldfish does not exist" 错误. -->
+    <!-- <remove-project name="device/generic/goldfish" /> -->
     <remove-project name="device/generic/mini-emulator-arm64" />
     <remove-project name="device/generic/mini-emulator-armv7-a-neon" />
     <remove-project name="device/generic/mini-emulator-x86" />
