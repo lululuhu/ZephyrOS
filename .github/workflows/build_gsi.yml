@@ -8,9 +8,9 @@ on:
         required: false
         default: 'android-14.0.0_r74'
       target:
-        description: 'Build target (aosp_arm64-ab-userdebug / aosp_x86_64-ab-userdebug)'
+        description: 'Build target (aosp_arm64-ab-trunk_staging-userdebug / aosp_x86_64-ab-trunk_staging-userdebug)'
         required: false
-        default: 'aosp_arm64-ab-userdebug'
+        default: 'aosp_arm64-ab-trunk_staging-userdebug'
       enable_ccache:
         description: 'Use ccache (recommended)'
         required: false
@@ -36,7 +36,7 @@ env:
   TZ: Asia/Shanghai
 
 concurrency:
-  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
+  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}
   cancel-in-progress: true
 
 jobs:
@@ -90,9 +90,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-${{ github.sha }}
+          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-
+            ccache-${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-
 
       - name: Setup build environment
         run: |
@@ -155,7 +155,7 @@ jobs:
         working-directory: ${{ env.AOSP_ROOT }}
         run: |
           source build/envsetup.sh
-          lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
+          lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}
           echo "TARGET_PRODUCT=$TARGET_PRODUCT"
           echo "TARGET_BUILD_VARIANT=$TARGET_BUILD_VARIANT"
 
@@ -163,7 +163,7 @@ jobs:
         working-directory: ${{ env.AOSP_ROOT }}
         run: |
           source build/envsetup.sh
-          lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
+          lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}
           bash $GITHUB_WORKSPACE/zephyr-overlay/build/build_gsi.sh
         timeout-minutes: 300
 
@@ -184,7 +184,7 @@ jobs:
           ZephyrOS GSI Build
           ==================
           Android: ${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}
-          Target:  ${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}
+          Target:  ${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}
           Commit:  ${{ github.sha }}
           Branch:  ${{ github.ref }}
           Built:   $(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -194,7 +194,7 @@ jobs:
       - name: Upload GSI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-ab-userdebug' }}-${{ github.sha }}
+          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}-${{ github.sha }}
           path: artifacts/*
           retention-days: 14
           compression-level: 0
