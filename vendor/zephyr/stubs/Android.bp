@@ -11,8 +11,12 @@ java_library {
     name: "lint_api",
     srcs: [],
     sdk_version: "current",
+    host_supported: true,
     // 空壳模块: 仅用于满足 Soong 依赖检查, 不包含任何实际代码.
-    // 引用了 lint_api 的模块 (BackCompatLintChecker 等) 不会被编译到 GSI 中.
+    // 引用了 lint_api 的模块 (BackCompatLintChecker, AndroidCommonLint 等)
+    // 不会被编译到 GSI 中.
+    // host_supported: true 是必需的, 因为 frameworks/base/tools/lint
+    // 是 host 侧工具, 需要 os:linux_glibc 变体.
 }
 
 java_library {
