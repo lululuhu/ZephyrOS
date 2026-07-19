@@ -83,6 +83,12 @@
     <remove-project name="platform/developers/demos" />
     <remove-project name="platform/developers/samples/android" />
 
+    <!-- ===== G. Dev tools not needed for GSI build ===== -->
+    <!-- apifinder: references lint_api (from platform/tools/base, not in AOSP 14 default manifest) -->
+    <remove-project name="platform/tools/apifinder" />
+    <!-- metalava: references metalava-gradle-plugin-deps (not in AOSP 14 default manifest) -->
+    <remove-project name="platform/tools/metalava" />
+
     <!-- ================================================================ -->
     <!-- ===== G. NEW (v3): Device trees — Pixel & vendor-specific ===== -->
     <!--      GSI does not need device-specific trees.                  -->

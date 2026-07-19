@@ -1,0 +1,16 @@
+// =============================================================================
+// ZephyrOS — Build Stubs
+// -----------------------------------------------------------------------------
+// 某些 AOSP 模块引用了 default manifest 中不存在的模块 (如 lint_api 定义在
+// platform/tools/base 中, 但该巨型项目不在 android-14.0.0_r74 的 default.xml 里).
+// 这些引用的模块仅用于开发工具 (apifinder, linter 等), 不影响系统镜像构建.
+// 这里提供空壳 stub 以通过 Soong bootstrap 的依赖检查.
+// =============================================================================
+
+java_library {
+    name: "lint_api",
+    srcs: [],
+    sdk_version: "current",
+    // 空壳模块: 仅用于满足 Soong 依赖检查, 不包含任何实际代码.
+    // 引用了 lint_api 的模块 (BackCompatLintChecker 等) 不会被编译到 GSI 中.
+}
