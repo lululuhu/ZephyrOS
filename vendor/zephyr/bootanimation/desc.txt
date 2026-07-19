@@ -1,17 +1,5 @@
-# ZephyrOS Boot Animation — desc.txt
-# 格式规范 (AOSP bootanimation):
-#   第一行: width height fps
-#   后续行: p count pause path
-#     p    : 表示一个 part
-#     count: 循环次数 (0 = 无限)
-#     pause: part 结束后暂停帧数 (0 = 不暂停)
-#     path : 帧图片所在目录 (相对 zip 根)
-#
-# 终端机分辨率 (默认 1080x1920 60fps), 设备实际播放时会按需缩放
 1080 1920 60
 
-# part0: 渐显阶段, 播放一次, 不暂停
 p 1 0 part0
 
-# part1: 风纹平移阶段, 播放一次后进入系统
 p 1 0 part1

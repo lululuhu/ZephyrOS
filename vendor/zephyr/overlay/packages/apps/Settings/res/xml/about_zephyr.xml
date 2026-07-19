@@ -31,11 +31,11 @@
         android:title="@string/zephyr_release_type_title"
         android:summary="社区版 (Community)" />
 
-    <!-- 构建日期 -->
+    <!-- 构建日期 (由 build prop ro.zephyr.build.date 提供, 此处仅占位) -->
     <Preference
         android:key="zephyr_build_date"
         android:title="@string/zephyr_build_date_title"
-        android:summary="$(date -u +%Y-%m-%d)" />
+        android:summary="@string/zephyr_build_date_summary" />
 
     <!-- 纯净承诺 -->
     <Preference

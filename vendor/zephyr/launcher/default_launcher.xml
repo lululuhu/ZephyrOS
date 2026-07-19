@@ -4,15 +4,14 @@
     通过 persistent preferred activity 让 Lawnchair 成为默认 HOME.
     系统启动时 PackageManagerService 会读取此文件并设置默认桌面.
 
-    注意: 实际包名需与 Lawnchair 14 分支编译产物一致,
-          若不同请修改下方 packageName / name 字段.
+    注意: Lawnchair 14-dev 分支的 applicationId 为 app.lawnchair.
 -->
 <preferred-activities>
     <preferred-activity>
         <action name="android.intent.action.MAIN" />
         <cat name="android.intent.category.HOME" />
         <cat name="android.intent.category.DEFAULT" />
-        <pkg name="ch.deletescape.lawnchair.plah" />
-        <cls name="ch.deletescape.lawnchair.LawnchairLauncher" />
+        <pkg name="app.lawnchair" />
+        <cls name="app.lawnchair.Launcher" />
     </preferred-activity>
 </preferred-activities>

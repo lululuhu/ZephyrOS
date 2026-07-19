@@ -8,9 +8,9 @@ on:
         required: false
         default: 'android-14.0.0_r74'
       target:
-        description: 'Build target (aosp_arm64-ab-trunk_staging-userdebug / aosp_x86_64-ab-trunk_staging-userdebug)'
+        description: 'Build target (aosp_arm64-trunk_staging-userdebug / aosp_x86_64-trunk_staging-userdebug)'
         required: false
-        default: 'aosp_arm64-ab-trunk_staging-userdebug'
+        default: 'aosp_arm64-trunk_staging-userdebug'
       enable_ccache:
         description: 'Use ccache (recommended)'
         required: false
@@ -36,7 +36,7 @@ env:
   TZ: Asia/Shanghai
 
 concurrency:
-  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}
+  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}
   cancel-in-progress: true
 
 jobs:
@@ -76,7 +76,9 @@ jobs:
             libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev \
             libx11-dev lib32z-dev ccache libgl1-mesa-dev \
             libxml2-utils xsltproc unzip python3 python3-pip \
-            repo rsync libncurses5 libtinfo5
+            repo rsync
+          # libncurses5/libtinfo5 在 Ubuntu 22.04 已移除, 安装兼容包
+          sudo apt-get install -y -qq libncurses5-compat libtinfo5-compat 2>/dev/null || true
           sudo ln -sf /usr/bin/python3 /usr/bin/python
 
       - name: Configure git
@@ -90,9 +92,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-${{ github.sha }}
+          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-
+            ccache-${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-
 
       - name: Setup build environment
         run: |
@@ -144,26 +146,38 @@ jobs:
       - name: Apply framework patches
         run: |
           # 应用 ZephyrOS framework 补丁 (status bar + gesture controller)
+          # 注意: 占位符 patch 会跳过, 不影响构建 (功能通过 overlay 实现)
           cd ${{ env.AOSP_ROOT }}
           for p in frameworks/base/patches/*.patch; do
+            [ -f "$p" ] || continue
             echo "[PATCH] Applying: $p"
-            git apply --verbose "$p" 2>&1 | tail -3 || \
-              echo "[WARN] $p failed to apply (may already be applied or context differs)"
+            if git apply --check "$p" 2>/dev/null; then
+              git apply --verbose "$p" 2>&1 | tail -3
+            else
+              echo "[WARN] $p skipped (context mismatch or placeholder — using overlay fallback)"
+            fi
           done
 
       - name: Lunch target
         working-directory: ${{ env.AOSP_ROOT }}
         run: |
           source build/envsetup.sh
-          lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}
+          # 诊断: 列出可用的 release config (AOSP 14 lunch 三段式: product-release-variant)
+          echo "=== Available release configs in build/release/ ==="
+          ls build/release/ 2>/dev/null || echo "(no build/release/ dir)"
+          echo "=== Available lunch targets (matching aosp_arm64) ==="
+          lunch --print-all 2>/dev/null | grep -i "aosp_arm64" | head -20 || true
+          echo "=== Attempting lunch ==="
+          lunch ${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}
           echo "TARGET_PRODUCT=$TARGET_PRODUCT"
           echo "TARGET_BUILD_VARIANT=$TARGET_BUILD_VARIANT"
+          echo "TARGET_RELEASE=$TARGET_RELEASE"
 
       - name: Build GSI system image
         working-directory: ${{ env.AOSP_ROOT }}
         run: |
           source build/envsetup.sh
-          lunch ${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}
+          lunch ${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}
           bash $GITHUB_WORKSPACE/zephyr-overlay/build/build_gsi.sh
         timeout-minutes: 300
 
@@ -184,7 +198,7 @@ jobs:
           ZephyrOS GSI Build
           ==================
           Android: ${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}
-          Target:  ${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}
+          Target:  ${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}
           Commit:  ${{ github.sha }}
           Branch:  ${{ github.ref }}
           Built:   $(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -194,7 +208,7 @@ jobs:
       - name: Upload GSI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-ab-trunk_staging-userdebug' }}-${{ github.sha }}
+          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}-${{ github.sha }}
           path: artifacts/*
           retention-days: 14
           compression-level: 0

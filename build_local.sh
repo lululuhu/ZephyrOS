@@ -14,7 +14,8 @@ set -e
 
 # ============ 配置 ============
 ANDROID_TAG="android-14.0.0_r74"
-TARGET="zephyr_gsi-userdebug"
+# AOSP 14 lunch 三段式: product-release_config-build_variant
+TARGET="aosp_arm64-trunk_staging-userdebug"
 AOSP_DIR="$HOME/zephyr-aosp"
 # ==============================
 
@@ -71,20 +72,27 @@ if [ ! -d ".repo" ]; then
     repo init -u https://android.googlesource.com/platform/manifest \
         -b "$ANDROID_TAG" --depth=1 --current-branch
 
-    # 应用 ZephyrOS manifest
+    # 应用 ZephyrOS manifest + remove-projects (瘦身)
     mkdir -p .repo/local_manifests
     SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
     cp "$SCRIPT_DIR/manifest/zephyr.xml" .repo/local_manifests/zephyr.xml
+    [ -f "$SCRIPT_DIR/manifest/remove-projects.xml" ] && \
+        cp "$SCRIPT_DIR/manifest/remove-projects.xml" .repo/local_manifests/
 
     echo ""
     echo "[INFO] Syncing AOSP source (~28GB, will take 30-60 min depending on network)..."
-    repo sync -c -j$(nproc) --no-tags --no-clone-bundle --prune -f
+    repo sync -c -j$(nproc) --no-tags --no-clone-bundle --prune --optimized-fetch -f
+
+    # 清理 .repo 元数据释放磁盘
+    rm -rf .repo/projects .repo/project-objects 2>/dev/null || true
 fi
 
 # 6. 应用 ZephyrOS overlay
 echo ""
 echo "[6/8] Applying ZephyrOS overlay..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# 先创建目标目录 (AOSP 源码默认无 vendor/ 顶层目录)
+mkdir -p "$AOSP_DIR/vendor/zephyr" "$AOSP_DIR/packages/apps" "$AOSP_DIR/frameworks"
 rsync -a --exclude='.git' --exclude='Lawnchair' \
     "$SCRIPT_DIR/packages/apps/" "$AOSP_DIR/packages/apps/"
 rsync -a --exclude='.git' "$SCRIPT_DIR/vendor/zephyr/" "$AOSP_DIR/vendor/zephyr/"

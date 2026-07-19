@@ -50,6 +50,7 @@
     <string name="zephyr_codename_title">ZephyrOS 代号</string>
     <string name="zephyr_release_type_title">发布类型</string>
     <string name="zephyr_build_date_title">构建日期</string>
+    <string name="zephyr_build_date_summary">见 build.prop ro.zephyr.build.date</string>
     <string name="zephyr_pure_promise_title">纯净承诺</string>
 
 </resources>

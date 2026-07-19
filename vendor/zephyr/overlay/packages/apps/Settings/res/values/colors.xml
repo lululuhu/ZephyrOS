@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ZephyrOS — Settings Color Palette
+    清风绿主题色 (PixelOS 风格 accent: #2EB872)
+    供 Settings 应用的 themes.xml 和 zephyr_about_header.xml 引用.
+-->
+<resources>
+
+    <!-- 主色: 清风绿 -->
+    <color name="zephyr_primary">#FF2EB872</color>
+    <!-- 深色变体: 用于状态栏背景 -->
+    <color name="zephyr_primary_dark">#FF1E7A4D</color>
+    <!-- 浅色变体: 用于 ripple/highlight -->
+    <color name="zephyr_primary_light">#FF7FD4A8</color>
+    <!-- 强调色 (与主色一致) -->
+    <color name="zephyr_accent">#FF2EB872</color>
+
+</resources>

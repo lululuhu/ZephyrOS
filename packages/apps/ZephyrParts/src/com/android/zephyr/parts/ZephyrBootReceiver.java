@@ -18,7 +18,11 @@ public class ZephyrBootReceiver extends BroadcastReceiver {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             Log.i(TAG, "Boot completed, starting ZephyrBootService");
             Intent service = new Intent(context, ZephyrBootService.class);
-            context.startForegroundService(service);
+            // 使用普通 startService 而非 startForegroundService, 因为
+            // ZephyrBootService 是短任务 (< 1 秒), 不需要前台服务状态.
+            // startForegroundService 要求 5 秒内调用 startForeground(),
+            // 否则崩溃 ForegroundServiceDidNotStartInTimeException.
+            context.startService(service);
         }
     }
 }
