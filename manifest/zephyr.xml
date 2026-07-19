@@ -28,18 +28,26 @@
             fetch="https://github.com/PixelOS-AOSP/"
             revision="thirteen" />
 
-    <!-- Lawnchair 远程入口: 替换 AOSP 默认 Launcher3
-         注意: Lawnchair 仓库没有 '14' 分支, 只有 14-beta 和 14-dev。
-         使用 14-dev (Android 14 开发分支, 最新功能)。 -->
+    <!-- Lawnchair 集成说明 (IMPORTANT):
+         Lawnchair 14-dev 分支内置了 SystemUI 库副本 (systemUICommon,
+         systemUIPluginCore, systemUIShared 等) 和 Launcher3 测试模块,
+         与 AOSP 自带模块重名, 导致 Soong 报 "module already defined" 错误。
+
+         当前策略: 暂不将 Lawnchair 源码拉入 AOSP 树构建。
+         后续集成方案 (任选其一):
+           1. 预编译 Lawnchair APK, 通过 PRODUCT_PREBUILT_BUILT_APKS 集成
+           2. Fork Lawnchair, 移除冲突的 Android.bp 模块定义
+           3. 用 LOCAL_OVERRIDES_MODULES := Launcher3 替换 (需 Lawnchair 配合)
+
     <remote name="lawnchair"
             fetch="https://github.com/LawnchairLauncher/"
             revision="14-dev" />
 
-    <!-- ========== 1. 桌面启动器 (Lawnchair, Apache 2.0) ========== -->
     <project path="packages/apps/Lawnchair"
              name="lawnchair"
              remote="lawnchair"
              revision="14-dev" />
+    -->
 
     <!-- ========== 2. 原创资源 (ZephyrOS 项目维护) ========== -->
     <!-- 取消注释前需在 GitHub 创建对应仓库 -->

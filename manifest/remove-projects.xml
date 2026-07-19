@@ -18,7 +18,10 @@
     <!-- ===== A. Testing suites (~5 GB) ===== -->
     <remove-project name="platform/cts" />
     <remove-project name="platform/platform_testing" />
-    <remove-project name="platform/test/app_compat/csuite" />
+    <!-- NOTE: platform/test/app_compat/csuite 已从移除清单中恢复.
+         art/test/Android.bp 和 WindowManager/Shell/tests 引用了
+         csuite_test 模块类型, 该类型定义在 csuite 项目中.
+         移除 csuite 会导致 Soong 报 "unrecognized module type" 错误. -->
     <remove-project name="platform/test/catbox" />
     <remove-project name="platform/test/cts-root" />
     <remove-project name="platform/test/dittosuite" />

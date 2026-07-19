@@ -61,11 +61,13 @@ echo "::endgroup::"
 # ------------------------------------------------------------------
 # 构建核心目标
 #   - systemimage  : 生成 system.img（GSI 核心）
-#   - ZephyrParts  : 自定义设置应用
+#
+# 注意: ZephyrParts / ZephyrWallpapers / ZephyrSystemUIHooks 等自定义模块
+# 暂不加入构建目标。它们依赖 SystemUI 内部 API, 需要先确保基础 GSI 能
+# 编译通过。后续通过 PRODUCT_PACKAGES 在 product mk 中启用。
 # ------------------------------------------------------------------
 BUILD_TARGETS=(
     "systemimage"
-    "ZephyrParts"
 )
 
 echo "[INFO] Starting build: ${BUILD_TARGETS[*]}"
