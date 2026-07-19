@@ -76,10 +76,12 @@ repo version
 if [ ! -d ".repo" ]; then
     echo "[INFO] Initializing AOSP repo from $AOSP_MIRROR (shallow + partial clone)..."
     # --depth=1: 浅克隆, 只取最新 commit (省 ~60% 磁盘)
-    # --partial-clone: 启用 git partial clone, 配合 --filter=blob:none
+    # --partial-clone: 启用 git partial clone (默认 filter=blob:none)
     #   按需下载 blob (构建读取文件时才下载该 blob)
     #   Run #20 实测: 浅克隆 sync 30分钟消耗 92GB (未完成), partial clone
     #   能将 .repo 元数据从 ~15GB 降到 ~3GB, 总磁盘占用减半。
+    #   注意: repo init 不支持 --filter 选项 (那是 git 的选项);
+    #   --partial-clone 已默认使用 blob:none filter。
     # -g default: 显式指定 default group (虽然 -g default 是空操作, 但保留
     #   语义清晰; 真正的瘦身靠 remove-projects.xml)
     repo init -u "$MANIFEST_URL" \
@@ -87,7 +89,6 @@ if [ ! -d ".repo" ]; then
         -g default \
         --depth=1 \
         --partial-clone \
-        --filter=blob:none \
         --current-branch
 else
     echo "[INFO] .repo already exists, skipping init."
