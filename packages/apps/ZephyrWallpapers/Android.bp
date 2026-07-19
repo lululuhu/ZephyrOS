@@ -19,7 +19,6 @@ android_app {
     platform_apis: true,
     certificate: "platform",
     privileged: false,
-    system_module: true,
 
     optimize: {
         proguard_flags_files: ["proguard.flags"],

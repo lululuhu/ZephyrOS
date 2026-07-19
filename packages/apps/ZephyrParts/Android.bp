@@ -26,10 +26,6 @@ android_app {
         proguard_flags_files: ["proguard.flags"],
     },
 
-    required: [
-        "ZephyrParts-permissions.xml",
-    ],
-
-    // 必须随 system 分区发布（GSI 一部分）
-    system_module: true,
+    // android_app 默认装到 system 分区 (GSI 一部分), 无需 system_module 属性.
+    // (ZephyrParts-permissions.xml 模块尚未定义, 暂不引用, 后续按需添加)
 }
