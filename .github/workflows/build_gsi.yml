@@ -114,6 +114,11 @@ jobs:
         run: |
           # 把当前仓库的内容铺到 AOSP 树对应路径
           # 注意: packages/apps/Lawnchair 由 repo sync 拉取, 不覆盖
+          # 先创建目标目录 (AOSP 源码默认无 vendor/ 顶层目录, rsync 不会
+          # 递归创建多层不存在的父目录)
+          mkdir -p ${{ env.AOSP_ROOT }}/vendor/zephyr
+          mkdir -p ${{ env.AOSP_ROOT }}/packages/apps
+          mkdir -p ${{ env.AOSP_ROOT }}/frameworks
           rsync -a --exclude='.git' --exclude='Lawnchair' \
             zephyr-overlay/packages/apps/ ${{ env.AOSP_ROOT }}/packages/apps/
           rsync -a --exclude='.git' zephyr-overlay/vendor/zephyr/ ${{ env.AOSP_ROOT }}/vendor/zephyr/
