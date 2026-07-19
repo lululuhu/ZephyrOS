@@ -14,3 +14,11 @@ java_library {
     // 空壳模块: 仅用于满足 Soong 依赖检查, 不包含任何实际代码.
     // 引用了 lint_api 的模块 (BackCompatLintChecker 等) 不会被编译到 GSI 中.
 }
+
+java_library {
+    name: "stub-annotations",
+    srcs: [],
+    sdk_version: "current",
+    // 空壳模块: 仅用于满足 Soong 依赖检查.
+    // 引用了 stub-annotations 的模块 (xsdc-java-tests 等) 不会被编译到 GSI 中.
+}
