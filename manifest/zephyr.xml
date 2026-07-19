@@ -28,16 +28,18 @@
             fetch="https://github.com/PixelOS-AOSP/"
             revision="thirteen" />
 
-    <!-- Lawnchair 远程入口: 替换 AOSP 默认 Launcher3 -->
+    <!-- Lawnchair 远程入口: 替换 AOSP 默认 Launcher3
+         注意: Lawnchair 仓库没有 '14' 分支, 只有 14-beta 和 14-dev。
+         使用 14-dev (Android 14 开发分支, 最新功能)。 -->
     <remote name="lawnchair"
             fetch="https://github.com/LawnchairLauncher/"
-            revision="14" />
+            revision="14-dev" />
 
     <!-- ========== 1. 桌面启动器 (Lawnchair, Apache 2.0) ========== -->
     <project path="packages/apps/Lawnchair"
              name="lawnchair"
              remote="lawnchair"
-             revision="14" />
+             revision="14-dev" />
 
     <!-- ========== 2. 原创资源 (ZephyrOS 项目维护) ========== -->
     <!-- 取消注释前需在 GitHub 创建对应仓库 -->

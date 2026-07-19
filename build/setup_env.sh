@@ -74,14 +74,20 @@ repo version
 # 2. 初始化 AOSP 仓库（浅克隆，节省 ~60% 磁盘）
 # ------------------------------------------------------------------
 if [ ! -d ".repo" ]; then
-    echo "[INFO] Initializing AOSP repo from $AOSP_MIRROR (shallow, depth=1)..."
-    # -g default: 只配置 default group, 跳过设备树(device/*)、非 Linux 平台
-    #   工具链(darwin/windows prebuilts)等 GSI 不需要的项目
-    #   (避免撑爆 GitHub runner 107GB 磁盘)
+    echo "[INFO] Initializing AOSP repo from $AOSP_MIRROR (shallow + partial clone)..."
+    # --depth=1: 浅克隆, 只取最新 commit (省 ~60% 磁盘)
+    # --partial-clone: 启用 git partial clone, 配合 --filter=blob:none
+    #   按需下载 blob (构建读取文件时才下载该 blob)
+    #   Run #20 实测: 浅克隆 sync 30分钟消耗 92GB (未完成), partial clone
+    #   能将 .repo 元数据从 ~15GB 降到 ~3GB, 总磁盘占用减半。
+    # -g default: 显式指定 default group (虽然 -g default 是空操作, 但保留
+    #   语义清晰; 真正的瘦身靠 remove-projects.xml)
     repo init -u "$MANIFEST_URL" \
         -b "$ANDROID_TAG" \
         -g default \
         --depth=1 \
+        --partial-clone \
+        --filter=blob:none \
         --current-branch
 else
     echo "[INFO] .repo already exists, skipping init."
