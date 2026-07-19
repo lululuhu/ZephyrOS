@@ -19,6 +19,10 @@ java_library {
     name: "stub-annotations",
     srcs: [],
     sdk_version: "current",
+    host_supported: true,
     // 空壳模块: 仅用于满足 Soong 依赖检查.
-    // 引用了 stub-annotations 的模块 (xsdc-java-tests 等) 不会被编译到 GSI 中.
+    // 引用了 stub-annotations 的模块 (xsdc-java-tests,
+    // libview-inspector-annotation-processor 等) 不会被编译到 GSI 中.
+    // host_supported: true 是必需的, 因为 frameworks/base/tools/processors
+    // 需要 host 变体 (os:linux_glibc,arch:common).
 }
