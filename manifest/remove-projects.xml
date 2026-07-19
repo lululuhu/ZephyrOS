@@ -16,8 +16,11 @@
 <manifest>
 
     <!-- ===== A. Testing suites (~5 GB) ===== -->
-    <remove-project name="platform/cts" />
-    <remove-project name="platform/platform_testing" />
+    <!-- NOTE: platform/cts 和 platform/platform_testing 已从移除清单中恢复.
+         数十个 CTS 测试 app 的 Android.bp 引用了 "cts_defaults" defaults 模块,
+         该模块定义在 platform/cts 项目中. 移除 cts 会导致 Soong 报
+         "depends on undefined module cts_defaults" 错误.
+         同样 platform_testing 也提供了测试基础设施, 一并恢复. -->
     <!-- NOTE: platform/test/app_compat/csuite 已从移除清单中恢复.
          art/test/Android.bp 和 WindowManager/Shell/tests 引用了
          csuite_test 模块类型, 该类型定义在 csuite 项目中.
@@ -25,10 +28,18 @@
     <remove-project name="platform/test/catbox" />
     <remove-project name="platform/test/cts-root" />
     <remove-project name="platform/test/dittosuite" />
-    <remove-project name="platform/test/framework" />
+    <!-- NOTE: platform/test/framework 已从移除清单中恢复.
+         它定义了 rdroidtest.defaults 模块 (Rust 测试 defaults),
+         被 packages/modules/Virtualization 和 system/secretkeeper 引用.
+         移除会导致 Soong 报 "depends on undefined module rdroidtest.defaults" 错误. -->
+    <!-- <remove-project name="platform/test/framework" /> -->
     <remove-project name="platform/test/mlts/benchmark" />
     <remove-project name="platform/test/mlts/models" />
-    <remove-project name="platform/test/mts" />
+    <!-- NOTE: platform/test/mts 已从移除清单中恢复.
+         它定义了 mts-target-sdk-version-current defaults 模块,
+         被 packages/modules/Permission, AdServices, Connectivity 引用.
+         移除会导致 Soong 报 "depends on undefined module mts-target-sdk-version-current" 错误. -->
+    <!-- <remove-project name="platform/test/mts" /> -->
     <remove-project name="platform/test/robolectric-extensions" />
     <remove-project name="platform/test/vts" />
     <remove-project name="platform/test/vts-testcase/hal" />
@@ -61,7 +72,11 @@
 
     <!-- ===== E. Trade Federation / misc test tools ===== -->
     <remove-project name="platform/tools/external/fat32lib" />
-    <remove-project name="platform/tools/tradefederation/prebuilts" />
+    <!-- NOTE: platform/tools/tradefederation/prebuilts 已从移除清单中恢复.
+         它定义了 tradefed_errorprone_defaults defaults 模块,
+         被 packages/modules/AdServices 的 device-collectors 引用.
+         移除会导致 Soong 报 "depends on undefined module tradefed_errorprone_defaults" 错误. -->
+    <!-- <remove-project name="platform/tools/tradefederation/prebuilts" /> -->
 
     <!-- ===== F. Docs & samples (~0.5 GB) ===== -->
     <remove-project name="platform/developers/build" />
@@ -95,7 +110,13 @@
     <remove-project name="device/google/coral" />
     <remove-project name="device/google/coral-kernel" />
     <remove-project name="device/google/coral-sepolicy" />
-    <remove-project name="device/google/cuttlefish" />
+    <!-- NOTE: device/google/cuttlefish 已从移除清单中恢复.
+         它定义了 cuttlefish_buildhost_only 和 cuttlefish_guest_only
+         soong_config_module_type, 被 device/generic/opengl-transport
+         和 device/google/trout 引用.
+         移除会导致 Soong 报 "depends on undefined module" 错误.
+         (cuttlefish_prebuilts 和 cuttlefish_vmm 仍可移除, 它们只是预编译产物) -->
+    <!-- <remove-project name="device/google/cuttlefish" /> -->
     <remove-project name="device/google/cuttlefish_prebuilts" />
     <remove-project name="device/google/cuttlefish_vmm" />
     <remove-project name="device/google/felix" />
