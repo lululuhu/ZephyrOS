@@ -201,10 +201,10 @@
     <remove-project name="platform/tools/metalava" />
 
     <!-- ================================================================ -->
-    <!-- NOTE: All platform/test/*, platform/cts, platform/platform_testing,
-    <!--        platform/tools/tradefederation/prebuilts, device/generic/*,
-    <!--        device/google/cuttlefish are KEPT (not removed).
-    <!--        These are deeply referenced by the build system and
-    <!--        removing them causes endless "undefined module" errors. -->
+    <!-- NOTE: All platform/test/*, platform/cts, platform/platform_testing,  -->
+    <!--       platform/tools/tradefederation/prebuilts, device/generic/*,    -->
+    <!--       device/google/cuttlefish are KEPT (not removed).               -->
+    <!--       These are deeply referenced by the build system and            -->
+    <!--       removing them causes endless "undefined module" errors.        -->
     <!-- ================================================================ -->
 </manifest>
