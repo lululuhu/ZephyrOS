@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       android_version:
-        description: 'AOSP tag (default android-14.0.0_r74)'
+        description: 'AOSP tag (default android-13.0.0_r83)'
         required: false
-        default: 'android-14.0.0_r74'
+        default: 'android-13.0.0_r83'
       target:
-        description: 'Build target (aosp_arm64-trunk_staging-userdebug / aosp_x86_64-trunk_staging-userdebug)'
+        description: 'Build target (aosp_arm64-userdebug / aosp_x86_64-userdebug)'
         required: false
-        default: 'aosp_arm64-trunk_staging-userdebug'
+        default: 'aosp_arm64-userdebug'
       enable_ccache:
         description: 'Use ccache (recommended)'
         required: false
@@ -36,7 +36,7 @@ env:
   TZ: Asia/Shanghai
 
 concurrency:
-  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}
+  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
   cancel-in-progress: true
 
 jobs:
@@ -92,14 +92,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-${{ github.sha }}
+          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}-${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}-
+            ccache-${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-
 
       - name: Setup build environment
         run: |
           bash zephyr-overlay/build/setup_env.sh \
-            "${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}" \
+            "${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}" \
             "${{ env.AOSP_ROOT }}" \
             "$GITHUB_WORKSPACE/zephyr-overlay/manifest/zephyr.xml"
 
@@ -172,7 +172,7 @@ jobs:
           echo "=== Available lunch targets (matching aosp_arm64) ==="
           lunch --print-all 2>/dev/null | grep -i "aosp_arm64" | head -20 || true
           echo "=== Attempting lunch ==="
-          lunch ${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}
+          lunch ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
           echo "TARGET_PRODUCT=$TARGET_PRODUCT"
           echo "TARGET_BUILD_VARIANT=$TARGET_BUILD_VARIANT"
           echo "TARGET_RELEASE=$TARGET_RELEASE"
@@ -180,7 +180,7 @@ jobs:
       - name: Build GSI system image
         working-directory: ${{ env.AOSP_ROOT }}
         env:
-          TARGET_LUNCH: ${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}
+          TARGET_LUNCH: ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
         run: |
           bash $GITHUB_WORKSPACE/zephyr-overlay/build/build_gsi.sh
         timeout-minutes: 300
@@ -201,8 +201,8 @@ jobs:
           cat > artifacts/build_info.txt <<EOF
           ZephyrOS GSI Build
           ==================
-          Android: ${{ github.event.inputs.android_version || 'android-14.0.0_r74' }}
-          Target:  ${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}
+          Android: ${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}
+          Target:  ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
           Commit:  ${{ github.sha }}
           Branch:  ${{ github.ref }}
           Built:   $(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -212,7 +212,7 @@ jobs:
       - name: Upload GSI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-trunk_staging-userdebug' }}-${{ github.sha }}
+          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}-${{ github.sha }}
           path: artifacts/*
           retention-days: 14
           compression-level: 0

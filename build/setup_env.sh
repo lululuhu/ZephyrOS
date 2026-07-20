@@ -17,7 +17,7 @@ set -euo pipefail
 exec > >(tee -a /tmp/setup_env.log) 2>&1
 set -x
 
-ANDROID_TAG="${1:-android-14.0.0_r74}"
+ANDROID_TAG="${1:-android-13.0.0_r83}"
 AOSP_ROOT="${2:-/mnt/aosp}"
 ZEPHYR_MANIFEST="${3:-}"
 # remove-projects.xml 与 zephyr.xml 位于同一目录

@@ -16,7 +16,7 @@ set -euo pipefail
 # ------------------------------------------------------------------
 # 0. 重新初始化 AOSP 构建环境 (m/soong_ui 等是 shell 函数, 不跨进程)
 # ------------------------------------------------------------------
-BUILD_TARGET_LUNCH="${TARGET_LUNCH:-aosp_arm64-trunk_staging-userdebug}"
+BUILD_TARGET_LUNCH="${TARGET_LUNCH:-aosp_arm64-userdebug}"
 
 if ! command -v m >/dev/null 2>&1; then
     echo "[INFO] Sourcing build/envsetup.sh + lunch (m function not available)..."

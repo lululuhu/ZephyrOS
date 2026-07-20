@@ -15,7 +15,7 @@ $(call inherit-product, vendor/zephyr/config/common.mk)
 # ---------- GSI 必备约束 ----------
 # GSI 必须无 vendor 分区依赖，因此不能引入厂商 blob
 PRODUCT_ENFORCE_VINTF_MANIFEST := true
-PRODUCT_SHIPPING_API_LEVEL := 34
+PRODUCT_SHIPPING_API_LEVEL := 33
 
 # ---------- 设备通用名 ----------
 PRODUCT_NAME := zephyr_gsi
