@@ -41,7 +41,13 @@
          移除会导致 Soong 报 "depends on undefined module mts-target-sdk-version-current" 错误. -->
     <!-- <remove-project name="platform/test/mts" /> -->
     <remove-project name="platform/test/robolectric-extensions" />
-    <remove-project name="platform/test/vts" />
+    <!-- NOTE: platform/test/vts 已从移除清单中恢复.
+         VTS (Vendor Test Suite) 定义了 VtsHalHidlTestUtils, VtsHalHidlTargetTestBase,
+         libvts_vintf_test_common 等测试工具模块, 被 hardware/interfaces/*/vts/
+         和 frameworks/base/omapi/*/vts/ 中的测试模块引用.
+         移除会导致 Soong 逐个报 "undefined module" 错误 (已发生 3 次).
+         恢复后一次性解决所有 VTS 相关依赖. -->
+    <!-- <remove-project name="platform/test/vts" /> -->
     <remove-project name="platform/test/vts-testcase/hal" />
     <remove-project name="platform/test/vts-testcase/hal-trace" />
     <remove-project name="platform/test/vts-testcase/kernel" />
