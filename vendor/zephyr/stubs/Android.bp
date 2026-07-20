@@ -73,3 +73,15 @@ java_library {
     system_modules: "none",
     host_supported: true,
 }
+
+// libvts_vintf_test_common: 定义在 platform/test/vts 中, 被 system/libvintf/Android.bp
+// 中的 libassemblevintf 模块引用. 这是 VTS 测试库, 不影响 GSI 构建.
+cc_library {
+    name: "libvts_vintf_test_common",
+    srcs: [],
+    shared_libs: [],
+    static_libs: [],
+    header_libs: [],
+    stl: "none",
+    host_supported: true,
+}
