@@ -6,74 +6,52 @@
 // 这些引用的模块仅用于开发工具 (apifinder, linter 等), 不影响系统镜像构建.
 // 这里提供空壳 stub 以通过 Soong bootstrap 的依赖检查.
 // =============================================================================
+//
+// 重要: 所有 stub 必须设置 sdk_version: "none"!
+// 如果 sdk_version 设置为 "current" 或默认值 "core_platform",
+// java_library 的设备变体会依赖 android_stubs_current 或 core.platform.api.stubs,
+// 而这些 SDK 桩的生成过程可能又依赖本 stub 文件中的模块,
+// 导致依赖循环: android_stubs_current → ... → stub → android_stubs_current.
+// 空壳模块没有源码, 不需要 SDK, 所以必须设 sdk_version: "none".
 
 java_library {
     name: "lint_api",
     srcs: [],
-    sdk_version: "current",
+    sdk_version: "none",
     host_supported: true,
-    // 空壳模块: 仅用于满足 Soong 依赖检查, 不包含任何实际代码.
-    // 引用了 lint_api 的模块 (BackCompatLintChecker, AndroidCommonLint 等)
-    // 不会被编译到 GSI 中.
-    // host_supported: true 是必需的, 因为 frameworks/base/tools/lint
-    // 是 host 侧工具, 需要 os:linux_glibc 变体.
 }
 
 java_library {
     name: "stub-annotations",
     srcs: [],
-    // 注意: 不能设置 sdk_version: "current"!
-    // 如果设置了 sdk_version: "current", 这个模块会依赖 android_stubs_current,
-    // 而 android_stubs_current.from-text 又依赖 stub-annotations (StubLibraries.bp:831),
-    // 形成依赖循环: android_stubs_current.from-text → stub-annotations → android_stubs_current
-    // 空壳模块没有源码, 不需要 SDK, 所以省略 sdk_version.
+    sdk_version: "none",
     host_supported: true,
-    // 空壳模块: 仅用于满足 Soong 依赖检查.
-    // 引用了 stub-annotations 的模块 (xsdc-java-tests,
-    // libview-inspector-annotation-processor 等) 不会被编译到 GSI 中.
-    // host_supported: true 是必需的, 因为 frameworks/base/tools/processors
-    // 需要 host 变体 (os:linux_glibc,arch:common).
 }
 
 java_library {
     name: "metalava-signature-reader",
     srcs: [],
-    sdk_version: "current",
+    sdk_version: "none",
     host_supported: true,
-    // 空壳模块: 仅用于满足 Soong 依赖检查.
-    // 引用了 metalava-signature-reader 的模块 (extract-flagged-apis 等)
-    // 不会被编译到 GSI 中.
-    // metalava 相关工具在 platform/tools/metalava 中定义,
-    // 该巨型项目不在 AOSP 14 r74 default manifest 中.
 }
 
 java_library {
     name: "lint",
     srcs: [],
-    sdk_version: "current",
+    sdk_version: "none",
     host_supported: true,
-    // 空壳模块: 仅用于满足 Soong 依赖检查.
-    // 引用了 lint 的模块 (LintCheckerTest 系列) 不会被编译到 GSI 中.
-    // lint 定义在 platform/tools/base 中, 不在 AOSP 14 r74 default manifest.
 }
 
 java_library {
     name: "lint_tests",
     srcs: [],
-    sdk_version: "current",
+    sdk_version: "none",
     host_supported: true,
-    // 空壳模块: 仅用于满足 Soong 依赖检查.
-    // 引用了 lint_tests 的模块 (LintCheckerTest 系列) 不会被编译到 GSI 中.
-    // lint_tests 定义在 platform/tools/base 中, 不在 AOSP 14 r74 default manifest.
 }
 
 java_library {
     name: "metalava-manual",
     srcs: [],
-    sdk_version: "current",
+    sdk_version: "none",
     host_supported: true,
-    // 空壳模块: 仅用于满足 Soong 依赖检查.
-    // 引用了 metalava-manual 的模块 (art.module.public.api.stubs 系列)
-    // 不会被编译到 GSI 中.
-    // metalava 定义在 platform/tools/metalava 中, 不在 AOSP 14 r74 default manifest.
 }
