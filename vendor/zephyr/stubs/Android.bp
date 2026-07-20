@@ -62,3 +62,14 @@ java_library {
     system_modules: "none",
     host_supported: true,
 }
+
+// private-stub-annotations-jar: 定义在 platform/tools/base 中, 被
+// frameworks/base/api/StubLibraries.bp 中的 android_stubs_current.from-text
+// android_system_stubs_current.from-text 和 android_test_stubs_current.from-text 引用.
+java_library {
+    name: "private-stub-annotations-jar",
+    srcs: [],
+    sdk_version: "none",
+    system_modules: "none",
+    host_supported: true,
+}
