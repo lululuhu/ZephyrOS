@@ -26,7 +26,7 @@ public class ZephyrPartsFragment extends PreferenceFragment {
         // 显示当前清风版本号
         Preference about = findPreference("zephyr_about");
         if (about != null) {
-            about.setSummary("ZephyrOS 1.0 · Android 14");
+            about.setSummary("ZephyrOS 1.0 · Android 13");
         }
     }
 

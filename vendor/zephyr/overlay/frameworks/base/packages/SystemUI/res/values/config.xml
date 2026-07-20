@@ -2,26 +2,76 @@
 <!--
     ZephyrOS — SystemUI Resources Overlay
     =====================================
-    覆盖 SystemUI 默认行为以接入清风原创功能模块。
+    覆盖 SystemUI 默认行为，实现 PixelOS 风格的全面定制。
 -->
 <resources>
 
-    <!-- 状态栏图标最大数量（清风自定义时限制） -->
-    <integer name="config_maxStatusIcons">6</integer>
+    <!-- ========== 状态栏 ========== -->
+    <!-- 状态栏图标最大数量 -->
+    <integer name="config_maxStatusIcons">7</integer>
+    <!-- 状态栏高度 -->
+    <dimen name="status_bar_height">28dp</dimen>
+    <dimen name="status_bar_icon_size">16dp</dimen>
+    <dimen name="status_bar_icon_spacing">4dp</dimen>
+    <!-- 状态栏左边距 -->
+    <dimen name="status_bar_padding_left">8dp</dimen>
+    <dimen name="status_bar_padding_right">8dp</dimen>
+    <!-- 状态栏字体大小 -->
+    <dimen name="status_bar_clock_size">14sp</dimen>
+    <dimen name="status_bar_battery_size">14sp</dimen>
+    <dimen name="status_bar_wifi_size">14sp</dimen>
+    <!-- 状态栏信号显示 -->
+    <bool name="config_showSignalStrength">true</bool>
 
-    <!-- 横幅通知默认显示时长（ms），ZephyrParts 可调 -->
+    <!-- ========== 通知面板 ========== -->
+    <!-- 横幅通知显示时长（ms） -->
     <integer name="config_headsUpNotificationSnoozeDelay">3000</integer>
+    <!-- 通知面板水平内边距 -->
+    <dimen name="notification_panel_padding_horizontal">12dp</dimen>
+    <!-- 通知头部收缩高度 -->
+    <dimen name="notification_header_shrink_height">44dp</dimen>
+    <!-- 通知最小/展开高度 -->
+    <dimen name="notification_min_height">88dp</dimen>
+    <dimen name="notification_expanded_height">176dp</dimen>
+    <!-- 通知圆角 -->
+    <dimen name="notification_corner_radius">20dp</dimen>
 
+    <!-- ========== 快捷设置面板 ========== -->
+    <!-- QS 磁贴圆角 -->
+    <dimen name="qs_corner_radius">28dp</dimen>
+    <!-- QS 磁贴内边距 -->
+    <dimen name="qs_tile_padding">16dp</dimen>
+    <dimen name="qs_tile_margin_horizontal">12dp</dimen>
+    <dimen name="qs_tile_margin_vertical">8dp</dimen>
+    <!-- QS 磁贴标签大小 -->
+    <dimen name="qs_tile_label_size">14sp</dimen>
+    <!-- QS 面板亮度条 -->
+    <bool name="config_showBrightnessSlider">true</bool>
+    <!-- QS 面板底部设置按钮 -->
+    <bool name="config_showSettingsButton">true</bool>
+    <!-- QS 面板用户头像 -->
+    <bool name="config_showUserAvatar">false</bool>
+
+    <!-- ========== 音量面板 ========== -->
+    <dimen name="volume_panel_width">320dp</dimen>
+    <dimen name="volume_dialog_corner_radius">24dp</dimen>
+
+    <!-- ========== 对话框 ========== -->
+    <dimen name="dialog_corner_radius">24dp</dimen>
+    <dimen name="controls_corner_radius">20dp</dimen>
+
+    <!-- ========== 清风原创功能引脚 ========== -->
     <!-- 清风胶囊（原创通知预览）默认启用 -->
     <bool name="config_zephyr_capsule_enabled">true</bool>
-
     <!-- 默认电池图标样式：0=横向条 / 1=圆形 / 2=隐藏 -->
     <integer name="config_zephyr_battery_style">0</integer>
-
     <!-- 默认时钟位置：0=左 / 1=中 / 2=右 -->
     <integer name="config_zephyr_clock_position">1</integer>
-
     <!-- 启用网速胶囊（原创双箭头样式） -->
     <bool name="config_zephyr_net_speed_chip">true</bool>
+    <!-- 天气芯片 -->
+    <bool name="config_zephyr_weather_chip">false</bool>
+    <!-- 单手模式 -->
+    <bool name="config_zephyr_one_handed">true</bool>
 
 </resources>

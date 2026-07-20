@@ -1,44 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    ZephyrOS — SystemUI Framework Config Overlay
-    应用 PixelOS 风格的全局开关.
+    ZephyrOS — Framework Configuration Overlay
+    ==========================================
+    全面的系统行为配置，覆盖 AOSP 默认行为，实现 PixelOS / EvolutionX 风格。
 -->
 <resources>
 
-    <!-- 启用 Material You 主题动态取色 -->
+    <!-- ========== Material You 主题引擎 ========== -->
     <bool name="config_use_material_you">true</bool>
-
-    <!-- 启用圆角系统图标 -->
     <bool name="config_use_rounded_icons">true</bool>
 
-    <!-- 启用 Pixel 风格的电源菜单 -->
+    <!-- ========== 电源菜单 ========== -->
     <bool name="config_enablePowerMenuOverlay">true</bool>
+    <!-- 启用高级重启选项 -->
+    <bool name="config_show_advancedReboot">true</bool>
 
-    <!-- 启用圆角音量条 -->
+    <!-- ========== 音量面板 ========== -->
     <bool name="config_volumeRounded">true</bool>
+    <!-- 扩展音量面板（媒体/铃声音量分开） -->
+    <bool name="config_volumeSeparateNotification">true</bool>
+    <!-- 音量条位置：0=右 1=左 -->
+    <integer name="config_volumePanelPosition">0</integer>
 
-    <!-- 启用 Pixel 风格的锁屏时钟 -->
+    <!-- ========== 锁屏设置 ========== -->
+    <!-- 锁屏时钟样式（Pixel 风格双行时钟） -->
     <bool name="config_usePixelLockScreenClock">true</bool>
+    <!-- 锁屏快速启动手电筒 -->
+    <bool name="config_lockScreenTorch">true</bool>
+    <!-- 锁屏双击熄屏 -->
+    <bool name="config_doubleTapOnSleep">true</bool>
+    <!-- 锁屏媒体艺术 -->
+    <bool name="config_lockScreenMediaArt">true</bool>
+    <!-- 锁屏通知显示 -->
+    <bool name="config_lockScreenNotifications">true</bool>
 
-    <!-- 状态栏时钟双行显示 (Pixel 风格) -->
+    <!-- ========== 状态栏 ========== -->
+    <!-- 状态栏时钟双行显示 -->
     <bool name="config_clock_dual_line">false</bool>
+    <!-- 显示秒 -->
+    <bool name="config_showSeconds">false</bool>
+    <!-- 状态栏网速 -->
+    <bool name="config_networkSpeedEnabled">true</bool>
+    <!-- 状态栏亮度条 -->
+    <bool name="config_brightnessSlider">true</bool>
 
-    <!-- 默认时区 (中文用户) -->
+    <!-- ========== 快捷设置面板 ========== -->
+    <!-- QS 面板磁贴列数 -->
+    <integer name="config_qsTileColumns">4</integer>
+    <!-- QS 面板磁贴行数 -->
+    <integer name="config_qsTileRows">3</integer>
+    <!-- 启用 QS 面板模糊 -->
+    <bool name="config_qsBlur">true</bool>
+    <!-- QS 面板媒体播放器 -->
+    <bool name="config_qsMediaPlayer">true</bool>
+
+    <!-- ========== 导航手势 ========== -->
+    <!-- 手势条宽度 -->
+    <dimen name="config_navigationBarGestureWidth">24dp</dimen>
+    <!-- 返回手势灵敏度 -->
+    <integer name="config_backGestureSensitivity">2</integer>
+    <!-- 全屏手势排除底部 -->
+    <integer name="config_gestureExclusionHeight">0</integer>
+
+    <!-- ========== 通知 ========== -->
+    <!-- 通知圆角 -->
+    <dimen name="config_notificationCornerRadius">20dp</dimen>
+    <!-- 通知历史 -->
+    <bool name="config_notificationHistory">true</bool>
+    <!-- 通知闪烁 -->
+    <bool name="config_notificationFlash">false</bool>
+
+    <!-- ========== 动画 ========== -->
+    <!-- 窗口动画速度缩放 -->
+    <float name="config_windowAnimationScale">1.0</float>
+    <!-- 过渡动画速度 -->
+    <float name="config_transitionAnimationScale">1.0</float>
+
+    <!-- ========== 默认时区（中文用户） ========== -->
     <string name="config_default_timezone">Asia/Shanghai</string>
 
-    <!-- 关闭 AOSP 默认遥测 -->
+    <!-- ========== 关闭遥测 ========== -->
     <bool name="config_default_enable_telemetry">false</bool>
 
-    <!-- 清风原创功能开关 -->
+    <!-- ========== ZephyrOS 清风原创功能开关 ========== -->
     <bool name="config_zephyr_status_bar_custom">true</bool>
     <bool name="config_zephyr_three_finger_screenshot">true</bool>
     <bool name="config_zephyr_capsule_notify">true</bool>
     <bool name="config_zephyr_one_handed_mode">true</bool>
+    <bool name="config_zephyr_edge_back_gesture">true</bool>
+    <bool name="config_zephyr_quick_pull_down">true</bool>
+    <bool name="config_zephyr_smart_pause">true</bool>
+    <bool name="config_zephyr_app_ops">true</bool>
 
     <!-- 边缘滑动灵敏度 (0-4) -->
     <integer name="config_zephyr_edge_swipe_sensitivity">2</integer>
-
     <!-- 手势条样式 (0=细 / 1=粗 / 2=隐藏) -->
     <integer name="config_zephyr_gesture_pill_style">0</integer>
+    <!-- 锁屏超时（秒） -->
+    <integer name="config_zephyr_screen_off_timeout">30000</integer>
 
 </resources>

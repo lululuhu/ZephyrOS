@@ -48,7 +48,7 @@
     <Preference
         android:key="android_version"
         android:title="@string/firmware_version"
-        android:summary="Android 14 (ZephyrOS 1.0)" />
+        android:summary="Android 13 (ZephyrOS 1.0)" />
 
     <!-- 开源许可证 -->
     <Preference

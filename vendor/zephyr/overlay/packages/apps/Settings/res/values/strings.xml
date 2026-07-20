@@ -27,7 +27,7 @@
     <!-- 系统版本号显示 -->
     <string name="model_number">ZephyrOS 1.0 (Breeze)</string>
     <string name="firmware_version">ZephyrOS 1.0</string>
-    <string name="system_version">ZephyrOS 1.0 - Android 14</string>
+    <string name="system_version">ZephyrOS 1.0 - Android 13</string>
     <string name="security_patch">ZephyrOS Build</string>
 
     <!-- 法律信息 -->

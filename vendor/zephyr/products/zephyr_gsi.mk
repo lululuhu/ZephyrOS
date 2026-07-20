@@ -5,8 +5,8 @@
 # 适用: 任何支持 Project Treble 的设备（通过 fastboot flash system 刷入）
 # ============================================================================
 
-# 继承 GSI 基线（AOSP 14 自带）
-$(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_system.mk)
+# 继承 GSI 基线
+# AOSP 13 使用 full_base.mk 作为 GSI 基础
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
 
 # ZephyrOS 自有配置
@@ -28,5 +28,5 @@ PRODUCT_ABIS := arm64-v8a
 # ---------- 解锁 treble 兼容 ----------
 PRODUCT_COMPATIBLE_PROPERTY_OVERRIDE := true
 
-# ---------- SystemUI overlay 注入 ----------
-PRODUCT_PACKAGE_OVERLAYS += vendor/zephyr/overlay
+# ---------- SystemUI overlay 注入 (通过 common.mk 统一管理) ----------
+# PRODUCT_PACKAGE_OVERLAYS += vendor/zephyr/overlay

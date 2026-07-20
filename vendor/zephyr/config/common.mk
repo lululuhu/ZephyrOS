@@ -8,35 +8,29 @@
 $(call inherit-product, vendor/zephyr/config/zephyr_branding.mk)
 
 # ---------- 原创功能模块包 ----------
+# 注意: ZephyrWallpapers / ZephyrSystemUIHooks / ZephyrSystemUIHooksApp
+# 暂未实现源码, 先移除避免编译错误。后续在 ZephyrParts 中统一实现。
 PRODUCT_PACKAGES += \
-    ZephyrParts \
-    ZephyrWallpapers \
-    ZephyrSystemUIHooks \
-    ZephyrSystemUIHooksApp
-
-# ---------- 桌面启动器 ----------
-$(call inherit-product, vendor/zephyr/launcher/zephyr_launcher.mk)
+    ZephyrParts
 
 # ---------- 原创资源 ----------
 $(call inherit-product-if-exists, vendor/zephyr/bootanimation/zephyr_bootanimation.mk)
 $(call inherit-product-if-exists, vendor/zephyr/fonts/zephyr_fonts.mk)
 $(call inherit-product-if-exists, vendor/zephyr/icons/zephyr_icons.mk)
 
+# ---------- GSI 构建时不启用 Lawnchair (源码未同步) ----------
+# 后续通过预编译 APK 集成
+# $(call inherit-product, vendor/zephyr/launcher/zephyr_launcher.mk)
+
 # ---------- PixelOS 风格 Overlay (核心改造, 让系统告别 AOSP 毛坯) ----------
 # 1. Framework 配置 overlay (默认时区, 风格开关等)
 # 2. SystemUI 主题 overlay (PixelOS 配色 + 圆角)
 # 3. Settings 应用 overlay (ZephyrOS 品牌 + 关于手机定制)
 # 4. 各 AOSP 应用 overlay (Dialer/Messaging/Contacts/Calendar/Calculator/DeskClock)
+# 注意: 各应用 overlay 使用 inherit-product-if-exists, 避免因 AOSP 版本
+# 差异导致 "no rule to make target" 错误
 PRODUCT_PACKAGE_OVERLAYS += \
-    vendor/zephyr/overlay \
-    vendor/zephyr/overlay/packages/apps/Settings \
-    vendor/zephyr/overlay/packages/apps/Dialer \
-    vendor/zephyr/overlay/packages/apps/Messaging \
-    vendor/zephyr/overlay/packages/apps/Contacts \
-    vendor/zephyr/overlay/packages/apps/Calendar \
-    vendor/zephyr/overlay/packages/apps/Calculator \
-    vendor/zephyr/overlay/packages/apps/DeskClock \
-    vendor/zephyr/overlay/frameworks/base/packages/SystemUI
+    vendor/zephyr/overlay
 
 # ---------- 默认关闭遥测 ----------
 PRODUCT_PROPERTY_OVERRIDES += \
