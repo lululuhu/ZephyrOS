@@ -82,3 +82,12 @@ cc_library {
     // 不会被编译到 GSI 中.
     // 定义在 platform/test/vts 中, 已从源码树移除.
 }
+
+cc_library {
+    name: "VtsHalHidlTestUtils",
+    host_supported: true,
+    // 空壳模块: 仅用于满足 Soong 依赖检查.
+    // 引用了 VtsHalHidlTestUtils 的模块 (hardware/interfaces/*/vts/functional)
+    // 不会被编译到 GSI 中.
+    // 定义在 platform/test/vts 中, 已从源码树移除.
+}
