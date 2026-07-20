@@ -1,106 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    ZephyrOS — AOSP Source Slimming Manifest (v3, aggressive)
+    ZephyrOS — AOSP Source Slimming Manifest (v4, safe)
     Generated from android-14.0.0_r74/default.xml.
 
-    Goal: fit AOSP source + build output within GitHub Actions
-    runner disk (~84 GB after cleanup). Removes ~25 GB of
-    device/kernel/trusty/hardware trees that GSI builds do not need.
+    Strategy: ONLY remove device trees, kernel prebuilts, and
+    truly optional SDK/emulator/docs projects. Keep ALL test/tool
+    platform projects (CTS, VTS, MTS, platform_testing, etc.).
+    This avoids the endless "undefined module" Soong errors.
 
-    KEEP (whitelisted):
-      device/generic/{arm64,armv7-a-neon,car,uml,x86_64}
-      device/google/{gs-common,trout}
-      hardware/{interfaces,libhardware,libhardware_legacy,ril}
-      All framework/packages/system/art/libcore projects
+    Disk budget: ~84 GB runner → ~25 GB freed by apt cleanup →
+    ~109 GB available. Source ~40 GB + build output ~35 GB = ~75 GB.
+    Fit within 109 GB with ~34 GB headroom.
+
+    Safe to remove (device-specific, not needed for GSI):
+      - Device trees (Pixel, amlogic, linaro, emulator, etc.)
+      - Kernel prebuilts
+      - Trusty TEE OS
+      - Emulator & SDK tool prebuilts
+      - PDK, docs, samples
+
+    MUST keep (referenced by framework/tools):
+      - ALL platform/test/*  (CTS, VTS, MTS, csuite, framework, etc.)
+      - platform/cts
+      - platform/platform_testing
+      - device/generic/{arm64,armv7-a-neon,car,uml,x86_64,common,goldfish}
+      - device/google/{cuttlefish,gs-common,trout}
+      - platform/tools/tradefederation/prebuilts
+      - hardware/{interfaces,libhardware,libhardware_legacy,ril}
 -->
 <manifest>
 
-    <!-- ===== A. Testing suites (~5 GB) ===== -->
-    <!-- NOTE: platform/cts 和 platform/platform_testing 已从移除清单中恢复.
-         数十个 CTS 测试 app 的 Android.bp 引用了 "cts_defaults" defaults 模块,
-         该模块定义在 platform/cts 项目中. 移除 cts 会导致 Soong 报
-         "depends on undefined module cts_defaults" 错误.
-         同样 platform_testing 也提供了测试基础设施, 一并恢复. -->
-    <!-- NOTE: platform/test/app_compat/csuite 已从移除清单中恢复.
-         art/test/Android.bp 和 WindowManager/Shell/tests 引用了
-         csuite_test 模块类型, 该类型定义在 csuite 项目中.
-         移除 csuite 会导致 Soong 报 "unrecognized module type" 错误. -->
-    <remove-project name="platform/test/catbox" />
-    <remove-project name="platform/test/cts-root" />
-    <remove-project name="platform/test/dittosuite" />
-    <!-- NOTE: platform/test/framework 已从移除清单中恢复.
-         它定义了 rdroidtest.defaults 模块 (Rust 测试 defaults),
-         被 packages/modules/Virtualization 和 system/secretkeeper 引用.
-         移除会导致 Soong 报 "depends on undefined module rdroidtest.defaults" 错误. -->
-    <!-- <remove-project name="platform/test/framework" /> -->
-    <remove-project name="platform/test/mlts/benchmark" />
-    <remove-project name="platform/test/mlts/models" />
-    <!-- NOTE: platform/test/mts 已从移除清单中恢复.
-         它定义了 mts-target-sdk-version-current defaults 模块,
-         被 packages/modules/Permission, AdServices, Connectivity 引用.
-         移除会导致 Soong 报 "depends on undefined module mts-target-sdk-version-current" 错误. -->
-    <!-- <remove-project name="platform/test/mts" /> -->
-    <remove-project name="platform/test/robolectric-extensions" />
-    <!-- NOTE: platform/test/vts 已从移除清单中恢复.
-         VTS (Vendor Test Suite) 定义了 VtsHalHidlTestUtils, VtsHalHidlTargetTestBase,
-         libvts_vintf_test_common 等测试工具模块, 被 hardware/interfaces/*/vts/
-         和 frameworks/base/omapi/*/vts/ 中的测试模块引用.
-         移除会导致 Soong 逐个报 "undefined module" 错误 (已发生 3 次).
-         恢复后一次性解决所有 VTS 相关依赖. -->
-    <!-- <remove-project name="platform/test/vts" /> -->
-    <remove-project name="platform/test/vts-testcase/hal" />
-    <remove-project name="platform/test/vts-testcase/hal-trace" />
-    <remove-project name="platform/test/vts-testcase/kernel" />
-    <remove-project name="platform/test/vts-testcase/nbu" />
-    <remove-project name="platform/test/vts-testcase/performance" />
-    <remove-project name="platform/test/vts-testcase/security" />
-    <remove-project name="platform/test/vts-testcase/vndk" />
-
-    <!-- ===== B. PDK (~1 GB) ===== -->
-    <remove-project name="platform/pdk" />
-
-    <!-- ===== C. Emulator prebuilts (~3 GB) ===== -->
-    <remove-project name="platform/prebuilts/android-emulator" />
-    <remove-project name="platform/prebuilts/qemu-kernel" />
-
-    <!-- ===== D. SDK / dev tools prebuilts (~2 GB) ===== -->
-    <remove-project name="platform/prebuilts/abi-dumps/ndk" />
-    <remove-project name="platform/prebuilts/abi-dumps/platform" />
-    <remove-project name="platform/prebuilts/abi-dumps/vndk" />
-    <remove-project name="platform/prebuilts/bundletool" />
-    <remove-project name="platform/prebuilts/checkcolor" />
-    <remove-project name="platform/prebuilts/checkstyle" />
-    <remove-project name="platform/prebuilts/cmdline-tools" />
-    <remove-project name="platform/prebuilts/devtools" />
-    <remove-project name="platform/prebuilts/gradle-plugin" />
-    <remove-project name="platform/prebuilts/ktlint" />
-    <remove-project name="platform/prebuilts/manifest-merger" />
-
-    <!-- ===== E. Trade Federation / misc test tools ===== -->
-    <remove-project name="platform/tools/external/fat32lib" />
-    <!-- NOTE: platform/tools/tradefederation/prebuilts 已从移除清单中恢复.
-         它定义了 tradefed_errorprone_defaults defaults 模块,
-         被 packages/modules/AdServices 的 device-collectors 引用.
-         移除会导致 Soong 报 "depends on undefined module tradefed_errorprone_defaults" 错误. -->
-    <!-- <remove-project name="platform/tools/tradefederation/prebuilts" /> -->
-
-    <!-- ===== F. Docs & samples (~0.5 GB) ===== -->
-    <remove-project name="platform/developers/build" />
-    <remove-project name="platform/developers/demos" />
-    <remove-project name="platform/developers/samples/android" />
-
-    <!-- ===== G. Dev tools not needed for GSI build ===== -->
-    <!-- apifinder: references lint_api (from platform/tools/base, not in AOSP 14 default manifest) -->
-    <remove-project name="platform/tools/apifinder" />
-    <!-- metalava: references metalava-gradle-plugin-deps (not in AOSP 14 default manifest) -->
-    <remove-project name="platform/tools/metalava" />
-
     <!-- ================================================================ -->
-    <!-- ===== G. NEW (v3): Device trees — Pixel & vendor-specific ===== -->
-    <!--      GSI does not need device-specific trees.                  -->
+    <!-- A. Device trees — Pixel & vendor-specific (NOT needed for GSI) -->
     <!-- ================================================================ -->
 
-    <!-- Google Pixel devices (akita..zumapro) (57 projects) -->
+    <!-- Google Pixel devices (akita..zumapro) -->
     <remove-project name="device/google/akita" />
     <remove-project name="device/google/akita-kernel" />
     <remove-project name="device/google/akita-sepolicy" />
@@ -122,13 +56,6 @@
     <remove-project name="device/google/coral" />
     <remove-project name="device/google/coral-kernel" />
     <remove-project name="device/google/coral-sepolicy" />
-    <!-- NOTE: device/google/cuttlefish 已从移除清单中恢复.
-         它定义了 cuttlefish_buildhost_only 和 cuttlefish_guest_only
-         soong_config_module_type, 被 device/generic/opengl-transport
-         和 device/google/trout 引用.
-         移除会导致 Soong 报 "depends on undefined module" 错误.
-         (cuttlefish_prebuilts 和 cuttlefish_vmm 仍可移除, 它们只是预编译产物) -->
-    <!-- <remove-project name="device/google/cuttlefish" /> -->
     <remove-project name="device/google/cuttlefish_prebuilts" />
     <remove-project name="device/google/cuttlefish_vmm" />
     <remove-project name="device/google/felix" />
@@ -165,7 +92,7 @@
     <remove-project name="device/google/zumapro" />
     <remove-project name="device/google/zumapro-sepolicy" />
 
-    <!-- Dev boards (amlogic, linaro, ti, samsung, etc.) (8 projects) -->
+    <!-- Dev boards (amlogic, linaro) -->
     <remove-project name="device/amlogic/yukawa" />
     <remove-project name="device/amlogic/yukawa-kernel" />
     <remove-project name="device/linaro/dragonboard" />
@@ -175,12 +102,7 @@
     <remove-project name="device/linaro/poplar" />
     <remove-project name="device/linaro/poplar-kernel" />
 
-    <!-- Emulator device configs (goldfish, mini-emulator, vulkan-cereal, qemu) (6 projects) -->
-    <!-- NOTE: device/generic/goldfish 已从移除清单中恢复.
-         device/google/cuttlefish 的 sensors/multihal/Android.bp 引用了
-         goldfish 的 soong_namespace, 移除会导致 Soong 报
-         "namespace device/generic/goldfish does not exist" 错误. -->
-    <!-- <remove-project name="device/generic/goldfish" /> -->
+    <!-- Emulator device configs (not needed for GSI) -->
     <remove-project name="device/generic/mini-emulator-arm64" />
     <remove-project name="device/generic/mini-emulator-armv7-a-neon" />
     <remove-project name="device/generic/mini-emulator-x86" />
@@ -188,9 +110,8 @@
     <remove-project name="device/generic/vulkan-cereal" />
 
     <!-- ================================================================ -->
-    <!-- ===== H. Kernel prebuilts (GSI uses device kernel) =========== -->
+    <!-- B. Kernel prebuilts (GSI uses device kernel) -->
     <!-- ================================================================ -->
-    <!-- kernel/prebuilts/* and kernel/tests (28 projects) -->
     <remove-project name="kernel/prebuilts/4.19/arm64" />
     <remove-project name="kernel/prebuilts/5.10/arm64" />
     <remove-project name="kernel/prebuilts/5.10/x86-64" />
@@ -221,9 +142,8 @@
     <remove-project name="kernel/tests" />
 
     <!-- ================================================================ -->
-    <!-- ===== I. Trusty TEE OS (device-specific) ===================== -->
+    <!-- C. Trusty TEE OS (device-specific, not needed for GSI) -->
     <!-- ================================================================ -->
-    <!-- trusty/* (24 projects) -->
     <remove-project name="trusty/app/avb" />
     <remove-project name="trusty/app/cast-auth" />
     <remove-project name="trusty/app/confirmationui" />
@@ -250,11 +170,41 @@
     <remove-project name="trusty/vendor/google/aosp" />
 
     <!-- ================================================================ -->
-    <!-- ===== J. Vendor HALs (device-specific) ======================= -->
+    <!-- D. SDK / dev tools / emulator / PDK / docs (not needed for GSI) -->
     <!-- ================================================================ -->
-    <!-- NOTE: AOSP 14 default manifest does NOT include hardware/qcom/*, -->
-    <!-- hardware/broadcom/*, etc. as separate projects. Those live in    -->
-    <!-- device vendor manifests, so there is nothing to remove here.     -->
-    <!-- Kept: hardware/{interfaces,libhardware,libhardware_legacy,ril}   -->
-    <!--       (framework dependencies required by GSI build)             -->
+    <remove-project name="platform/pdk" />
+    <remove-project name="platform/prebuilts/android-emulator" />
+    <remove-project name="platform/prebuilts/qemu-kernel" />
+    <remove-project name="platform/prebuilts/abi-dumps/ndk" />
+    <remove-project name="platform/prebuilts/abi-dumps/platform" />
+    <remove-project name="platform/prebuilts/abi-dumps/vndk" />
+    <remove-project name="platform/prebuilts/bundletool" />
+    <remove-project name="platform/prebuilts/checkcolor" />
+    <remove-project name="platform/prebuilts/checkstyle" />
+    <remove-project name="platform/prebuilts/cmdline-tools" />
+    <remove-project name="platform/prebuilts/devtools" />
+    <remove-project name="platform/prebuilts/gradle-plugin" />
+    <remove-project name="platform/prebuilts/ktlint" />
+    <remove-project name="platform/prebuilts/manifest-merger" />
+    <remove-project name="platform/tools/external/fat32lib" />
+    <remove-project name="platform/developers/build" />
+    <remove-project name="platform/developers/demos" />
+    <remove-project name="platform/developers/samples/android" />
+
+    <!-- ================================================================ -->
+    <!-- E. Dev tools that need modules NOT in AOSP 14 default manifest -->
+    <!--     (apifinder → lint_api in platform/tools/base;              -->
+    <!--      metalava → metalava-gradle-plugin-deps;                   -->
+    <!--      both resolved via vendor/zephyr/stubs/Android.bp)         -->
+    <!-- ================================================================ -->
+    <remove-project name="platform/tools/apifinder" />
+    <remove-project name="platform/tools/metalava" />
+
+    <!-- ================================================================ -->
+    <!-- NOTE: All platform/test/*, platform/cts, platform/platform_testing,
+    <!--        platform/tools/tradefederation/prebuilts, device/generic/*,
+    <!--        device/google/cuttlefish are KEPT (not removed).
+    <!--        These are deeply referenced by the build system and
+    <!--        removing them causes endless "undefined module" errors. -->
+    <!-- ================================================================ -->
 </manifest>
