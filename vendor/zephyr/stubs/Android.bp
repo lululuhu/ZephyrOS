@@ -62,3 +62,23 @@ java_library {
     // 引用了 lint_tests 的模块 (LintCheckerTest 系列) 不会被编译到 GSI 中.
     // lint_tests 定义在 platform/tools/base 中, 不在 AOSP 14 r74 default manifest.
 }
+
+java_library {
+    name: "metalava-manual",
+    srcs: [],
+    sdk_version: "current",
+    host_supported: true,
+    // 空壳模块: 仅用于满足 Soong 依赖检查.
+    // 引用了 metalava-manual 的模块 (art.module.public.api.stubs 系列)
+    // 不会被编译到 GSI 中.
+    // metalava 定义在 platform/tools/metalava 中, 不在 AOSP 14 r74 default manifest.
+}
+
+cc_library {
+    name: "libvts_vintf_test_common",
+    host_supported: true,
+    // 空壳模块: 仅用于满足 Soong 依赖检查.
+    // 引用了 libvts_vintf_test_common 的模块 (libassemblevintf)
+    // 不会被编译到 GSI 中.
+    // 定义在 platform/test/vts 中, 已从源码树移除.
+}
