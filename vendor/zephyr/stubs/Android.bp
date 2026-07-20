@@ -30,3 +30,15 @@ java_library {
     // host_supported: true 是必需的, 因为 frameworks/base/tools/processors
     // 需要 host 变体 (os:linux_glibc,arch:common).
 }
+
+java_library {
+    name: "metalava-signature-reader",
+    srcs: [],
+    sdk_version: "current",
+    host_supported: true,
+    // 空壳模块: 仅用于满足 Soong 依赖检查.
+    // 引用了 metalava-signature-reader 的模块 (extract-flagged-apis 等)
+    // 不会被编译到 GSI 中.
+    // metalava 相关工具在 platform/tools/metalava 中定义,
+    // 该巨型项目不在 AOSP 14 r74 default manifest 中.
+}
