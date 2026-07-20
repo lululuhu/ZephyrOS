@@ -22,7 +22,11 @@ java_library {
 java_library {
     name: "stub-annotations",
     srcs: [],
-    sdk_version: "current",
+    // 注意: 不能设置 sdk_version: "current"!
+    // 如果设置了 sdk_version: "current", 这个模块会依赖 android_stubs_current,
+    // 而 android_stubs_current.from-text 又依赖 stub-annotations (StubLibraries.bp:831),
+    // 形成依赖循环: android_stubs_current.from-text → stub-annotations → android_stubs_current
+    // 空壳模块没有源码, 不需要 SDK, 所以省略 sdk_version.
     host_supported: true,
     // 空壳模块: 仅用于满足 Soong 依赖检查.
     // 引用了 stub-annotations 的模块 (xsdc-java-tests,
