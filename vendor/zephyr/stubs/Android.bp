@@ -42,3 +42,23 @@ java_library {
     // metalava 相关工具在 platform/tools/metalava 中定义,
     // 该巨型项目不在 AOSP 14 r74 default manifest 中.
 }
+
+java_library {
+    name: "lint",
+    srcs: [],
+    sdk_version: "current",
+    host_supported: true,
+    // 空壳模块: 仅用于满足 Soong 依赖检查.
+    // 引用了 lint 的模块 (LintCheckerTest 系列) 不会被编译到 GSI 中.
+    // lint 定义在 platform/tools/base 中, 不在 AOSP 14 r74 default manifest.
+}
+
+java_library {
+    name: "lint_tests",
+    srcs: [],
+    sdk_version: "current",
+    host_supported: true,
+    // 空壳模块: 仅用于满足 Soong 依赖检查.
+    // 引用了 lint_tests 的模块 (LintCheckerTest 系列) 不会被编译到 GSI 中.
+    // lint_tests 定义在 platform/tools/base 中, 不在 AOSP 14 r74 default manifest.
+}
