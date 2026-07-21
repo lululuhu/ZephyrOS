@@ -210,6 +210,7 @@ rm -rf "$AOSP_ROOT/device/google/tangorpro"* 2>/dev/null || true
 rm -rf "$AOSP_ROOT/device/google/zuma"* 2>/dev/null || true
 rm -rf "$AOSP_ROOT/device/google/zumapro"* 2>/dev/null || true
 rm -rf "$AOSP_ROOT/device/google/atv" 2>/dev/null || true
+rm -rf "$AOSP_ROOT/device/google/trout" 2>/dev/null || true
 # 其他厂商设备树
 rm -rf "$AOSP_ROOT/device/amlogic" 2>/dev/null || true
 rm -rf "$AOSP_ROOT/device/linaro" 2>/dev/null || true
