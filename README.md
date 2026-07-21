@@ -2,13 +2,13 @@
 
 # 🌿 ZephyrOS
 
-**A clean, ad-free Android 14 GSI built on AOSP with PixelOS-style UI, Lawnchair launcher, and 8 original customization modules.**
+**A clean, ad-free Android 13 GSI built on AOSP with PixelOS-style UI, Lawnchair launcher, and 8 original customization modules.**
 
 *Pure · Fast · No telemetry · No commercial bloatware*
 
 [![Build GSI](https://github.com/lululuhu/ZephyrOS/actions/workflows/build_gsi.yml/badge.svg)](https://github.com/lululuhu/ZephyrOS/actions/workflows/build_gsi.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Android](https://img.shields.io/badge/Android-14-green.svg)](https://source.android.com/)
+[![Android](https://img.shields.io/badge/Android-13-green.svg)](https://source.android.com/)
 [![GSI](https://img.shields.io/badge/type-GSI-orange.svg)](https://source.android.com/docs/core/architecture/treble)
 
 </div>
@@ -17,7 +17,7 @@
 
 ## ✨ Features
 
-ZephyrOS is a community-driven Android 14 Generic System Image (GSI) that brings a Pixel-style experience with original customization features tailored for Chinese users.
+ZephyrOS is a community-driven Android 13 Generic System Image (GSI) that brings a Pixel-style experience with original customization features tailored for Chinese users.
 
 ### 🎨 PixelOS-Style UI
 - **Material You** theming with Breeze green accent (`#2EB872`)
@@ -59,9 +59,9 @@ Replaces AOSP Launcher3 with [Lawnchair](https://github.com/LawnchairLauncher/la
 
 | Item | Value |
 |---|---|
-| Android version | 14 (android-14.0.0_r74) |
-| Build target | `aosp_arm64-ab-userdebug` (GSI) |
-| API level | 34 |
+| Android version | 13 (android-13.0.0_r83) |
+| Build target | `aosp_arm64-userdebug` (GSI) |
+| API level | 33 |
 | Architecture | arm64-v8a |
 | Build system | GitHub Actions (Ubuntu 22.04) |
 | Build time | ~4.5 hours |
