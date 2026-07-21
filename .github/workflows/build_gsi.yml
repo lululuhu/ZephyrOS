@@ -202,7 +202,7 @@ jobs:
           rm -rf ${{ env.AOSP_ROOT }}/prebuilts/abi-dumps 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/prebuilts/misc 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/prebuilts/python 2>/dev/null || true
-          rm -rf ${{ env.AOSP_ROOT }}/prebuilts/go 2>/dev/null || true
+          # 注意: prebuilts/go/ 不能删 (Soong/Blueprint 微工厂需要 Go 编译器)
           # 删除 CTS 兼容性测试套件 (释放 ~3GB)
           echo "Removing CTS..."
           rm -rf ${{ env.AOSP_ROOT }}/cts 2>/dev/null || true
