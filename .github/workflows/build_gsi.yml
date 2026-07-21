@@ -204,12 +204,12 @@ jobs:
           rm -rf ${{ env.AOSP_ROOT }}/prebuilts/python 2>/dev/null || true
           # 注意: prebuilts/go/ 不能删 (Soong/Blueprint 微工厂需要 Go 编译器)
           # 注意: cts/ 不能删 (tools/platform-compat 依赖 cts_defaults 模块)
+          # 注意: device/google/ 不能删 (cuttlefish_buildhost_only 被 virglrenderer 引用)
           # 删除文档 (释放 ~1GB)
           echo "Removing docs..."
           rm -rf ${{ env.AOSP_ROOT }}/docs 2>/dev/null || true
-          # 删除不需要的设备树 (释放 ~5GB)
+          # 删除不需要的设备树 (释放 ~1GB)
           echo "Removing unused device trees..."
-          rm -rf ${{ env.AOSP_ROOT }}/device/google 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/device/sample 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/device/linaro 2>/dev/null || true
           # 不删 prebuilts/rust/ gcc/ kernel/ 等 (有模块依赖)
