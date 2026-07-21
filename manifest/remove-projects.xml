@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-    <!-- ZephyrOS — AOSP Source Slimming Manifest (v6, AOSP 13)
+    <!-- ZephyrOS — AOSP Source Slimming Manifest (v7, AOSP 13)
          Only remove projects that are confirmed to exist in
          android-13.0.0_r83 manifest.
          
-         CRITICAL: Do NOT add remove-project entries for AOSP 14-only
-         projects (akita, caimito, comet, felix, shusky, tangorpro,
-         zuma, zumapro) — they don't exist in AOSP 13 and will cause
-         "remove-project element specifies non-existent project" error.
+         CRITICAL: Do NOT add remove-project entries for projects that
+         don't exist in AOSP 13 — this causes "remove-project element
+         specifies non-existent project" error during repo sync.
+         Confirmed non-existent in AOSP 13:
+           - device/google/{akita,caimito,comet,felix,shusky,tangorpro,zuma,zumapro}
+           - device/google/cuttlefish_vmm
+           - device/google/cuttlefish_prebuilts
+           - kernel/prebuilts/5.15/x86-64
+           - kernel/prebuilts/6.1/*, kernel/prebuilts/6.6/*
+           - kernel/prebuilts/mainline/*
+           - kernel/prebuilts/common-modules/virtual-device/mainline/*
     -->
 
     <!-- ================================================================ -->
@@ -27,8 +34,6 @@
     <remove-project name="device/google/coral" />
     <remove-project name="device/google/coral-kernel" />
     <remove-project name="device/google/coral-sepolicy" />
-    <remove-project name="device/google/cuttlefish_prebuilts" />
-    <remove-project name="device/google/cuttlefish_vmm" />
     <remove-project name="device/google/gs101" />
     <remove-project name="device/google/gs101-sepolicy" />
     <remove-project name="device/google/gs201" />
@@ -66,13 +71,12 @@
     <!-- ================================================================ -->
     <!-- B. Kernel prebuilts (GSI uses device kernel, ~3-5GB saved) -->
     <!-- ================================================================ -->
-    <!-- AOSP 13 has kernel prebuilts up to 5.15; 6.1/6.6 may not exist -->
+    <!-- AOSP 13 has: 4.19/{arm64,x86-64}, 5.4/{arm64}, 5.10/{arm64,x86-64}, 5.15/{arm64} -->
     <remove-project name="kernel/prebuilts/4.19/arm64" />
     <remove-project name="kernel/prebuilts/4.19/x86-64" />
     <remove-project name="kernel/prebuilts/5.10/arm64" />
     <remove-project name="kernel/prebuilts/5.10/x86-64" />
     <remove-project name="kernel/prebuilts/5.15/arm64" />
-    <remove-project name="kernel/prebuilts/5.15/x86-64" />
     <remove-project name="kernel/prebuilts/5.4/arm64" />
     <remove-project name="kernel/prebuilts/5.4/x86-64" />
     <remove-project name="kernel/prebuilts/common-modules/virtual-device/4.19/arm64" />
@@ -80,13 +84,8 @@
     <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.10/arm64" />
     <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.10/x86-64" />
     <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.15/arm64" />
-    <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.15/x86-64" />
     <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.4/arm64" />
     <remove-project name="kernel/prebuilts/common-modules/virtual-device/5.4/x86-64" />
-    <remove-project name="kernel/prebuilts/common-modules/virtual-device/mainline/arm64" />
-    <remove-project name="kernel/prebuilts/common-modules/virtual-device/mainline/x86-64" />
-    <remove-project name="kernel/prebuilts/mainline/arm64" />
-    <remove-project name="kernel/prebuilts/mainline/x86-64" />
     <remove-project name="kernel/tests" />
 
     <!-- ================================================================ -->

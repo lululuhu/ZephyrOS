@@ -10,3 +10,4 @@ vendor/zephyr/fonts/files/
 *~
 .vscode/
 .idea/
+*.log
