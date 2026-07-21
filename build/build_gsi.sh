@@ -20,8 +20,9 @@ BUILD_TARGET_LUNCH="${TARGET_LUNCH:-aosp_arm64-userdebug}"
 
 if ! command -v m >/dev/null 2>&1; then
     echo "[INFO] Sourcing build/envsetup.sh + lunch (m function not available)..."
-    # AOSP 的 envsetup.sh 引用了未定义的 TOP 变量, 在 set -u 下会报错.
-    # 临时关闭 -u (nounset) 选项, source 完成后再恢复.
+    # AOSP 的 envsetup.sh 引用了未定义的 TOP 变量, 在 bash -e 下会报错.
+    # 显式设置 TOP 为当前目录 (AOSP 根) 再 source.
+    export TOP=$(pwd)
     set +u
     source build/envsetup.sh
     lunch "$BUILD_TARGET_LUNCH"
