@@ -199,10 +199,8 @@ jobs:
           echo "Removing unused prebuilts..."
           rm -rf ${{ env.AOSP_ROOT }}/prebuilts/abi-dumps 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/prebuilts/gcc 2>/dev/null || true
-          # 删除引用 prebuilt_libstd 的 Rust crate (prebuilts/rust/ 已保留)
-          echo "Removing Rust crates that depend on deleted prebuilts..."
-          rm -rf ${{ env.AOSP_ROOT }}/external/rust/crates/plotters-backend 2>/dev/null || true
-          rm -rf ${{ env.AOSP_ROOT }}/external/rust/crates/xml-rs 2>/dev/null || true
+          # 不删 prebuilts/rust/ 和 external/rust/crates/ (Rust 模块有依赖链)
+          echo "Keeping prebuilts/rust/ (needed for Rust module dependencies)"
           # 删除 tools/ 中不需要的测试/IDE 工具
           echo "Removing unused tools..."
           rm -rf ${{ env.AOSP_ROOT }}/tools/studio 2>/dev/null || true
@@ -215,6 +213,16 @@ jobs:
           rm -rf ${{ env.AOSP_ROOT }}/hardware/ti 2>/dev/null || true
           # 同时删除引用了上述硬件目录的设备树
           rm -rf ${{ env.AOSP_ROOT }}/device/ti 2>/dev/null || true
+          # 删除不需要的测试框架和开发工具 (释放 ~5GB)
+          echo "Removing test frameworks and dev tools..."
+          rm -rf ${{ env.AOSP_ROOT }}/test 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/developer 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/development/samples 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/development/tools 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/development/testrunner 2>/dev/null || true
+          # 删除不需要的预编译 clang 旧版本 (保留最新)
+          echo "Removing old clang prebuilts..."
+          ls -d ${{ env.AOSP_ROOT }}/prebuilts/clang/host/linux-x86/clang-* 2>/dev/null | sort -V | head -n -1 | xargs rm -rf 2>/dev/null || true
           echo "Disk after cleanup:"
           df -h /
           bash $GITHUB_WORKSPACE/zephyr-overlay/build/build_gsi.sh
