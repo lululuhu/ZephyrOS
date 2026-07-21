@@ -166,16 +166,20 @@ kill $MONITOR_PID 2>/dev/null || true
 trap - EXIT
 
 # ------------------------------------------------------------------
-# 4.1 清理 .repo 元数据 (释放 5-10GB 磁盘给构建用)
-#     repo sync 完成后, .repo/projects 和 .repo/project-objects 中的
-#     git 元数据不再需要 (CI 一次性构建, 不需要再次 sync)。
-#     保留 .repo/manifest*.xml (构建脚本读取版本信息用)
+# 4.1 清理 .repo 元数据 (释放 15-25GB 磁盘给构建用)
+#     repo sync 完成后, .repo/ 目录中的 git 元数据不再需要
+#     (CI 一次性构建, 不需要再次 sync)。
+#     .repo/repo/ 保留 (repo 工具本身), 其余全部删除。
 # ------------------------------------------------------------------
 echo "[INFO] Cleaning .repo git metadata to free disk for build..."
 REPO_META_SIZE=$(du -sh .repo 2>/dev/null | awk '{print $1}' || echo "unknown")
 echo "[INFO] .repo size before cleanup: $REPO_META_SIZE"
+# 删除最大的 git 对象存储
 rm -rf .repo/projects .repo/project-objects 2>/dev/null || true
-# 保留 .repo/manifests 目录 (包含 manifest 定义) 和 .repo/manifest.xml
+# 删除 manifest 副本 (已不需要)
+rm -rf .repo/manifests .repo/manifest.xml 2>/dev/null || true
+# 删除 repo 缓存
+rm -rf .repo/repo/.repo 2>/dev/null || true
 echo "[INFO] .repo metadata cleanup done."
 df -h "$AOSP_ROOT"
 

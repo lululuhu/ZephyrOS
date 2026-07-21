@@ -189,6 +189,19 @@ jobs:
           free -h
           echo "AOSP root:"
           du -sh ${{ env.AOSP_ROOT }}
+          echo "=== Large directories (top 10) ==="
+          du -sh ${{ env.AOSP_ROOT }}/*/ 2>/dev/null | sort -rh | head -10
+          echo "=== Freeing extra space ==="
+          # 删除 tools/ 中不需要的测试/IDE 工具
+          rm -rf ${{ env.AOSP_ROOT }}/tools/studio 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/tools/external_gradle 2>/dev/null || true
+          # 删除 hardware/ 中不需要的厂商硬件适配
+          rm -rf ${{ env.AOSP_ROOT }}/hardware/broadcom 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/hardware/invensense 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/hardware/marvell 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/hardware/ti 2>/dev/null || true
+          echo "Disk after cleanup:"
+          df -h /
           bash $GITHUB_WORKSPACE/zephyr-overlay/build/build_gsi.sh
         timeout-minutes: 300
 
