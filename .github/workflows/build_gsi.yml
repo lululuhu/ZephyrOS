@@ -196,9 +196,18 @@ jobs:
           # prebuilts/ 占 51GB, 是最大的空间消耗者
           # 注意: prebuilts/sdk/ 不能删 (系统模块引用 SDK jar)
           # 注意: prebuilts/rust/ 不能删 (Rust crate 依赖 prebuilt_libstd 模块)
+          # 注意: prebuilts/gcc/ 不能删 (libwinpthread 被多个系统模块引用)
           echo "Removing unused prebuilts..."
           rm -rf ${{ env.AOSP_ROOT }}/prebuilts/abi-dumps 2>/dev/null || true
-          rm -rf ${{ env.AOSP_ROOT }}/prebuilts/gcc 2>/dev/null || true
+          # 删除 kernel/ 源码 (GSI 不需要内核源码, 释放 ~5GB)
+          echo "Removing kernel sources..."
+          rm -rf ${{ env.AOSP_ROOT }}/kernel 2>/dev/null || true
+          # 删除 CTS 兼容性测试套件 (释放 ~3GB)
+          echo "Removing CTS..."
+          rm -rf ${{ env.AOSP_ROOT }}/cts 2>/dev/null || true
+          # 删除文档 (释放 ~1GB)
+          echo "Removing docs..."
+          rm -rf ${{ env.AOSP_ROOT }}/docs 2>/dev/null || true
           # 不删 prebuilts/rust/ 和 external/rust/crates/ (Rust 模块有依赖链)
           echo "Keeping prebuilts/rust/ (needed for Rust module dependencies)"
           # 删除 tools/ 中不需要的测试/IDE 工具
