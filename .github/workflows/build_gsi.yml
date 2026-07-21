@@ -214,8 +214,8 @@ jobs:
           # 同时删除引用了上述硬件目录的设备树
           rm -rf ${{ env.AOSP_ROOT }}/device/ti 2>/dev/null || true
           # 删除不需要的测试框架和开发工具 (释放 ~5GB)
-          echo "Removing test frameworks and dev tools..."
-          rm -rf ${{ env.AOSP_ROOT }}/test 2>/dev/null || true
+          # 注意: test/ 不能删 (art/test/ 依赖 csuite_test 模块类型)
+          echo "Removing dev tools samples..."
           rm -rf ${{ env.AOSP_ROOT }}/developer 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/development/samples 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/development/tools 2>/dev/null || true
