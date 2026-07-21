@@ -1,75 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-    <!-- ZephyrOS — AOSP Source Slimming Manifest (v8, AOSP 13)
+    <!-- ZephyrOS — AOSP Source Slimming Manifest (v9, AOSP 13)
          
-         CRITICAL: remove-project only works for projects that actually
-         exist in the AOSP manifest. AOSP 13 has fewer projects than
-         AOSP 14 (no 6.1/6.6 kernel, no mainline, fewer x86-64 variants).
+         WARNING: AOSP 13 has fewer projects than AOSP 14. Many
+         remove-project entries that existed in AOSP 14 cause
+         "non-existent project" errors in AOSP 13.
          
-         To avoid trial-and-error, we only remove projects that are
-         CONFIRMED to exist in android-13.0.0_r83.
-         
-         All other large projects (device trees, kernel prebuilts) are
-         deleted AFTER sync via a cleanup script to save disk space.
+         ALL cleanup is now done via post-sync script in setup_env.sh.
+         This file is intentionally empty.
     -->
-
-    <!-- ================================================================ -->
-    <!-- A. Trusty TEE OS (confirmed in AOSP 13) -->
-    <!-- ================================================================ -->
-    <remove-project name="trusty/app/avb" />
-    <remove-project name="trusty/app/cast-auth" />
-    <remove-project name="trusty/app/confirmationui" />
-    <remove-project name="trusty/app/gatekeeper" />
-    <remove-project name="trusty/app/keymaster" />
-    <remove-project name="trusty/app/keymint" />
-    <remove-project name="trusty/app/sample" />
-    <remove-project name="trusty/app/secretkeeper" />
-    <remove-project name="trusty/app/storage" />
-    <remove-project name="trusty/device/arm/generic-arm64" />
-    <remove-project name="trusty/device/arm/vexpress-a15" />
-    <remove-project name="trusty/device/nxp/imx7d" />
-    <remove-project name="trusty/device/x86/generic-x86_64" />
-    <remove-project name="trusty/external/headers" />
-    <remove-project name="trusty/external/musl" />
-    <remove-project name="trusty/external/trusted-firmware-a" />
-    <remove-project name="trusty/external/trusty" />
-    <remove-project name="trusty/host/common" />
-    <remove-project name="trusty/interfaces" />
-    <remove-project name="trusty/lib" />
-    <remove-project name="trusty/lk/common" />
-    <remove-project name="trusty/lk/nxp" />
-    <remove-project name="trusty/lk/trusty" />
-    <remove-project name="trusty/vendor/google/aosp" />
-
-    <!-- ================================================================ -->
-    <!-- B. SDK / dev tools / emulator / PDK / docs (confirmed in AOSP 13) -->
-    <!-- ================================================================ -->
-    <remove-project name="platform/pdk" />
-    <remove-project name="platform/prebuilts/android-emulator" />
-    <remove-project name="platform/prebuilts/qemu-kernel" />
-    <remove-project name="platform/prebuilts/abi-dumps/ndk" />
-    <remove-project name="platform/prebuilts/abi-dumps/platform" />
-    <remove-project name="platform/prebuilts/abi-dumps/vndk" />
-    <remove-project name="platform/prebuilts/bundletool" />
-    <remove-project name="platform/prebuilts/checkcolor" />
-    <remove-project name="platform/prebuilts/checkstyle" />
-    <remove-project name="platform/prebuilts/cmdline-tools" />
-    <remove-project name="platform/prebuilts/devtools" />
-    <remove-project name="platform/prebuilts/gradle-plugin" />
-    <remove-project name="platform/prebuilts/ktlint" />
-    <remove-project name="platform/prebuilts/manifest-merger" />
-    <remove-project name="platform/tools/external/fat32lib" />
-    <remove-project name="platform/developers/build" />
-    <remove-project name="platform/developers/demos" />
-    <remove-project name="platform/developers/samples/android" />
-    <remove-project name="platform/tools/apifinder" />
-    <remove-project name="platform/tools/metalava" />
-
-    <!-- ================================================================ -->
-    <!-- Device trees and kernel prebuilts are NOT removed via manifest
-         (too many variants between AOSP versions). Instead, they are
-         deleted after sync via build/setup_env.sh cleanup step.
-         See the "Post-sync cleanup" section in setup_env.sh.
-    -->
-    <!-- ================================================================ -->
 </manifest>

@@ -103,8 +103,7 @@ fi
 
 # ------------------------------------------------------------------
 # 3. 应用 ZephyrOS local manifest（在 sync 前完成, 以便拉取 Lawnchair 等）
-#    同时应用 remove-projects.xml 移除 GSI 不需要的大型项目
-#    (cts, androidx, maven_repo, Android Studio 等, 节省 ~12GB)
+#    remove-projects.xml 已清空 (AOSP 13 项目差异过大, 改用 post-sync cleanup)
 # ------------------------------------------------------------------
 LOCAL_MANIFEST_DIR=".repo/local_manifests"
 mkdir -p "$LOCAL_MANIFEST_DIR"
@@ -218,6 +217,8 @@ rm -rf "$AOSP_ROOT/device/generic/mini-emulator"* 2>/dev/null || true
 rm -rf "$AOSP_ROOT/device/generic/vulkan-cereal" 2>/dev/null || true
 # 内核预编译 (GSI 不需要)
 rm -rf "$AOSP_ROOT/kernel/prebuilts" 2>/dev/null || true
+# Trusty TEE (设备专用, GSI 不需要)
+rm -rf "$AOSP_ROOT/trusty" 2>/dev/null || true
 echo "[OK] Post-sync cleanup done."
 
 # ------------------------------------------------------------------
