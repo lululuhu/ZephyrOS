@@ -192,14 +192,25 @@ jobs:
           echo "=== Large directories (top 10) ==="
           du -sh ${{ env.AOSP_ROOT }}/*/ 2>/dev/null | sort -rh | head -10
           echo "=== Freeing extra space ==="
+          # 删除 prebuilts/ 中不需要的工具链和 SDK
+          # prebuilts/ 占 51GB, 是最大的空间消耗者
+          echo "Removing unused prebuilts..."
+          rm -rf ${{ env.AOSP_ROOT }}/prebuilts/rust 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/prebuilts/abi-dumps 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/prebuilts/sdk 2>/dev/null || true
+          rm -rf ${{ env.AOSP_ROOT }}/prebuilts/gcc 2>/dev/null || true
           # 删除 tools/ 中不需要的测试/IDE 工具
+          echo "Removing unused tools..."
           rm -rf ${{ env.AOSP_ROOT }}/tools/studio 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/tools/external_gradle 2>/dev/null || true
           # 删除 hardware/ 中不需要的厂商硬件适配
+          echo "Removing unused hardware vendor dirs..."
           rm -rf ${{ env.AOSP_ROOT }}/hardware/broadcom 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/hardware/invensense 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/hardware/marvell 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/hardware/ti 2>/dev/null || true
+          # 同时删除引用了上述硬件目录的设备树
+          rm -rf ${{ env.AOSP_ROOT }}/device/ti 2>/dev/null || true
           echo "Disk after cleanup:"
           df -h /
           bash $GITHUB_WORKSPACE/zephyr-overlay/build/build_gsi.sh
