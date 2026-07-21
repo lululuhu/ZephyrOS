@@ -75,9 +75,9 @@ echo "[INFO] Starting build: ${BUILD_TARGETS[*]}"
 START_TS=$(date +%s)
 
 # 使用 m 命令（自动处理依赖与并行度），限制并行度避免 OOM
-# AOSP 14 推荐使用 m 而非 make
-# GitHub Actions runner 只有 4 核, 降到 -j2 避免 OOM (15GB RAM)
-BUILD_JOBS="${BUILD_JOBS:-2}"
+# GitHub Actions runner 只有 4 核 15GB RAM, 降到 -j1 避免 OOM
+# 之前 -j2 导致构建被取消 (可能是 OOM 或磁盘不足)
+BUILD_JOBS="${BUILD_JOBS:-1}"
 m -j"$BUILD_JOBS" "${BUILD_TARGETS[@]}"
 
 END_TS=$(date +%s)

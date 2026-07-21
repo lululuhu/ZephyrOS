@@ -182,6 +182,13 @@ jobs:
         env:
           TARGET_LUNCH: ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
         run: |
+          echo "=== Pre-build resource check ==="
+          echo "Disk:"
+          df -h /
+          echo "Memory:"
+          free -h
+          echo "AOSP root:"
+          du -sh ${{ env.AOSP_ROOT }}
           bash $GITHUB_WORKSPACE/zephyr-overlay/build/build_gsi.sh
         timeout-minutes: 300
 
