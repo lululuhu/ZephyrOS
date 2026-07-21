@@ -132,13 +132,6 @@ jobs:
           rm -rf ${{ env.AOSP_ROOT }}/frameworks/base/packages/SystemUI/ZephyrHooks 2>/dev/null || true
           echo "Lawnchair source:"
           ls ${{ env.AOSP_ROOT }}/packages/apps/Lawnchair/ 2>/dev/null | head -5 || echo "WARN: Lawnchair not synced"
-          # 清理 VTS 测试用例目录 (避免 vts/vndk 等模块未定义错误)
-          # GSI 构建不需要任何 VTS 测试, 全部删除
-          echo "Removing all VTS testcase directories..."
-          rm -rf ${{ env.AOSP_ROOT }}/test/vts-testcase 2>/dev/null || true
-          rm -rf ${{ env.AOSP_ROOT }}/test/vts 2>/dev/null || true
-          find ${{ env.AOSP_ROOT }} -type d -name "vts" -exec rm -rf {} + 2>/dev/null || true
-          echo "VTS cleanup done."
           echo "Done."
 
       - name: Generate original boot animation

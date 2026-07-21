@@ -180,50 +180,13 @@ echo "[INFO] .repo metadata cleanup done."
 df -h "$AOSP_ROOT"
 
 # ------------------------------------------------------------------
-# 5. 同步后清理大型目录 (释放磁盘空间给构建)
-#    这些设备树和内核预编译文件在 GSI 构建中不需要,
-#    但无法通过 remove-project 安全移除 (AOSP 版本间差异大),
-#    所以同步完成后直接删除。
+# 5. ⚠️ 重要: 不再进行任何 post-sync 源码清理!
+#    之前尝试删除 device/ kernel/ trusty/ 等目录来节省磁盘,
+#    但 Soong 构建系统会扫描所有 Android.bp 文件,
+#    删除目录会导致"undefined module"错误。
+#    GitHub runner 146GB 磁盘足够完整同步+编译。
 # ------------------------------------------------------------------
-echo "[INFO] Post-sync cleanup: removing device trees and kernel prebuilts..."
-# Pixel 设备树 (GSI 不需要)
-rm -rf "$AOSP_ROOT/device/google/akita"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/barbet"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/bluejay"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/bramble"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/caimito"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/comet"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/contexthub" 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/coral"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/cuttlefish"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/felix"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/gs101"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/gs201"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/lynx"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/pantah"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/raviole"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/redbull"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/redfin"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/shusky"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/sunfish"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/tangorpro"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/zuma"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/zumapro"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/atv" 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/google/trout" 2>/dev/null || true
-# 其他厂商设备树
-rm -rf "$AOSP_ROOT/device/amlogic" 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/linaro" 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/generic/mini-emulator"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/generic/vulkan-cereal" 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/generic/opengl-transport" 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/generic/goldfish"* 2>/dev/null || true
-rm -rf "$AOSP_ROOT/device/generic/x86"* 2>/dev/null || true
-# 内核预编译 (GSI 不需要)
-rm -rf "$AOSP_ROOT/kernel/prebuilts" 2>/dev/null || true
-# Trusty TEE (设备专用, GSI 不需要)
-rm -rf "$AOSP_ROOT/trusty" 2>/dev/null || true
-echo "[OK] Post-sync cleanup done."
+echo "[INFO] Skipping post-sync cleanup (keeping full AOSP tree to avoid module dependency errors)."
 
 # ------------------------------------------------------------------
 # 6. 显示同步后磁盘占用
