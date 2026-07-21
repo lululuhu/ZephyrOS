@@ -124,9 +124,12 @@ jobs:
           rsync -a --exclude='.git' --exclude='Lawnchair' \
             zephyr-overlay/packages/apps/ ${{ env.AOSP_ROOT }}/packages/apps/
           rsync -a --exclude='.git' zephyr-overlay/vendor/zephyr/ ${{ env.AOSP_ROOT }}/vendor/zephyr/
-          rsync -a --exclude='.git' zephyr-overlay/frameworks/ ${{ env.AOSP_ROOT }}/frameworks/ 2>/dev/null || true
+          # frameworks/ 目录中的 ZephyrSystemUIHooks 模块暂未启用,
+          # 且引用 SystemUI-core (AOSP 13 中可能不存在), 不复制到 AOSP 树
           echo "ZephyrOS overlay applied:"
           ls -la ${{ env.AOSP_ROOT }}/vendor/zephyr/
+          # 确保 frameworks/ 中未启用的模块不会残留
+          rm -rf ${{ env.AOSP_ROOT }}/frameworks/base/packages/SystemUI/ZephyrHooks 2>/dev/null || true
           echo "Lawnchair source:"
           ls ${{ env.AOSP_ROOT }}/packages/apps/Lawnchair/ 2>/dev/null | head -5 || echo "WARN: Lawnchair not synced"
           # 清理不需要的 VTS 测试用例目录 (避免 vndk_abi_dump_zip 等模块未定义错误)

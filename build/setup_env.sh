@@ -216,6 +216,9 @@ rm -rf "$AOSP_ROOT/device/amlogic" 2>/dev/null || true
 rm -rf "$AOSP_ROOT/device/linaro" 2>/dev/null || true
 rm -rf "$AOSP_ROOT/device/generic/mini-emulator"* 2>/dev/null || true
 rm -rf "$AOSP_ROOT/device/generic/vulkan-cereal" 2>/dev/null || true
+rm -rf "$AOSP_ROOT/device/generic/opengl-transport" 2>/dev/null || true
+rm -rf "$AOSP_ROOT/device/generic/goldfish"* 2>/dev/null || true
+rm -rf "$AOSP_ROOT/device/generic/x86"* 2>/dev/null || true
 # 内核预编译 (GSI 不需要)
 rm -rf "$AOSP_ROOT/kernel/prebuilts" 2>/dev/null || true
 # Trusty TEE (设备专用, GSI 不需要)
