@@ -115,11 +115,11 @@ jobs:
       - name: Setup swap and memory tuning
         run: |
           # soong_build 分析所有 Android.bp 文件需要大量内存
-          # GitHub runner 只有 15GB RAM + 3GB swap, 再加 4GB 避免 OOM
+          # GitHub runner 只有 15GB RAM + 3GB swap, 再加 10GB 避免 OOM
           echo "=== Memory before ==="
           free -h
-          echo "=== Adding 4GB swap ==="
-          sudo fallocate -l 4G /swap_zephyr
+          echo "=== Adding 10GB swap ==="
+          sudo fallocate -l 10G /swap_zephyr
           sudo chmod 600 /swap_zephyr
           sudo mkswap /swap_zephyr
           sudo swapon /swap_zephyr
