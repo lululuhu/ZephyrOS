@@ -222,9 +222,9 @@ jobs:
           rm -rf ${{ env.AOSP_ROOT }}/developer 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/development/samples 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/development/testrunner 2>/dev/null || true
-          # 删除不需要的预编译 clang 旧版本 (保留最新)
-          echo "Removing old clang prebuilts..."
-          ls -d ${{ env.AOSP_ROOT }}/prebuilts/clang/host/linux-x86/clang-* 2>/dev/null | sort -V | head -n -1 | xargs rm -rf 2>/dev/null || true
+          # 注意: 不能删除任何 clang 预编译版本! llvm-tools 模块引用了多版本路径
+          # 删除 clang 旧版本会导致 "module source path ... does not exist" 错误
+          echo "Keeping all clang prebuilts (llvm-tools references multiple versions)"
           echo "Disk after cleanup:"
           df -h /
           bash $GITHUB_WORKSPACE/zephyr-overlay/build/build_gsi.sh
