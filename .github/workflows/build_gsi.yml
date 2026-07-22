@@ -112,21 +112,22 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Setup swap space (prevent OOM during soong_build)
+      - name: Setup swap and memory tuning
         run: |
           # soong_build 分析所有 Android.bp 文件需要大量内存
-          # GitHub runner 只有 15GB RAM + 3GB swap, 再加 8GB 避免 OOM
-          echo "=== Memory before swap ==="
+          # GitHub runner 只有 15GB RAM + 3GB swap, 再加 4GB 避免 OOM
+          echo "=== Memory before ==="
           free -h
-          echo "=== Current swap ==="
-          swapon --show 2>/dev/null || true
-          echo "=== Adding 8GB swap ==="
-          sudo fallocate -l 8G /swapfile_zephyr
-          sudo chmod 600 /swapfile_zephyr
-          sudo mkswap /swapfile_zephyr
-          sudo swapon /swapfile_zephyr
-          echo "=== Memory after swap ==="
+          echo "=== Adding 4GB swap ==="
+          sudo fallocate -l 4G /swap_zephyr
+          sudo chmod 600 /swap_zephyr
+          sudo mkswap /swap_zephyr
+          sudo swapon /swap_zephyr
+          echo "=== Memory after ==="
           free -h
+          # 设置内存优化变量
+          echo "MALLOC_ARENA_MAX=2" >> /etc/environment
+          export MALLOC_ARENA_MAX=2
 
       - name: Apply ZephyrOS overlay
         run: |
