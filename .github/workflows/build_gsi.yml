@@ -125,9 +125,8 @@ jobs:
           sudo swapon /swap_zephyr
           echo "=== Memory after ==="
           free -h
-          # 设置内存优化变量
-          echo "MALLOC_ARENA_MAX=2" >> /etc/environment
-          export MALLOC_ARENA_MAX=2
+          # 设置内存优化变量 (通过 GITHUB_ENV 传给后续步骤)
+          echo "MALLOC_ARENA_MAX=2" >> $GITHUB_ENV
 
       - name: Apply ZephyrOS overlay
         run: |
@@ -198,6 +197,7 @@ jobs:
         working-directory: ${{ env.AOSP_ROOT }}
         env:
           TARGET_LUNCH: ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
+          MALLOC_ARENA_MAX: 2
         run: |
           echo "=== Pre-build resource check ==="
           echo "Disk:"
