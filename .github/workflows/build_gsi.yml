@@ -112,6 +112,22 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+      - name: Setup swap space (prevent OOM during soong_build)
+        run: |
+          # soong_build 分析所有 Android.bp 文件需要大量内存
+          # GitHub runner 只有 15GB RAM, 创建 8GB swap 避免 OOM
+          echo "=== Memory before swap ==="
+          free -h
+          echo "=== Creating 8GB swap file ==="
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          echo "=== Memory after swap ==="
+          free -h
+          echo "=== Swap enabled ==="
+          swapon --show
+
       - name: Apply ZephyrOS overlay
         run: |
           # 把当前仓库的内容铺到 AOSP 树对应路径
