@@ -192,19 +192,10 @@ jobs:
           echo "=== Large directories (top 10) ==="
           du -sh ${{ env.AOSP_ROOT }}/*/ 2>/dev/null | sort -rh | head -10
           echo "=== Freeing extra space ==="
-          # 删除 prebuilts/ 中不需要的工具链
-          # prebuilts/ 占 51GB, 是最大的空间消耗者
-          # 注意: prebuilts/sdk/ 不能删 (系统模块引用 SDK jar)
-          # 注意: prebuilts/rust/ 不能删 (Rust crate 依赖 prebuilt_libstd 模块)
-          # 注意: prebuilts/gcc/ 不能删 (libwinpthread 被多个系统模块引用)
-          # 注意: kernel/ 不能删 (kernel-config-soong-rules 被 hardware/interfaces 引用)
-          echo "Removing unused prebuilts..."
-          rm -rf ${{ env.AOSP_ROOT }}/prebuilts/abi-dumps 2>/dev/null || true
-          rm -rf ${{ env.AOSP_ROOT }}/prebuilts/misc 2>/dev/null || true
-          rm -rf ${{ env.AOSP_ROOT }}/prebuilts/python 2>/dev/null || true
-          # 注意: prebuilts/go/ 不能删 (Soong/Blueprint 微工厂需要 Go 编译器)
-          # 注意: cts/ 不能删 (tools/platform-compat 依赖 cts_defaults 模块)
-          # 注意: device/google/ 不能删 (cuttlefish_buildhost_only 被 virglrenderer 引用)
+          # 策略: 不删 prebuilts/ 内的任何东西, 只删已知安全的独立目录
+          # prebuilts/ 内每个子目录都有模块依赖链
+          # 注意: prebuilts/sdk/ rust/ gcc/ go/ misc/ 都不能删
+          echo "Removing known-safe dirs only (no prebuilts/ touching)..."
           # 删除文档 (释放 ~1GB)
           echo "Removing docs..."
           rm -rf ${{ env.AOSP_ROOT }}/docs 2>/dev/null || true
@@ -212,8 +203,6 @@ jobs:
           echo "Removing unused device trees..."
           rm -rf ${{ env.AOSP_ROOT }}/device/sample 2>/dev/null || true
           rm -rf ${{ env.AOSP_ROOT }}/device/linaro 2>/dev/null || true
-          # 不删 prebuilts/rust/ gcc/ kernel/ 等 (有模块依赖)
-          echo "Keeping essential prebuilts (rust, gcc, sdk, kernel)"
           # 删除 tools/ 中不需要的测试/IDE 工具
           echo "Removing unused tools..."
           rm -rf ${{ env.AOSP_ROOT }}/tools/studio 2>/dev/null || true
