@@ -43,7 +43,7 @@ jobs:
   build:
     name: Build GSI
     runs-on: ubuntu-22.04
-    timeout-minutes: 360
+    timeout-minutes: 780
 
     steps:
       - name: Checkout ZephyrOS overlay
@@ -254,7 +254,7 @@ jobs:
           lunch ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
           export USE_RBE=false
           set -u
-          m -j1 nothing
+          m -j2 nothing
           echo "=== build.ninja generated ==="
           
           # 释放 swap (soong_build 已完成, Ninja 编译不需要大量内存)
@@ -270,8 +270,8 @@ jobs:
           echo "=== Phase 2: Ninja build (no swap, disk-hungry) ==="
           export USE_RBE=false
           set +u
-          m -j1 systemimage
-        timeout-minutes: 300
+          m -j2 systemimage
+        timeout-minutes: 720
 
       - name: Sign GSI
         working-directory: ${{ env.AOSP_ROOT }}
