@@ -254,7 +254,7 @@ jobs:
           lunch ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
           export USE_RBE=false
           set -u
-          m -j2 nothing
+          m -j1 nothing
           echo "=== build.ninja generated ==="
           
           # 释放 swap (soong_build 已完成, Ninja 编译不需要大量内存)
@@ -270,7 +270,7 @@ jobs:
           echo "=== Phase 2: Ninja build (no swap, disk-hungry) ==="
           export USE_RBE=false
           set +u
-          m -j2 systemimage
+          m -j1 systemimage
         timeout-minutes: 720
 
       - name: Sign GSI
