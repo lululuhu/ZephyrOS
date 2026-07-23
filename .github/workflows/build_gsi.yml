@@ -252,7 +252,7 @@ jobs:
           set +u
           source build/envsetup.sh
           lunch ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
-          export USE_RBE=0
+          export USE_RBE=false
           set -u
           m -j1 nothing
           echo "=== build.ninja generated ==="
@@ -268,7 +268,7 @@ jobs:
           
           # Phase 2: Ninja 编译 (需要磁盘, 不需要 swap)
           echo "=== Phase 2: Ninja build (no swap, disk-hungry) ==="
-          export USE_RBE=0
+          export USE_RBE=false
           set +u
           m -j1 systemimage
         timeout-minutes: 300
