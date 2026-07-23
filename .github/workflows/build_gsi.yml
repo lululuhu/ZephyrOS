@@ -267,6 +267,7 @@ jobs:
           
           # Phase 2: Ninja 编译 (需要磁盘, 不需要 swap)
           echo "=== Phase 2: Ninja build (no swap, disk-hungry) ==="
+          set +u
           m -j1 systemimage
         timeout-minutes: 300
 
