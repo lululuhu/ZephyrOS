@@ -116,12 +116,13 @@ jobs:
       - name: Setup swap and memory tuning
         run: |
           # GitHub Actions Azure VM 不支持 zram 内核模块, 使用磁盘 swap
-          # 5GB swap 文件: 足够 soong_build 分析 (需要 25-32GB 虚拟内存)
+          # 12GB swap: 15GB RAM + 3GB 系统 swap + 12GB = 30GB 虚拟内存
+          # soong_build 分析需要 25-32GB, 5GB 不够导致 OOM kill
           echo "=== Memory before ==="
           free -h
-          echo "=== Setting up disk swap (5GB) ==="
+          echo "=== Setting up disk swap (12GB) ==="
           SWAPFILE=/swap_zephyr
-          sudo fallocate -l 5G $SWAPFILE
+          sudo fallocate -l 12G $SWAPFILE
           sudo chmod 600 $SWAPFILE
           sudo mkswap $SWAPFILE
           sudo swapon $SWAPFILE
@@ -260,8 +261,8 @@ jobs:
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # Phase 1 完成, 释放 swap 释放 5GB 磁盘给 ninja 编译
-          echo "=== Releasing swap to free 5GB disk for ninja build ==="
+          # Phase 1 完成, 释放 swap 释放 12GB 磁盘给 ninja 编译
+          echo "=== Releasing swap to free 12GB disk for ninja build ==="
           sudo swapoff /swap_zephyr 2>/dev/null || true
           sudo rm -f /swap_zephyr 2>/dev/null || true
           echo "=== Disk/Memory before Phase 2 ==="
