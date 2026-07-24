@@ -115,16 +115,15 @@ jobs:
 
       - name: Setup swap and memory tuning
         run: |
-          # soong_build 分析所有 Android.bp 文件需要大量内存
-          # GitHub runner 只有 15GB RAM + 3GB swap, 再加 10GB 避免 OOM
-          # (soong_build 需要 25-32GB 虚拟内存, 10GB swap 后共 28GB)
+          # 用 zram 代替磁盘 swap! 不占用磁盘空间, 压缩后在 RAM 中存储
+          # zram 提供 10GB 虚拟内存, 实测压缩比 ~2:1, 仅用 ~5GB RAM
           echo "=== Memory before ==="
           free -h
-          echo "=== Adding 10GB swap ==="
-          sudo fallocate -l 10G /swap_zephyr
-          sudo chmod 600 /swap_zephyr
-          sudo mkswap /swap_zephyr
-          sudo swapon /swap_zephyr
+          echo "=== Setting up zram (10GB compressed swap in RAM, 0 disk) ==="
+          sudo modprobe zram
+          echo 10G | sudo tee /sys/block/zram0/disksize
+          sudo mkswap /dev/zram0
+          sudo swapon /dev/zram0
           echo "=== Memory after ==="
           free -h
           # 设置内存优化变量 (通过 GITHUB_ENV 传给后续步骤)
@@ -247,8 +246,8 @@ jobs:
           echo "Disk after cleanup:"
           df -h /
           
-          # Phase 1: 生成 build.ninja (需要 swap, 因为 soong_build 吃 25-32GB)
-          echo "=== Phase 1: Generating build.ninja (needs swap) ==="
+          # Phase 1: 生成 build.ninja (zram 提供内存, 不占磁盘)
+          echo "=== Phase 1: Generating build.ninja (zram swap, 0 disk used) ==="
           export TOP=$(pwd)
           set +u
           source build/envsetup.sh
@@ -258,21 +257,13 @@ jobs:
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # 释放 swap! 10GB 还给磁盘, 防止 out/ 写满
-          # 但保留 2GB 防止 Phase 2 OOM (clang 进程吃内存)
-          echo "=== Reducing swap to 2GB (prevents OOM, frees 8GB disk) ==="
-          sudo swapoff /swap_zephyr 2>/dev/null || true
-          sudo rm -f /swap_zephyr 2>/dev/null || true
-          sudo fallocate -l 2G /swap_zephyr
-          sudo chmod 600 /swap_zephyr
-          sudo mkswap /swap_zephyr
-          sudo swapon /swap_zephyr
+          # zram 不占磁盘, 无需释放! 直接进入 Phase 2
           echo "=== Disk/Memory before Phase 2 ==="
           df -h /
           free -h
           
-          # Phase 2: Ninja 编译 (-j2 并行, 2GB swap 防 OOM)
-          echo "=== Phase 2: Ninja build (-j2, 2GB swap) ==="
+          # Phase 2: Ninja 编译 (-j2 并行, zram 不占磁盘)
+          echo "=== Phase 2: Ninja build (-j2, zram swap) ==="
           export USE_RBE=false
           set +u
           m -j2 systemimage
