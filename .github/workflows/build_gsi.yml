@@ -8,9 +8,9 @@ on:
         required: false
         default: 'android-13.0.0_r83'
       target:
-        description: 'Build target (aosp_arm64-userdebug / aosp_x86_64-userdebug)'
+        description: 'Build target (aosp_arm64-user / aosp_x86_64-user)'
         required: false
-        default: 'aosp_arm64-userdebug'
+        default: 'aosp_arm64-user'
       enable_ccache:
         description: 'Use ccache (recommended)'
         required: false
@@ -36,7 +36,7 @@ env:
   TZ: Asia/Shanghai
 
 concurrency:
-  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
+  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-user' }}
   cancel-in-progress: true
 
 jobs:
@@ -93,9 +93,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-${{ github.sha }}
+          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-user' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-
+            ccache-${{ github.event.inputs.target || 'aosp_arm64-user' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-
 
       - name: Setup build environment
         run: |
@@ -116,11 +116,11 @@ jobs:
       - name: Setup swap and memory tuning
         run: |
           # soong_build 分析所有 Android.bp 文件需要大量内存
-          # GitHub runner 只有 15GB RAM + 3GB swap, 再加 10GB 避免 OOM
+          # GitHub runner 只有 15GB RAM + 3GB swap, 再加 5GB 避免 OOM
           echo "=== Memory before ==="
           free -h
-          echo "=== Adding 10GB swap ==="
-          sudo fallocate -l 10G /swap_zephyr
+          echo "=== Adding 5GB swap ==="
+          sudo fallocate -l 5G /swap_zephyr
           sudo chmod 600 /swap_zephyr
           sudo mkswap /swap_zephyr
           sudo swapon /swap_zephyr
@@ -189,7 +189,7 @@ jobs:
           echo "=== Available lunch targets (matching aosp_arm64) ==="
           lunch --print-all 2>/dev/null | grep -i "aosp_arm64" | head -20 || true
           echo "=== Attempting lunch ==="
-          lunch ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
+          lunch ${{ github.event.inputs.target || 'aosp_arm64-user' }}
           echo "TARGET_PRODUCT=$TARGET_PRODUCT"
           echo "TARGET_BUILD_VARIANT=$TARGET_BUILD_VARIANT"
           echo "TARGET_RELEASE=$TARGET_RELEASE"
@@ -197,7 +197,7 @@ jobs:
       - name: Build GSI system image
         working-directory: ${{ env.AOSP_ROOT }}
         env:
-          TARGET_LUNCH: ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
+          TARGET_LUNCH: ${{ github.event.inputs.target || 'aosp_arm64-user' }}
           MALLOC_ARENA_MAX: 2
         run: |
           echo "=== Pre-build resource check ==="
@@ -251,19 +251,22 @@ jobs:
           export TOP=$(pwd)
           set +u
           source build/envsetup.sh
-          lunch ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
+          lunch ${{ github.event.inputs.target || 'aosp_arm64-user' }}
           export USE_RBE=false
           set -u
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # 保留 swap! -j2 并行编译需要更多内存, swap 提供 28GB 虚拟内存
+          # 释放 swap! 5GB 还给磁盘, 防止 out/ 写满
+          echo "=== Removing swap to free disk for build ==="
+          sudo swapoff /swap_zephyr 2>/dev/null || true
+          sudo rm -f /swap_zephyr 2>/dev/null || true
           echo "=== Disk/Memory before Phase 2 ==="
           df -h /
           free -h
           
-          # Phase 2: Ninja 编译 (-j2 并行, swap 防止 OOM)
-          echo "=== Phase 2: Ninja build (-j2, keep swap) ==="
+          # Phase 2: Ninja 编译 (-j2 并行, swap 已释放磁盘)
+          echo "=== Phase 2: Ninja build (-j2, no swap) ==="
           export USE_RBE=false
           set +u
           m -j2 systemimage
@@ -296,7 +299,7 @@ jobs:
       - name: Upload GSI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}-${{ github.sha }}
+          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-user' }}-${{ github.sha }}
           path: artifacts/*
           retention-days: 14
           compression-level: 0

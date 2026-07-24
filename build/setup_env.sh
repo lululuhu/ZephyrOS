@@ -184,16 +184,27 @@ echo "[INFO] .repo metadata cleanup done."
 df -h "$AOSP_ROOT"
 
 # ------------------------------------------------------------------
-# 5. ⚠️ 重要: 不再进行任何 post-sync 源码清理!
+# 5. 清理项目 .git 目录 (释放 5-10GB 磁盘)
+#    repo sync 后每个项目仍保留 .git 目录 (refs/logs/config)。
+#    .repo/projects 已删除, 这些 .git 目录的 refs 已无用,
+#    删除它们可释放 5-10GB。
+# ------------------------------------------------------------------
+echo "[INFO] Removing per-project .git directories to free disk..."
+find . -name ".git" -type d -not -path "./.repo/*" -exec rm -rf {} + 2>/dev/null || true
+echo "[INFO] .git cleanup done."
+df -h "$AOSP_ROOT"
+
+# ------------------------------------------------------------------
+# 6. ⚠️ 注意: 不再删除源码目录!
 #    之前尝试删除 device/ kernel/ trusty/ 等目录来节省磁盘,
 #    但 Soong 构建系统会扫描所有 Android.bp 文件,
 #    删除目录会导致"undefined module"错误。
-#    GitHub runner 146GB 磁盘足够完整同步+编译。
+#    只删除 .git 元数据 (不影响 Soong 扫描), 不删除源码。
 # ------------------------------------------------------------------
-echo "[INFO] Skipping post-sync cleanup (keeping full AOSP tree to avoid module dependency errors)."
+echo "[INFO] Keeping full AOSP source tree (only .git metadata removed)."
 
 # ------------------------------------------------------------------
-# 6. 显示同步后磁盘占用
+# 7. 显示同步后磁盘占用
 # ------------------------------------------------------------------
 echo "::group::Disk usage after sync"
 df -h "$AOSP_ROOT"
@@ -201,7 +212,7 @@ du -sh "$AOSP_ROOT" 2>/dev/null || true
 echo "::endgroup::"
 
 # ------------------------------------------------------------------
-# 7. 注入 ZephyrOS 构建标识
+# 8. 注入 ZephyrOS 构建标识
 # ------------------------------------------------------------------
 cat > "$AOSP_ROOT/.zephyr_build_env" <<EOF
 ZEPHYR_BUILD=1
