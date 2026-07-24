@@ -257,20 +257,16 @@ jobs:
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # 释放 swap (soong_build 已完成, Ninja 编译不需要大量内存)
-          echo "=== Removing swap to free disk for build ==="
-          sudo swapoff /swap_zephyr 2>/dev/null || true
-          sudo rm -f /swap_zephyr 2>/dev/null || true
-          echo "=== Disk after swap removal ==="
+          # 保留 swap! -j2 并行编译需要更多内存, swap 提供 28GB 虚拟内存
+          echo "=== Disk/Memory before Phase 2 ==="
           df -h /
-          echo "=== Memory after swap removal ==="
           free -h
           
-          # Phase 2: Ninja 编译 (需要磁盘, 不需要 swap)
-          echo "=== Phase 2: Ninja build (no swap, disk-hungry) ==="
+          # Phase 2: Ninja 编译 (-j2 并行, swap 防止 OOM)
+          echo "=== Phase 2: Ninja build (-j2, keep swap) ==="
           export USE_RBE=false
           set +u
-          m -j1 systemimage
+          m -j2 systemimage
         timeout-minutes: 720
 
       - name: Sign GSI
