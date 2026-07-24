@@ -115,17 +115,20 @@ jobs:
 
       - name: Setup swap and memory tuning
         run: |
-          # 用 zram 代替磁盘 swap! 不占用磁盘空间, 压缩后在 RAM 中存储
-          # zram 提供 10GB 虚拟内存, 实测压缩比 ~2:1, 仅用 ~5GB RAM
+          # GitHub Actions Azure VM 不支持 zram 内核模块, 使用磁盘 swap
+          # 5GB swap 文件: 足够 soong_build 分析 (需要 25-32GB 虚拟内存)
           echo "=== Memory before ==="
           free -h
-          echo "=== Setting up zram (10GB compressed swap in RAM, 0 disk) ==="
-          sudo modprobe zram
-          echo 10G | sudo tee /sys/block/zram0/disksize
-          sudo mkswap /dev/zram0
-          sudo swapon /dev/zram0
+          echo "=== Setting up disk swap (5GB) ==="
+          SWAPFILE=/swap_zephyr
+          sudo fallocate -l 5G $SWAPFILE
+          sudo chmod 600 $SWAPFILE
+          sudo mkswap $SWAPFILE
+          sudo swapon $SWAPFILE
           echo "=== Memory after ==="
           free -h
+          echo "=== Disk ==="
+          df -h /
           # 设置内存优化变量 (通过 GITHUB_ENV 传给后续步骤)
           echo "MALLOC_ARENA_MAX=2" >> $GITHUB_ENV
 
@@ -246,8 +249,8 @@ jobs:
           echo "Disk after cleanup:"
           df -h /
           
-          # Phase 1: 生成 build.ninja (zram 提供内存, 不占磁盘)
-          echo "=== Phase 1: Generating build.ninja (zram swap, 0 disk used) ==="
+          # Phase 1: 生成 build.ninja (需要 swap 提供 25-32GB 虚拟内存)
+          echo "=== Phase 1: Generating build.ninja (with swap) ==="
           export TOP=$(pwd)
           set +u
           source build/envsetup.sh
@@ -257,16 +260,19 @@ jobs:
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # zram 不占磁盘, 无需释放! 直接进入 Phase 2
+          # Phase 1 完成, 释放 swap 释放 5GB 磁盘给 ninja 编译
+          echo "=== Releasing swap to free 5GB disk for ninja build ==="
+          sudo swapoff /swap_zephyr 2>/dev/null || true
+          sudo rm -f /swap_zephyr 2>/dev/null || true
           echo "=== Disk/Memory before Phase 2 ==="
           df -h /
           free -h
           
-          # Phase 2: Ninja 编译 (-j2 并行, zram 不占磁盘)
-          echo "=== Phase 2: Ninja build (-j2, zram swap) ==="
+          # Phase 2: Ninja 编译 (-j1 保守, 无 swap 需控制内存)
+          echo "=== Phase 2: Ninja build (-j1, no swap) ==="
           export USE_RBE=false
           set +u
-          m -j2 systemimage
+          m -j1 systemimage
         timeout-minutes: 720
 
       - name: Sign GSI
