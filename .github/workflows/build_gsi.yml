@@ -261,19 +261,23 @@ jobs:
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # Phase 1 完成, 释放 swap 释放 12GB 磁盘给 ninja 编译
-          echo "=== Releasing swap to free 12GB disk for ninja build ==="
+          # Phase 1 完成, 缩减 swap 从 12GB→4GB (释放 8GB 磁盘, 保留 4GB 防 OOM)
+          echo "=== Reducing swap 12GB→4GB for ninja build ==="
           sudo swapoff /swap_zephyr 2>/dev/null || true
           sudo rm -f /swap_zephyr 2>/dev/null || true
+          sudo fallocate -l 4G /swap_zephyr
+          sudo chmod 600 /swap_zephyr
+          sudo mkswap /swap_zephyr
+          sudo swapon /swap_zephyr
           echo "=== Disk/Memory before Phase 2 ==="
           df -h /
           free -h
           
-          # Phase 2: Ninja 编译 (-j1 保守, 无 swap 需控制内存)
-          echo "=== Phase 2: Ninja build (-j1, no swap) ==="
+          # Phase 2: Ninja 编译 (-j2 并行, 4GB swap 保底)
+          echo "=== Phase 2: Ninja build (-j2, 4GB swap) ==="
           export USE_RBE=false
           set +u
-          m -j1 systemimage
+          m -j2 systemimage
         timeout-minutes: 720
 
       - name: Sign GSI
