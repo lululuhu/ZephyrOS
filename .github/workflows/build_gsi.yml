@@ -31,7 +31,7 @@ env:
   CCACHE_DIR: ${{ github.workspace }}/ccache
   AOSP_ROOT: ${{ github.workspace }}/aosp
   # 降到 3G (从 5G) — 首次构建无缓存命中, ccache 反而占磁盘
-  CCACHE_MAXSIZE: 3G
+  CCACHE_MAXSIZE: 5G
   USE_CCACHE: 1
   TZ: Asia/Shanghai
 
@@ -261,15 +261,15 @@ jobs:
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # Phase 1 完成, 缩减 swap 从 12GB→6GB (释放 6GB 磁盘, 保留 6GB 防 OOM)
-          # Run#117: 4GB swap + -j2 → OOM kill at 29% (内存不够, 22GB 虚拟内存)
-          # Run#118: 8GB swap + -j2 → disk full at 20% (磁盘不够, 7.7GB free)
-          # 折中: 6GB swap = 15GB+3GB+6GB=24GB 虚拟内存, 磁盘 ~10GB free
-          # 配合 ccache 增量构建, 每次运行推进更多进度
-          echo "=== Reducing swap 12GB→6GB for ninja build ==="
+          # Phase 1 完成, 缩减 swap 从 12GB→4GB (释放 8GB 磁盘, 保留 4GB 防 OOM)
+          # Run#117-119 结论: -j2 并行 Rust 编译需要 >25GB 虚拟内存,
+          #   GitHub 免费 runner (15GB RAM) 物理上不够。
+          # 新策略: 改用 -j1 串行编译 (内存峰值低), 配合 5GB ccache 加速。
+          # 4GB swap = 15GB+3GB+4GB=22GB 虚拟内存, -j1 足够。
+          echo "=== Reducing swap 12GB→4GB for ninja build ==="
           sudo swapoff /swap_zephyr 2>/dev/null || true
           sudo rm -f /swap_zephyr 2>/dev/null || true
-          sudo fallocate -l 6G /swap_zephyr
+          sudo fallocate -l 4G /swap_zephyr
           sudo chmod 600 /swap_zephyr
           sudo mkswap /swap_zephyr
           sudo swapon /swap_zephyr
@@ -277,11 +277,11 @@ jobs:
           df -h /
           free -h
           
-          # Phase 2: Ninja 编译 (-j2 并行, 6GB swap 保底)
-          echo "=== Phase 2: Ninja build (-j2, 6GB swap) ==="
+          # Phase 2: Ninja 编译 (-j1 串行, 4GB swap 保底, 5GB ccache 加速)
+          echo "=== Phase 2: Ninja build (-j1, 4GB swap, 5GB ccache) ==="
           export USE_RBE=false
           set +u
-          m -j2 systemimage
+          m -j1 systemimage
         timeout-minutes: 720
 
       - name: Sign GSI
