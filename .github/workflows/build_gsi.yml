@@ -119,15 +119,11 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Save AOSP source cache (if fresh sync)
-        if: env.CACHE_HIT != 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "[CACHE] Fresh sync detected (CACHE_HIT=${{ env.CACHE_HIT }}). Saving to cache..."
-          bash zephyr-overlay/build/cache_source.sh save "${{ env.AOSP_ROOT }}" "aosp-cache-13" || \
-            echo "[CACHE] Cache save failed (non-fatal). Will retry on next run."
-        timeout-minutes: 60
+      # 注意: 源码缓存在 GitHub Actions 上自动压缩上传 79GB 源码太慢(超60分钟超时),
+      # 且 runner 磁盘空间不足(79GB 源码 + 28GB 空闲)。缓存保存改为手动触发:
+      #   在 GitHub Actions 页面 → Run workflow → 选择 "Save cache" workflow
+      # 或者本地运行: bash build/cache_source.sh save <aosp_root> aosp-cache-13
+      # 缓存恢复仍然自动生效 (setup_env.sh 中自动检测 Release 中的缓存)
 
       - name: Setup swap and memory tuning
         run: |
