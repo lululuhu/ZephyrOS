@@ -35,6 +35,10 @@ env:
   USE_CCACHE: 1
   TZ: Asia/Shanghai
 
+# 需要 contents: write 权限来创建/更新 GitHub Release (源码缓存)
+permissions:
+  contents: write
+
 concurrency:
   group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-user' }}
   cancel-in-progress: true
@@ -98,6 +102,8 @@ jobs:
             ccache-${{ github.event.inputs.target || 'aosp_arm64-user' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-
 
       - name: Setup build environment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bash zephyr-overlay/build/setup_env.sh \
             "${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}" \
@@ -112,6 +118,16 @@ jobs:
           path: /tmp/setup_env.log
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Save AOSP source cache (if fresh sync)
+        if: env.CACHE_HIT != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "[CACHE] Fresh sync detected (CACHE_HIT=${{ env.CACHE_HIT }}). Saving to cache..."
+          bash zephyr-overlay/build/cache_source.sh save "${{ env.AOSP_ROOT }}" "aosp-cache-13" || \
+            echo "[CACHE] Cache save failed (non-fatal). Will retry on next run."
+        timeout-minutes: 60
 
       - name: Setup swap and memory tuning
         run: |

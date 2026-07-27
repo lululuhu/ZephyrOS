@@ -71,8 +71,39 @@ fi
 repo version
 
 # ------------------------------------------------------------------
-# 2. 初始化 AOSP 仓库（浅克隆，节省 ~60% 磁盘）
+# 1.2 尝试从 GitHub Release 缓存恢复 AOSP 源码 (跳过 repo sync)
+#     如果缓存恢复成功, 设置 CACHE_HIT=true 并跳过整个 sync 阶段
 # ------------------------------------------------------------------
+CACHE_HIT=false
+CACHE_TAG="aosp-cache-13"
+if [ "${CI:-false}" = "true" ] || [ -n "${GITHUB_ACTIONS:-}" ]; then
+    CACHE_SCRIPT="$(dirname "$0")/cache_source.sh"
+    if [ -f "$CACHE_SCRIPT" ]; then
+        echo "[INFO] Attempting AOSP source cache restore..."
+        if bash "$CACHE_SCRIPT" restore "$AOSP_ROOT" "$CACHE_TAG"; then
+            CACHE_HIT=true
+            echo "[INFO] Cache hit! Skipping repo sync (saved ~30-40 min)."
+            echo "CACHE_HIT=true" >> "$GITHUB_ENV"
+        else
+            echo "[INFO] Cache miss. Will sync from source."
+            echo "CACHE_HIT=false" >> "$GITHUB_ENV"
+        fi
+    else
+        echo "[INFO] Cache script not found: $CACHE_SCRIPT"
+        echo "CACHE_HIT=false" >> "$GITHUB_ENV"
+    fi
+else
+    echo "[INFO] Not in CI environment, skipping cache check."
+fi
+
+# ------------------------------------------------------------------
+# 2. 初始化 AOSP 仓库（浅克隆，节省 ~60% 磁盘）
+#    仅在缓存未命中时执行
+# ------------------------------------------------------------------
+if [ "$CACHE_HIT" = "true" ]; then
+    echo "[INFO] Cache restored, skipping repo init and sync entirely."
+    # 跳过整个 repo init + sync + cleanup 阶段, 直接跳到构建标识注入
+else
 if [ ! -d ".repo" ]; then
     echo "[INFO] Initializing AOSP repo from $AOSP_MIRROR (shallow clone)..."
     # --depth=1: 浅克隆, 只取最新 commit (省 ~60% 磁盘)
@@ -210,6 +241,8 @@ echo "::group::Disk usage after sync"
 df -h "$AOSP_ROOT"
 du -sh "$AOSP_ROOT" 2>/dev/null || true
 echo "::endgroup::"
+
+fi  # end of cache-hit conditional (sync skipped if cache restored)
 
 # ------------------------------------------------------------------
 # 8. 注入 ZephyrOS 构建标识
