@@ -72,7 +72,7 @@ restore_cache() {
     if ! gh release download "$CACHE_TAG" \
         --repo "${GITHUB_REPOSITORY:-}" \
         --dir "$DOWNLOAD_DIR" \
-        --pattern "aosp_*.tar.gz.*" \
+        --pattern "aosp_part_*" \
         --clobber; then
         echo "[CACHE] Download failed. Will sync from source."
         rm -rf "$DOWNLOAD_DIR"
@@ -80,7 +80,7 @@ restore_cache() {
     fi
 
     # 检查下载的文件
-    PART_COUNT=$(ls "$DOWNLOAD_DIR"/aosp_*.tar.gz.* 2>/dev/null | wc -l)
+    PART_COUNT=$(ls "$DOWNLOAD_DIR"/aosp_part_* 2>/dev/null | wc -l)
     if [ "$PART_COUNT" -eq 0 ]; then
         echo "[CACHE] No cache parts found in release."
         rm -rf "$DOWNLOAD_DIR"
@@ -89,10 +89,10 @@ restore_cache() {
 
     echo "[CACHE] Downloaded $PART_COUNT part(s)."
 
-    # 合并分片
+    # 合并分片 (按数字顺序排序)
     echo "[CACHE] Merging parts..."
     COMBINED="$DOWNLOAD_DIR/aosp_source.tar.gz"
-    cat "$DOWNLOAD_DIR"/aosp_*.tar.gz.* > "$COMBINED"
+    ls "$DOWNLOAD_DIR"/aosp_part_* | sort -V | xargs cat > "$COMBINED"
 
     # 解压到 AOSP 目录
     echo "[CACHE] Extracting to $AOSP_ROOT ..."
@@ -116,7 +116,8 @@ restore_cache() {
 }
 
 # =========================================================================
-# SAVE: 将同步好的 AOSP 源码打包上传到 GitHub Release
+# SAVE: 将同步好的 AOSP 源码流式打包上传到 GitHub Release
+#       使用命名管道 (FIFO) 避免创建完整 tarball, 只占用 ~1.5GB 缓冲
 # =========================================================================
 save_cache() {
     echo "=============================================="
@@ -144,64 +145,88 @@ save_cache() {
         fi
     fi
 
-    echo "[CACHE] Creating tarball (excluding .repo and .git)..."
-    echo "[CACHE] Source size before compression:"
+    echo "[CACHE] Source size:"
     du -sh "$AOSP_ROOT" 2>/dev/null || true
+    echo "[CACHE] Disk free before:"
+    df -h / | tail -1
 
-    TARBALL="/tmp/aosp_source.tar.gz"
-    echo "[CACHE] This may take 15-30 minutes (compressing ~25GB)..."
-    tar -czf "$TARBALL" \
+    # 先创建空 release
+    echo "[CACHE] Creating release $CACHE_TAG ..."
+    if gh release view "$CACHE_TAG" --repo "${GITHUB_REPOSITORY:-}" &>/dev/null; then
+        gh release delete "$CACHE_TAG" --repo "${GITHUB_REPOSITORY:-}" --yes 2>/dev/null || true
+        git push origin ":refs/tags/$CACHE_TAG" 2>/dev/null || true
+        sleep 5  # 等待 GitHub 删除完成
+    fi
+
+    if ! gh release create "$CACHE_TAG" \
+        --repo "${GITHUB_REPOSITORY:-}" \
+        --title "AOSP Source Cache" \
+        --notes "Pre-synced AOSP source for ZephyrOS CI. $(date -u +"%Y-%m-%d %H:%M:%S UTC")" \
+        --draft 2>/dev/null; then
+        echo "[CACHE] Failed to create release."
+        return 0
+    fi
+
+    # 流式打包: tar → 命名管道 → dd 分片 → 逐个上传并删除
+    # 避免在磁盘上创建完整 tarball (79GB 源码压缩后约 30-40GB, 磁盘不够)
+    echo "[CACHE] Streaming tar + split + upload (max ~1.5GB buffer)..."
+    FIFO="/tmp/aosp_cache_fifo"
+    mkfifo "$FIFO"
+
+    # 后台 tar: 从 AOSP_ROOT 打包输出到 FIFO
+    tar -czf "$FIFO" \
         -C "$AOSP_ROOT" \
         --exclude='.repo' \
         --exclude='.git' \
         --exclude='out' \
-        . 2>/dev/null || {
-        echo "[CACHE] tar failed, trying without compression for speed..."
-        rm -f "$TARBALL"
-        TARBALL="/tmp/aosp_source.tar"
-        tar -cf "$TARBALL" \
-            -C "$AOSP_ROOT" \
-            --exclude='.repo' \
-            --exclude='.git' \
-            --exclude='out' \
-            . 2>/dev/null
-    }
+        . 2>/dev/null &
+    TAR_PID=$!
 
-    TARBALL_SIZE=$(du -sh "$TARBALL" 2>/dev/null | awk '{print $1}')
-    echo "[CACHE] Tarball size: $TARBALL_SIZE"
+    PART_NUM=0
+    CHUNK_PREFIX="aosp_part_"
+    CHUNK_FILE="/tmp/${CHUNK_PREFIX}chunk"
+    CHUNK_BYTES=$((CHUNK_SIZE_MB * 1024 * 1024))
+    FAILED=false
 
-    # 分片 (每个 1.5GB, 留 500MB 余量给 GitHub 2GB 限制)
-    echo "[CACHE] Splitting into ${CHUNK_SIZE_MB}MB chunks..."
-    SPLIT_DIR="/tmp/aosp_cache_parts"
-    mkdir -p "$SPLIT_DIR"
-    split -b "${CHUNK_SIZE_MB}M" -d "$TARBALL" "$SPLIT_DIR/aosp_$(date +%Y%m%d).tar.gz."
-    PART_COUNT=$(ls "$SPLIT_DIR"/ | wc -l)
-    echo "[CACHE] Created $PART_COUNT part(s)."
+    while true; do
+        # 从 FIFO 读取一个分片 (1.5GB)
+        dd if="$FIFO" of="$CHUNK_FILE" bs=64K count=$((CHUNK_BYTES / 65536)) 2>/dev/null
+        ACTUAL_SIZE=$(stat -c%s "$CHUNK_FILE" 2>/dev/null || echo 0)
 
-    # 创建或更新 release
-    echo "[CACHE] Creating/updating release $CACHE_TAG ..."
-    if gh release view "$CACHE_TAG" --repo "${GITHUB_REPOSITORY:-}" &>/dev/null; then
-        # 删除旧 release 和 tag
-        gh release delete "$CACHE_TAG" --repo "${GITHUB_REPOSITORY:-}" --yes 2>/dev/null || true
-        # 删除旧 tag (可能需要 force push)
-        git push origin ":refs/tags/$CACHE_TAG" 2>/dev/null || true
+        if [ "$ACTUAL_SIZE" -eq 0 ]; then
+            rm -f "$CHUNK_FILE"
+            break
+        fi
+
+        # 重命名为唯一名称以便 restore 时识别
+        PART_NAME="${CHUNK_PREFIX}$(printf '%03d' $PART_NUM)"
+        PART_FILE="/tmp/${PART_NAME}"
+        mv "$CHUNK_FILE" "$PART_FILE"
+
+        echo "[CACHE] Part $PART_NUM ($PART_NAME): $(numfmt --to=iec $ACTUAL_SIZE) — uploading..."
+        if ! gh release upload "$CACHE_TAG" "$PART_FILE" \
+            --repo "${GITHUB_REPOSITORY:-}" \
+            --clobber 2>/dev/null; then
+            echo "[CACHE] Upload failed for part $PART_NUM. Aborting."
+            FAILED=true
+            rm -f "$PART_FILE"
+            break
+        fi
+
+        rm -f "$PART_FILE"
+        PART_NUM=$((PART_NUM + 1))
+    done
+
+    # 等待 tar 完成
+    wait $TAR_PID 2>/dev/null || true
+    rm -f "$FIFO" "$CHUNK_FILE" /tmp/"${CHUNK_PREFIX}"* 2>/dev/null || true
+
+    if [ "$FAILED" = "true" ]; then
+        echo "[CACHE] Cache save incomplete. Will retry on next run."
+        return 0
     fi
 
-    gh release create "$CACHE_TAG" \
-        --repo "${GITHUB_REPOSITORY:-}" \
-        --title "AOSP Source Cache" \
-        --notes "Pre-synced AOSP source for ZephyrOS CI. $(date -u +"%Y-%m-%d %H:%M:%S UTC")" \
-        "$SPLIT_DIR"/* 2>/dev/null || {
-        echo "[CACHE] Failed to create release. Uploading may have timed out."
-        echo "[CACHE] You can manually upload later."
-        rm -rf "$TARBALL" "$SPLIT_DIR"
-        return 0
-    }
-
-    # 清理
-    rm -rf "$TARBALL" "$SPLIT_DIR"
-
-    echo "[CACHE] AOSP source cached successfully!"
+    echo "[CACHE] AOSP source cached successfully! ($PART_NUM parts)"
     echo "[CACHE] Next CI run will restore from cache, skipping repo sync."
     echo "=============================================="
     return 0
