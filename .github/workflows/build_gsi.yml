@@ -259,6 +259,9 @@ jobs:
           # 注意: 不能删除任何 clang 预编译版本! llvm-tools 模块引用了多版本路径
           # 删除 clang 旧版本会导致 "module source path ... does not exist" 错误
           echo "Keeping all clang prebuilts (llvm-tools references multiple versions)"
+          # 清除 ccache 释放 ~5GB 磁盘 (构建阶段磁盘紧张, ccache 命中率低不值得)
+          echo "Removing ccache to free ~5GB for build..."
+          rm -rf ${{ env.CCACHE_DIR }} 2>/dev/null || true
           echo "Disk after cleanup:"
           df -h /
           
@@ -273,18 +276,12 @@ jobs:
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # Phase 1 完成, 缩减 swap 从 12GB→4GB (释放 8GB 磁盘, 保留 4GB 防 OOM)
-          # Run#117-120 结论: 所有 Run 都在 29% (46600-46630) 同一位置死亡
-          # 无论 -j1/-j2 都一样, 不是内存/磁盘问题。
-          # 新假设: meta_lic 阶段每秒 400+ 行输出, 触发 GitHub Actions 日志限流杀进程。
-          # 修复: 将 ninja 输出重定向到文件, 每 60s tail 一次, 避免触发限流。
-          echo "=== Reducing swap 12GB→4GB for ninja build ==="
+          # Phase 1 完成, 完全移除 swap (释放 12GB 磁盘)
+          # 之前保留 4GB 防 OOM, 但实际 146GB 磁盘不够, out/ 目录 26GB+
+          # 导致磁盘满载。Ninja -j1 串行编译内存够用, 不再需要 swap。
+          echo "=== Removing swap entirely (free 12GB for ninja build) ==="
           sudo swapoff /swap_zephyr 2>/dev/null || true
           sudo rm -f /swap_zephyr 2>/dev/null || true
-          sudo fallocate -l 4G /swap_zephyr
-          sudo chmod 600 /swap_zephyr
-          sudo mkswap /swap_zephyr
-          sudo swapon /swap_zephyr
           echo "=== Disk/Memory before Phase 2 ==="
           df -h /
           free -h
