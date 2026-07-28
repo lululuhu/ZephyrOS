@@ -205,12 +205,10 @@ trap - EXIT
 echo "[INFO] Cleaning .repo git metadata to free disk for build..."
 REPO_META_SIZE=$(du -sh .repo 2>/dev/null | awk '{print $1}' || echo "unknown")
 echo "[INFO] .repo size before cleanup: $REPO_META_SIZE"
-# 删除最大的 git 对象存储
-rm -rf .repo/projects .repo/project-objects 2>/dev/null || true
-# 删除 manifest 副本 (已不需要)
-rm -rf .repo/manifests .repo/manifest.xml 2>/dev/null || true
-# 删除 repo 缓存
-rm -rf .repo/repo/.repo 2>/dev/null || true
+
+# 完全删除 .repo 目录 (repo sync 完成后不再需要)
+rm -rf .repo 2>/dev/null || true
+echo "[INFO] .repo completely removed."
 echo "[INFO] .repo metadata cleanup done."
 df -h "$AOSP_ROOT"
 
