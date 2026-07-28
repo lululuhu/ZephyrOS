@@ -286,24 +286,41 @@ jobs:
           df -h /
           free -h
           
-          # Phase 2: Ninja 编译 (-j1 串行, 输出重定向到文件避免日志限流)
-          echo "=== Phase 2: Ninja build (-j1, output to file) ==="
+          # Phase 2: Ninja 编译 (-j2 并行, 输出重定向到文件避免日志限流)
+          # -j1 到 42% 需要 4.5 小时, 完成 158207 个目标需要 ~10 小时 (超 6 小时限制)
+          # -j2 把编译时间压到 ~5 小时, 配合后台 .o 清理控制磁盘
+          echo "=== Phase 2: Ninja build (-j2, output to file) ==="
           export USE_RBE=false
           set +u
           NINJA_LOG=/tmp/ninja_build.log
-          # 后台监控: 每 60s 打印最后 3 行进度
+          # 后台监控: 每 60s 打印进度 + 磁盘状态
           (while true; do
             sleep 60
             echo "=== [PROGRESS] $(date +%H:%M:%S) ==="
             tail -3 "$NINJA_LOG" 2>/dev/null || true
             echo "=== [DISK] $(df -h / | tail -1) ==="
+            echo "=== [MEM] $(free -h | awk '/^Mem:/{print $7" avail"}') ==="
           done) &
           MONITOR_PID=$!
+          # 后台磁盘清理: 每 5 分钟清理 out/ 中已链接的 .o 中间文件
+          # ninja 链接 .so 后 .o 不再需要, 删除释放磁盘
+          (while true; do
+            sleep 300
+            USAGE=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
+            if [ "$USAGE" -ge 92 ]; then
+              echo "=== [CLEANUP] Disk ${USAGE}% full, cleaning .o files ==="
+              # 只删除 obj/ 下的 .o 文件 (保留 .so 和最终产物)
+              find out/target/product/*/obj/ -name "*.o" -type f -delete 2>/dev/null || true
+              find out/target/product/*/obj/ -name "*.o.d" -type f -delete 2>/dev/null || true
+              echo "=== [CLEANUP] Done. Disk: $(df -h / | tail -1) ==="
+            fi
+          done) &
+          CLEANUP_PID=$!
           # 执行构建, 输出重定向到文件
-          m -j1 systemimage > "$NINJA_LOG" 2>&1
+          m -j2 systemimage > "$NINJA_LOG" 2>&1
           BUILD_EXIT=$?
-          kill $MONITOR_PID 2>/dev/null || true
-          wait $MONITOR_PID 2>/dev/null || true
+          kill $MONITOR_PID $CLEANUP_PID 2>/dev/null || true
+          wait $MONITOR_PID $CLEANUP_PID 2>/dev/null || true
           # 打印最后 50 行以备检查
           echo "=== Build exit code: $BUILD_EXIT ==="
           echo "=== Last 50 lines of build log ==="
