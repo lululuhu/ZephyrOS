@@ -306,25 +306,14 @@ jobs:
             echo "=== [MEM] $(free -h | awk '/^Mem:/{print $7" avail"}') ==="
           done) &
           MONITOR_PID=$!
-          # 后台磁盘清理: 每 3 分钟清理 out/ 中已链接的 .o 中间文件
-          # ninja 链接 .so 后 .o 不再需要, 删除释放磁盘
-          (while true; do
-            sleep 180
-            USAGE=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
-            if [ "$USAGE" -ge 85 ]; then
-              echo "=== [CLEANUP] Disk ${USAGE}% full, cleaning .o files ==="
-              # 只删除 obj/ 下的 .o 文件 (保留 .so 和最终产物)
-              find out/target/product/*/obj/ -name "*.o" -type f -delete 2>/dev/null || true
-              find out/target/product/*/obj/ -name "*.o.d" -type f -delete 2>/dev/null || true
-              echo "=== [CLEANUP] Done. Disk: $(df -h / | tail -1) ==="
-            fi
-          done) &
-          CLEANUP_PID=$!
+          # 注意: 不能删除 out/ 中的 .o 文件! ninja 依赖 .o 存在性判断是否
+          # 需要重新编译。删 .o 会导致 ninja 重新编译, 形成死循环。
+          # 磁盘空间已通过清理 .repo/.git 释放 (setup_env.sh), 146GB 足够。
           # 执行构建, 输出重定向到文件
           m -j2 systemimage > "$NINJA_LOG" 2>&1
           BUILD_EXIT=$?
-          kill $MONITOR_PID $CLEANUP_PID 2>/dev/null || true
-          wait $MONITOR_PID $CLEANUP_PID 2>/dev/null || true
+          kill $MONITOR_PID 2>/dev/null || true
+          wait $MONITOR_PID 2>/dev/null || true
           # 打印最后 50 行以备检查
           echo "=== Build exit code: $BUILD_EXIT ==="
           echo "=== Last 50 lines of build log ==="
