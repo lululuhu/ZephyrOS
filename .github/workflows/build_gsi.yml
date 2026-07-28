@@ -276,12 +276,16 @@ jobs:
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # Phase 1 完成, 完全移除 swap (释放 12GB 磁盘)
-          # 之前保留 4GB 防 OOM, 但实际 146GB 磁盘不够, out/ 目录 26GB+
-          # 导致磁盘满载。Ninja -j1 串行编译内存够用, 不再需要 swap。
-          echo "=== Removing swap entirely (free 12GB for ninja build) ==="
+          # Phase 1 完成, 缩减 swap 从 12GB→2GB (释放 10GB 磁盘, 保留 2GB 防 OOM)
+          # 完全移除 swap 时 -j2 会 OOM (15GB RAM 不够两个 ninja 进程)
+          # 2GB swap 足够应对偶发内存峰值, 同时释放 10GB 磁盘给 out/
+          echo "=== Reducing swap 12GB→2GB for ninja build ==="
           sudo swapoff /swap_zephyr 2>/dev/null || true
           sudo rm -f /swap_zephyr 2>/dev/null || true
+          sudo fallocate -l 2G /swap_zephyr
+          sudo chmod 600 /swap_zephyr
+          sudo mkswap /swap_zephyr
+          sudo swapon /swap_zephyr
           echo "=== Disk/Memory before Phase 2 ==="
           df -h /
           free -h
@@ -302,12 +306,12 @@ jobs:
             echo "=== [MEM] $(free -h | awk '/^Mem:/{print $7" avail"}') ==="
           done) &
           MONITOR_PID=$!
-          # 后台磁盘清理: 每 5 分钟清理 out/ 中已链接的 .o 中间文件
+          # 后台磁盘清理: 每 3 分钟清理 out/ 中已链接的 .o 中间文件
           # ninja 链接 .so 后 .o 不再需要, 删除释放磁盘
           (while true; do
-            sleep 300
+            sleep 180
             USAGE=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
-            if [ "$USAGE" -ge 92 ]; then
+            if [ "$USAGE" -ge 85 ]; then
               echo "=== [CLEANUP] Disk ${USAGE}% full, cleaning .o files ==="
               # 只删除 obj/ 下的 .o 文件 (保留 .so 和最终产物)
               find out/target/product/*/obj/ -name "*.o" -type f -delete 2>/dev/null || true
