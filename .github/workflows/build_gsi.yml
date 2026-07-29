@@ -180,22 +180,18 @@ jobs:
           # 清空 TARGET_2ND_ARCH 使 Soong 不生成 32 位编译目标
           # 编译目标 157K→~80K, out/ 110GB→~55GB, 适配 146GB 磁盘
           echo "=== Disabling 32-bit ABI in gsi_arm64 BoardConfig ==="
-          DISABLE_32BIT=$(cat <<'EOFMK'
-
-# === ZephyrOS: Disable 32-bit ABI (64-bit only GSI) ===
-TARGET_2ND_ARCH :=
-TARGET_2ND_ARCH_VARIANT :=
-TARGET_2ND_CPU_VARIANT :=
-TARGET_2ND_CPU_ABI :=
-TARGET_2ND_CPU_ABI2 :=
-TARGET_2ND_CPU_ABI_LIST_32_BIT :=
-EOFMK
-          )
           for cfg in \
             ${{ env.AOSP_ROOT }}/build/make/target/board/gsi_arm64/BoardConfig.mk \
             ${{ env.AOSP_ROOT }}/build/make/target/board/BoardConfigGsiCommon.mk; do
             if [ -f "$cfg" ]; then
-              echo "$DISABLE_32BIT" >> "$cfg"
+              echo "" >> "$cfg"
+              echo "# === ZephyrOS: Disable 32-bit ABI (64-bit only GSI) ===" >> "$cfg"
+              echo "TARGET_2ND_ARCH :=" >> "$cfg"
+              echo "TARGET_2ND_ARCH_VARIANT :=" >> "$cfg"
+              echo "TARGET_2ND_CPU_VARIANT :=" >> "$cfg"
+              echo "TARGET_2ND_CPU_ABI :=" >> "$cfg"
+              echo "TARGET_2ND_CPU_ABI2 :=" >> "$cfg"
+              echo "TARGET_2ND_CPU_ABI_LIST_32_BIT :=" >> "$cfg"
               echo "Disabled 32-bit ABI in $cfg"
             fi
           done
