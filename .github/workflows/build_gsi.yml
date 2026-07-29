@@ -308,6 +308,14 @@ jobs:
           echo "=== Removing large unnecessary source dirs ==="
           # chromium-webview 源码 (~3GB) - 系统使用 prebuilt, 源码无 Android.bp
           rm -rf ${{ env.AOSP_ROOT }}/external/chromium-webview 2>/dev/null || true
+          # CTS 兼容性测试套件 (~5GB) - GSI 编译不需要
+          rm -rf ${{ env.AOSP_ROOT }}/cts 2>/dev/null || true
+          # compatibility 兼容性相关 (~1GB)
+          rm -rf ${{ env.AOSP_ROOT }}/compatibility 2>/dev/null || true
+          # pdk 平台开发包 (~1GB)
+          rm -rf ${{ env.AOSP_ROOT }}/pdk 2>/dev/null || true
+          # tradefed 测试框架 (~1GB) - 已通过 prebuilts 提供
+          rm -rf ${{ env.AOSP_ROOT }}/tools/tradefederation 2>/dev/null || true
           
           echo "Disk after cleanup:"
           df -h /
@@ -319,17 +327,17 @@ jobs:
           source build/envsetup.sh
           lunch ${{ github.event.inputs.target || 'gsi_arm64-user' }}
           export USE_RBE=false
+          export WITH_TIDY=0
           set -u
           m -j1 nothing
           echo "=== build.ninja generated ==="
           
-          # Phase 1 完成, 缩减 swap 从 12GB→2GB (释放 10GB 磁盘, 保留 2GB 防 OOM)
-          # 完全移除 swap 时 -j2 会 OOM (15GB RAM 不够两个 ninja 进程)
-          # 2GB swap 足够应对偶发内存峰值, 同时释放 10GB 磁盘给 out/
-          echo "=== Reducing swap 12GB→2GB for ninja build ==="
+          # Phase 1 完成, 缩减 swap 从 12GB→1GB (释放 11GB 磁盘给 out/)
+          # 1GB swap 足够应对偶发内存峰值, -j2 配合 MALLOC_ARENA_MAX=2
+          echo "=== Reducing swap 12GB→1GB for ninja build ==="
           sudo swapoff /swap_zephyr 2>/dev/null || true
           sudo rm -f /swap_zephyr 2>/dev/null || true
-          sudo fallocate -l 2G /swap_zephyr
+          sudo fallocate -l 1G /swap_zephyr
           sudo chmod 600 /swap_zephyr
           sudo mkswap /swap_zephyr
           sudo swapon /swap_zephyr
@@ -342,7 +350,7 @@ jobs:
           # 进一步优化: 禁用 clang-tidy (减少 ~20-30% 目标) + 清理 .sdump
           echo "=== Phase 2: Ninja build (-j2, output to file) ==="
           export USE_RBE=false
-          export WITH_TIDY=false
+          export WITH_TIDY=0
           set +u
           NINJA_LOG=/tmp/ninja_build.log
           # 后台监控: 每 60s 打印进度 + 磁盘状态
