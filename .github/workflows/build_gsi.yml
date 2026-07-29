@@ -262,6 +262,35 @@ jobs:
           # 清除 ccache 释放 ~5GB 磁盘 (构建阶段磁盘紧张, ccache 命中率低不值得)
           echo "Removing ccache to free ~5GB for build..."
           rm -rf ${{ env.CCACHE_DIR }} 2>/dev/null || true
+          
+          # 禁用 32 位 ABI 支持 (关键优化!)
+          # 默认 arm64 构建会同时编译 32 位 (arm) 和 64 位 (arm64) 两套库
+          # 日志显示大量 [arm] 标记的 32 位编译, 占用一半时间和磁盘
+          # 禁用后: 目标数 158207→~80000, out/ 110GB→~55GB, 时间 9h→~4.5h
+          echo "=== Disabling 32-bit ABI support (halves build time + disk) ==="
+          BOARD_CFG=${{ env.AOSP_ROOT }}/build/make/target/board/generic_arm64/BoardConfig.mk
+          if [ -f "$BOARD_CFG" ]; then
+            echo 'TARGET_SUPPORTS_32_BIT_ABI := false' >> "$BOARD_CFG"
+            echo "Added TARGET_SUPPORTS_32_BIT_ABI := false to $BOARD_CFG"
+          else
+            echo "WARNING: BoardConfig.mk not found at $BOARD_CFG"
+          fi
+          
+          # 删除大型不必要源码目录 (释放 ~10GB)
+          echo "=== Removing large unnecessary source dirs ==="
+          # chromium-webview 源码 (~3GB) - 系统使用 prebuilt WebView, 不需要源码
+          rm -rf ${{ env.AOSP_ROOT }}/external/chromium-webview 2>/dev/null || true
+          # chromium-libpac (~2GB) - Chrome 代理解析器, GSI 不需要
+          rm -rf ${{ env.AOSP_ROOT }}/external/chromium-libpac 2>/dev/null || true
+          # chromium-trace (~1GB) - Chrome 追踪工具, GSI 不需要
+          rm -rf ${{ env.AOSP_ROOT }}/external/chromium-trace 2>/dev/null || true
+          # kotlin-compiler (~2GB) - Kotlin 编译器源码, 只需要 prebuilt
+          rm -rf ${{ env.AOSP_ROOT }}/external/kotlinc 2>/dev/null || true
+          # scudo ~1GB - LLVM 分配器源码, 已有 prebuilt
+          rm -rf ${{ env.AOSP_ROOT }}/external/scudo 2>/dev/null || true
+          # libtextclassifier ~1GB - 文本分类, GSI 非必需
+          rm -rf ${{ env.AOSP_ROOT }}/external/libtextclassifier 2>/dev/null || true
+          
           echo "Disk after cleanup:"
           df -h /
           
