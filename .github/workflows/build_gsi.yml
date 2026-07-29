@@ -8,9 +8,9 @@ on:
         required: false
         default: 'android-13.0.0_r83'
       target:
-        description: 'Build target (aosp_arm64-user / aosp_x86_64-user)'
+        description: 'Build target (gsi_arm64-user / aosp_x86_64-user)'
         required: false
-        default: 'aosp_arm64-user'
+        default: 'gsi_arm64-user'
       enable_ccache:
         description: 'Use ccache (recommended)'
         required: false
@@ -40,7 +40,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'aosp_arm64-user' }}
+  group: zephyr-gsi-${{ github.ref }}-${{ github.event.inputs.target || 'gsi_arm64-user' }}
   cancel-in-progress: true
 
 jobs:
@@ -97,9 +97,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ github.event.inputs.target || 'aosp_arm64-user' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-${{ github.sha }}
+          key: ccache-${{ github.event.inputs.target || 'gsi_arm64-user' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ github.event.inputs.target || 'aosp_arm64-user' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-
+            ccache-${{ github.event.inputs.target || 'gsi_arm64-user' }}-${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}-
 
       - name: Setup build environment
         env:
@@ -165,6 +165,18 @@ jobs:
           rm -rf ${{ env.AOSP_ROOT }}/frameworks/base/packages/SystemUI/ZephyrHooks 2>/dev/null || true
           echo "Lawnchair source:"
           ls ${{ env.AOSP_ROOT }}/packages/apps/Lawnchair/ 2>/dev/null | head -5 || echo "WARN: Lawnchair not synced"
+          # 注入 ZephyrOS 定制到 gsi_arm64 产品 (使用 gsi_arm64 = 64-bit only GSI)
+          # gsi_arm64 是官方 64-bit only GSI 目标, 不编译 32 位 ABI
+          # 这样编译目标数减半 (~158K → ~80K), out/ 从 110GB 降到 ~55GB
+          GSI_PRODUCT=${{ env.AOSP_ROOT }}/build/make/target/product/gsi_arm64.mk
+          if [ -f "$GSI_PRODUCT" ]; then
+            echo "" >> "$GSI_PRODUCT"
+            echo "# === ZephyrOS customization injection ===" >> "$GSI_PRODUCT"
+            echo "\$(call inherit-product-if-exists, vendor/zephyr/config/common.mk)" >> "$GSI_PRODUCT"
+            echo "Injected ZephyrOS common.mk into $GSI_PRODUCT"
+          else
+            echo "WARNING: gsi_arm64.mk not found at $GSI_PRODUCT"
+          fi
           echo "Done."
 
       - name: Generate original boot animation
@@ -202,10 +214,10 @@ jobs:
           # 诊断: 列出可用的 release config (AOSP 14 lunch 三段式: product-release-variant)
           echo "=== Available release configs in build/release/ ==="
           ls build/release/ 2>/dev/null || echo "(no build/release/ dir)"
-          echo "=== Available lunch targets (matching aosp_arm64) ==="
-          lunch --print-all 2>/dev/null | grep -i "aosp_arm64" | head -20 || true
+          echo "=== Available lunch targets (matching gsi_arm64) ==="
+          lunch --print-all 2>/dev/null | grep -i "gsi_arm64" | head -20 || true
           echo "=== Attempting lunch ==="
-          lunch ${{ github.event.inputs.target || 'aosp_arm64-user' }}
+          lunch ${{ github.event.inputs.target || 'gsi_arm64-user' }}
           echo "TARGET_PRODUCT=$TARGET_PRODUCT"
           echo "TARGET_BUILD_VARIANT=$TARGET_BUILD_VARIANT"
           echo "TARGET_RELEASE=$TARGET_RELEASE"
@@ -213,7 +225,7 @@ jobs:
       - name: Build GSI system image
         working-directory: ${{ env.AOSP_ROOT }}
         env:
-          TARGET_LUNCH: ${{ github.event.inputs.target || 'aosp_arm64-user' }}
+          TARGET_LUNCH: ${{ github.event.inputs.target || 'gsi_arm64-user' }}
           MALLOC_ARENA_MAX: 2
         run: |
           echo "=== Pre-build resource check ==="
@@ -262,20 +274,11 @@ jobs:
           # 清除 ccache 释放 ~5GB 磁盘 (构建阶段磁盘紧张, ccache 命中率低不值得)
           echo "Removing ccache to free ~5GB for build..."
           rm -rf ${{ env.CCACHE_DIR }} 2>/dev/null || true
-          
-          # 禁用 32 位 ABI 支持 (关键优化!)
-          # 默认 arm64 构建会同时编译 32 位 (arm) 和 64 位 (arm64) 两套库
-          # 日志显示大量 [arm] 标记的 32 位编译, 占用一半时间和磁盘
-          # 禁用后: 目标数 158207→~80000, out/ 110GB→~55GB, 时间 9h→~4.5h
-          echo "=== Disabling 32-bit ABI support (halves build time + disk) ==="
-          BOARD_CFG=${{ env.AOSP_ROOT }}/build/make/target/board/generic_arm64/BoardConfig.mk
-          if [ -f "$BOARD_CFG" ]; then
-            echo 'TARGET_SUPPORTS_32_BIT_ABI := false' >> "$BOARD_CFG"
-            echo "Added TARGET_SUPPORTS_32_BIT_ABI := false to $BOARD_CFG"
-          else
-            echo "WARNING: BoardConfig.mk not found at $BOARD_CFG"
-          fi
-          
+
+          # 32 位 ABI 已通过 gsi_arm64 目标禁用 (gsi_arm64 = 64-bit only GSI)
+          # 不需要修改 BoardConfig.mk, gsi_arm64 自身不定义 TARGET_2ND_ARCH
+          # 之前用 aosp_arm64 + TARGET_SUPPORTS_32_BIT_ABI 无效 (AOSP 14 变量)
+
           # 删除大型不必要源码目录 - 谨慎操作
           # 注意: external/ 中的目录几乎都有 Android.bp 依赖, 不能随意删除
           # 之前删除 kotlinc/libtextclassifier 都导致 Soong 分析失败
@@ -292,7 +295,7 @@ jobs:
           export TOP=$(pwd)
           set +u
           source build/envsetup.sh
-          lunch ${{ github.event.inputs.target || 'aosp_arm64-user' }}
+          lunch ${{ github.event.inputs.target || 'gsi_arm64-user' }}
           export USE_RBE=false
           set -u
           m -j1 nothing
@@ -360,7 +363,7 @@ jobs:
           ZephyrOS GSI Build
           ==================
           Android: ${{ github.event.inputs.android_version || 'android-13.0.0_r83' }}
-          Target:  ${{ github.event.inputs.target || 'aosp_arm64-userdebug' }}
+          Target:  ${{ github.event.inputs.target || 'gsi_arm64-user' }}
           Commit:  ${{ github.sha }}
           Branch:  ${{ github.ref }}
           Built:   $(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -370,7 +373,7 @@ jobs:
       - name: Upload GSI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zephyr-gsi-${{ github.event.inputs.target || 'aosp_arm64-user' }}-${{ github.sha }}
+          name: zephyr-gsi-${{ github.event.inputs.target || 'gsi_arm64-user' }}-${{ github.sha }}
           path: artifacts/*
           retention-days: 14
           compression-level: 0
