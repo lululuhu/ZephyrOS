@@ -276,7 +276,7 @@ jobs:
             echo "WARNING: BoardConfig.mk not found at $BOARD_CFG"
           fi
           
-          # 删除大型不必要源码目录 (释放 ~10GB)
+          # 删除大型不必要源码目录 (释放 ~7GB)
           echo "=== Removing large unnecessary source dirs ==="
           # chromium-webview 源码 (~3GB) - 系统使用 prebuilt WebView, 不需要源码
           rm -rf ${{ env.AOSP_ROOT }}/external/chromium-webview 2>/dev/null || true
@@ -284,8 +284,7 @@ jobs:
           rm -rf ${{ env.AOSP_ROOT }}/external/chromium-libpac 2>/dev/null || true
           # chromium-trace (~1GB) - Chrome 追踪工具, GSI 不需要
           rm -rf ${{ env.AOSP_ROOT }}/external/chromium-trace 2>/dev/null || true
-          # kotlin-compiler (~2GB) - Kotlin 编译器源码, 只需要 prebuilt
-          rm -rf ${{ env.AOSP_ROOT }}/external/kotlinc 2>/dev/null || true
+          # 注意: kotlinc 不能删! kotlinx.atomicfu 依赖 kotlin-stdlib 等模块
           # scudo ~1GB - LLVM 分配器源码, 已有 prebuilt
           rm -rf ${{ env.AOSP_ROOT }}/external/scudo 2>/dev/null || true
           # libtextclassifier ~1GB - 文本分类, GSI 非必需
