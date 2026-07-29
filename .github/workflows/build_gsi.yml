@@ -256,6 +256,11 @@ jobs:
           echo "=== Large directories (top 10) ==="
           du -sh ${{ env.AOSP_ROOT }}/*/ 2>/dev/null | sort -rh | head -10
           echo "=== Freeing extra space ==="
+          # 删除所有 .git 目录 (释放 5-10GB, 编译不需要 git 历史)
+          echo "Removing .git directories (saves 5-10GB)..."
+          find ${{ env.AOSP_ROOT }} -name ".git" -type d -prune -exec rm -rf {} + 2>/dev/null || true
+          echo "After .git cleanup:"
+          df -h /
           # 策略: 不删 prebuilts/ 内的任何东西, 只删已知安全的独立目录
           # prebuilts/ 内每个子目录都有模块依赖链
           # 注意: prebuilts/sdk/ rust/ gcc/ go/ misc/ 都不能删
@@ -333,10 +338,11 @@ jobs:
           free -h
           
           # Phase 2: Ninja 编译 (-j2 并行, 输出重定向到文件避免日志限流)
-          # -j1 到 42% 需要 4.5 小时, 完成 158207 个目标需要 ~10 小时 (超 6 小时限制)
-          # -j2 把编译时间压到 ~5 小时, 配合后台 .o 清理控制磁盘
+          # Run #141: 32-bit 禁用后目标 157K→112K, 到 79% 磁盘满
+          # 进一步优化: 禁用 clang-tidy (减少 ~20-30% 目标) + 清理 .sdump
           echo "=== Phase 2: Ninja build (-j2, output to file) ==="
           export USE_RBE=false
+          export WITH_TIDY=false
           set +u
           NINJA_LOG=/tmp/ninja_build.log
           # 后台监控: 每 60s 打印进度 + 磁盘状态
@@ -350,7 +356,7 @@ jobs:
           MONITOR_PID=$!
           # 注意: 不能删除 out/ 中的 .o 文件! ninja 依赖 .o 存在性判断是否
           # 需要重新编译。删 .o 会导致 ninja 重新编译, 形成死循环。
-          # 磁盘空间已通过清理 .repo/.git 释放 (setup_env.sh), 146GB 足够。
+          # .sdump 文件是 header-abi-dumper 产物, 用于 ABI 检查, 编译后期可安全删除
           # 执行构建, 输出重定向到文件
           m -j2 systemimage > "$NINJA_LOG" 2>&1
           BUILD_EXIT=$?
