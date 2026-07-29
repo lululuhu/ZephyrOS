@@ -165,9 +165,7 @@ jobs:
           rm -rf ${{ env.AOSP_ROOT }}/frameworks/base/packages/SystemUI/ZephyrHooks 2>/dev/null || true
           echo "Lawnchair source:"
           ls ${{ env.AOSP_ROOT }}/packages/apps/Lawnchair/ 2>/dev/null | head -5 || echo "WARN: Lawnchair not synced"
-          # 注入 ZephyrOS 定制到 gsi_arm64 产品 (使用 gsi_arm64 = 64-bit only GSI)
-          # gsi_arm64 是官方 64-bit only GSI 目标, 不编译 32 位 ABI
-          # 这样编译目标数减半 (~158K → ~80K), out/ 从 110GB 降到 ~55GB
+          # 注入 ZephyrOS 定制到 gsi_arm64 产品
           GSI_PRODUCT=${{ env.AOSP_ROOT }}/build/make/target/product/gsi_arm64.mk
           if [ -f "$GSI_PRODUCT" ]; then
             echo "" >> "$GSI_PRODUCT"
@@ -177,6 +175,30 @@ jobs:
           else
             echo "WARNING: gsi_arm64.mk not found at $GSI_PRODUCT"
           fi
+          # 禁用 32 位 ABI (gsi_arm64 默认仍编译 32 位 native 库!)
+          # Run #139 证实: gsi_arm64 的 "64-bit" 指设备架构, 仍编译 [arm] 32 位
+          # 清空 TARGET_2ND_ARCH 使 Soong 不生成 32 位编译目标
+          # 编译目标 157K→~80K, out/ 110GB→~55GB, 适配 146GB 磁盘
+          echo "=== Disabling 32-bit ABI in gsi_arm64 BoardConfig ==="
+          DISABLE_32BIT=$(cat <<'EOFMK'
+
+# === ZephyrOS: Disable 32-bit ABI (64-bit only GSI) ===
+TARGET_2ND_ARCH :=
+TARGET_2ND_ARCH_VARIANT :=
+TARGET_2ND_CPU_VARIANT :=
+TARGET_2ND_CPU_ABI :=
+TARGET_2ND_CPU_ABI2 :=
+TARGET_2ND_CPU_ABI_LIST_32_BIT :=
+EOFMK
+          )
+          for cfg in \
+            ${{ env.AOSP_ROOT }}/build/make/target/board/gsi_arm64/BoardConfig.mk \
+            ${{ env.AOSP_ROOT }}/build/make/target/board/BoardConfigGsiCommon.mk; do
+            if [ -f "$cfg" ]; then
+              echo "$DISABLE_32BIT" >> "$cfg"
+              echo "Disabled 32-bit ABI in $cfg"
+            fi
+          done
           echo "Done."
 
       - name: Generate original boot animation
@@ -275,9 +297,8 @@ jobs:
           echo "Removing ccache to free ~5GB for build..."
           rm -rf ${{ env.CCACHE_DIR }} 2>/dev/null || true
 
-          # 32 位 ABI 已通过 gsi_arm64 目标禁用 (gsi_arm64 = 64-bit only GSI)
-          # 不需要修改 BoardConfig.mk, gsi_arm64 自身不定义 TARGET_2ND_ARCH
-          # 之前用 aosp_arm64 + TARGET_SUPPORTS_32_BIT_ABI 无效 (AOSP 14 变量)
+          # 32 位 ABI 已在 Apply overlay 步骤中禁用 (清空 TARGET_2ND_ARCH)
+          # gsi_arm64 默认仍编译 32 位 native 库, 需手动在 BoardConfig 中清空
 
           # 删除大型不必要源码目录 - 谨慎操作
           # 注意: external/ 中的目录几乎都有 Android.bp 依赖, 不能随意删除
