@@ -358,15 +358,13 @@ jobs:
           echo "=== Phase 1 done, no cleanup needed ==="
           df -h /
 
-          # Phase 2: Ninja 编译 (-j1, 输出重定向到文件避免日志限流)
-          # Run #144: 即使 32 位禁用 + clang-tidy 禁用, 79GB 源码 + 55GB out/ 仍顶满 146GB 磁盘
-          # 进一步优化:
-          #   1. WITHOUT_CHECK_API=true (跳过 ABI dump .sdump, 节省 15-20GB)
-          #   2. DONT_DEXPREOPT_PREBUILTS=true (跳过 prebuilt app dexpreopt, 节省 ~2GB)
-          #   3. -j1 (单线程, 磁盘峰值最低)
-          #   4. 后台激进清理 .sdump/.gcno/.o.d
-          #   注意: WITH_DEXPREOPT=false 不可用 (AOSP 13 强制 user 构建启用 dexpreopt)
-          echo "=== Phase 2: Ninja build (-j1, output to file) ==="
+          # Phase 2: Ninja 编译 (-j4, 输出重定向到文件避免日志限流)
+          # Run #146: -j1 太慢, 6 小时 GitHub runner 硬限制内编不完 (6h0m 超时)
+          # GitHub-hosted runner job 最大 6h, timeout-minutes 无法超过此限制
+          # 改用 -j4 (runner 有 4 核 CPU), WITHOUT_CHECK_API=true 省了 15-20GB
+          # 磁盘空间, 足以应对 -j4 更高的磁盘峰值
+          # 时间预算: setup+sync ~60min + Phase1 ~45min + Phase2 ~3h = ~4.75h (< 6h)
+          echo "=== Phase 2: Ninja build (-j4, output to file) ==="
           export USE_RBE=false
           export WITH_TIDY=0
           export WITHOUT_CHECK_API=true
@@ -411,7 +409,7 @@ jobs:
           # 注意: 不能在编译早期删除 .o 文件! ninja 依赖 .o 存在性判断是否
           # 需要重新编译。仅在磁盘紧急(<2GB)时清理, 此时宁可重编译也要避免 OOD
           # 执行构建, 输出重定向到文件
-          m -j1 systemimage > "$NINJA_LOG" 2>&1
+          m -j4 systemimage > "$NINJA_LOG" 2>&1
           BUILD_EXIT=$?
           kill $MONITOR_PID 2>/dev/null || true
           wait $MONITOR_PID 2>/dev/null || true
