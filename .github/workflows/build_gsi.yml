@@ -352,35 +352,29 @@ jobs:
           df -h /
           free -h
 
-          # Phase 1 后: 删除不再需要的源码目录释放磁盘
-          # build.ninja 已生成, Soong 分析阶段完成, 不再需要 cts/ 源码
-          # (gsi_arm64 产品不包含 CTS 测试, build.ninja 不应引用 cts/ 文件)
-          # 如果 ninja 报错 "no such file", 说明有依赖, 需要恢复
-          echo "=== Phase 1 done, cleaning unneeded source dirs ==="
-          rm -rf cts 2>/dev/null && echo "Removed cts/ (~5GB)" || true
-          rm -rf compatibility 2>/dev/null && echo "Removed compatibility/" || true
-          rm -rf pdk 2>/dev/null && echo "Removed pdk/" || true
-          # 删除 tools/tradefederation (测试框架, GSI 不需要)
-          rm -rf tools/tradefederation 2>/dev/null && echo "Removed tools/tradefederation/" || true
-          # 再次清理 .git (Phase 1 可能重新生成了一些)
-          find . -name ".git" -type d -prune -exec rm -rf {} + 2>/dev/null || true
-          echo "=== Disk after source cleanup ==="
+          # Phase 1 后: 不删除源码目录!
+          # Run #149 教训: 删除 cts/ 等导致 ninja 报错 (build.ninja 引用了这些文件)
+          # 即使 build.ninja 已生成, ninja 仍需要源文件进行编译
+          echo "=== Phase 1 done, keeping all source dirs ==="
           df -h /
 
           # Phase 2: Ninja 编译 (-j4, 输出重定向到文件避免日志限流)
-          # Run #148 教训: 删除 intermediates .o 导致 ninja 重编译恶性循环!
-          #   (删 .o → ninja 重编译 → 生成 .o → 磁盘满 → 删 .o → ...)
-          #   Run #148 (3h31m) 比 Run #147 (4h) 更快失败, 证明恶性循环存在
-          # 新策略: 只删安全文件 (.sdump/.gcno/.o.d + host .o), 不删 intermediates .o
+          # Run #149 教训: 删除源码 → ninja 15s 报错
+          # Run #148 教训: 删除 .o → ninja 重编译恶性循环 (3h31m 比 4h 更快满)
+          # Run #147 教训: -j4 + 60s 清理 → 4h 磁盘满
+          # 新策略: 删除 .a (静态库归档), 保留 .o (避免重编译)
+          #   .a 删除后 ninja 重新归档 (从 .o, 速度快), 不重编译
+          #   .a 占 ~10-15GB, 定期删除可释放大量空间
           echo "=== Phase 2: Ninja build (-j4, output to file) ==="
           export USE_RBE=false
           export WITH_TIDY=0
           export WITHOUT_CHECK_API=true
           export SKIP_ABI_CHECKS=true
           set +u
+          set +e  # 重要: 关闭 set -e, 确保 m 命令失败后能看到错误日志
           NINJA_LOG=/tmp/ninja_build.log
           BUILD_START=$(date +%s)
-          # 后台监控: 每 30s 打印进度 + 清理安全文件
+          # 后台监控: 每 30s 打印进度 + 清理
           (while true; do
             sleep 30
             NOW=$(date +%s)
@@ -390,43 +384,47 @@ jobs:
             echo "=== [DISK] $(df -h / | tail -1) ==="
             echo "=== [MEM] $(free -h | awk '/^Mem:/{print $7" avail"}') ==="
             AVAIL_KB=$(df --output=avail -BKB / 2>/dev/null | tail -1 | tr -d ' ')
-            # 30 分钟后持续清理 host .o (host 工具已编译完成, 安全删除)
-            if [ -n "$ELAPSED" ] && [ "$ELAPSED" -gt 30 ] 2>/dev/null; then
+            # 20 分钟后持续清理 host .o (host 工具已编译完成)
+            if [ -n "$ELAPSED" ] && [ "$ELAPSED" -gt 20 ] 2>/dev/null; then
               find out/host -name "*.o" -type f -delete 2>/dev/null
             fi
-            # 磁盘空间低于 10GB 时清理安全文件 (不删 .o, 避免重编译循环)
-            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 10485760 ] 2>/dev/null; then
-              echo "=== [DISK CLEANUP] Disk <10GB! Cleaning safe files ==="
-              # .sdump: ABI dump (安全删除, 不影响编译)
+            # 磁盘空间低于 12GB 时: 清理安全文件 + 删除 .a
+            # .a 删除后 ninja 重新归档 (从 .o), 不重编译, 代价小
+            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 12582912 ] 2>/dev/null; then
+              echo "=== [DISK CLEANUP] Disk <12GB! Cleaning safe + .a files ==="
+              # 安全文件
               find out/ -name "*.sdump" -type f -delete 2>/dev/null
-              # .gcno/.gcda: 代码覆盖率 (安全删除)
               find out/ -name "*.gcno" -type f -delete 2>/dev/null
               find out/ -name "*.gcda" -type f -delete 2>/dev/null
-              # .o.d: 依赖文件 (安全删除, ninja 会重新生成)
               find out/ -name "*.o.d" -type f -delete 2>/dev/null
-              # .toc: 链接器 toc (安全删除, 重新链接时重建)
               find out/ -name "*.toc" -type f -delete 2>/dev/null
-              # host .o (安全, host 工具已完成)
+              # host .o
               find out/host -name "*.o" -type f -delete 2>/dev/null
+              # .a 文件 (静态库归档, 链接进 .so 后不需要)
+              # ninja 重新归档从 .o (快), 不会重编译
+              find out/soong/.intermediates -name "*.a" -type f -delete 2>/dev/null
               echo "=== [DISK CLEANUP] Done: $(df -h / | tail -1) ==="
             fi
-            # 磁盘空间低于 3GB 时终极清理: 删除 .a (保留 .so)
-            # .a 删除后 ninja 会重新归档 (从 .o), 但不会重编译, 代价较小
-            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 3145728 ] 2>/dev/null; then
-              echo "=== [DISK CRITICAL] Disk <3GB! Deleting .a files ==="
-              find out/soong/.intermediates -name "*.a" -type f -delete 2>/dev/null
-              echo "=== [DISK CRITICAL] Done: $(df -h / | tail -1) ==="
+            # 磁盘空间低于 4GB 时: 删除 host bin (已编译完成的 host 工具)
+            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 4194304 ] 2>/dev/null; then
+              echo "=== [DISK EMERGENCY] Disk <4GB! Deleting host bins ==="
+              # host 工具的可执行文件 (编译完成后不再需要, 除了签名工具)
+              find out/host/linux-x86/bin -type f -not -name "signapk*" \
+                -not -name "apksigner*" -not -name "zipalign*" \
+                -delete 2>/dev/null
+              echo "=== [DISK EMERGENCY] Done: $(df -h / | tail -1) ==="
             fi
           done) &
           MONITOR_PID=$!
-          # 重要: 不删除 intermediates .o! 删除会导致 ninja 重编译恶性循环
+          # 重要: 不删除 .o! 删除会导致 ninja 重编译恶性循环
+          # .a 可以删除 (ninja 重新归档, 不重编译)
           m -j4 systemimage > "$NINJA_LOG" 2>&1
           BUILD_EXIT=$?
           kill $MONITOR_PID 2>/dev/null || true
           wait $MONITOR_PID 2>/dev/null || true
           echo "=== Build exit code: $BUILD_EXIT ==="
-          echo "=== Last 50 lines of build log ==="
-          tail -50 "$NINJA_LOG"
+          echo "=== Last 80 lines of build log ==="
+          tail -80 "$NINJA_LOG"
           exit $BUILD_EXIT
         timeout-minutes: 720
 
