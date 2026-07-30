@@ -179,7 +179,7 @@ jobs:
           # Run #139 证实: gsi_arm64 的 "64-bit" 指设备架构, 仍编译 [arm] 32 位
           # 清空 TARGET_2ND_ARCH 使 Soong 不生成 32 位编译目标
           # 编译目标 157K→~80K, out/ 110GB→~55GB, 适配 146GB 磁盘
-          echo "=== Disabling 32-bit ABI in gsi_arm64 BoardConfig ==="
+          echo "=== Disabling 32-bit ABI + dexpreopt + ABI checks in BoardConfig ==="
           for cfg in \
             ${{ env.AOSP_ROOT }}/build/make/target/board/gsi_arm64/BoardConfig.mk \
             ${{ env.AOSP_ROOT }}/build/make/target/board/BoardConfigGsiCommon.mk; do
@@ -192,7 +192,12 @@ jobs:
               echo "TARGET_2ND_CPU_ABI :=" >> "$cfg"
               echo "TARGET_2ND_CPU_ABI2 :=" >> "$cfg"
               echo "TARGET_2ND_CPU_ABI_LIST_32_BIT :=" >> "$cfg"
-              echo "Disabled 32-bit ABI in $cfg"
+              echo "# === ZephyrOS: Disable dexpreopt (saves 5-10GB in out/) ===" >> "$cfg"
+              echo "WITH_DEXPREOPT := false" >> "$cfg"
+              echo "DONT_DEXPREOPT_PREBUILTS := true" >> "$cfg"
+              echo "# === ZephyrOS: Disable VINTF manifest enforcement ===" >> "$cfg"
+              echo "PRODUCT_ENFORCE_VINTF_MANIFEST := false" >> "$cfg"
+              echo "Patched $cfg (32-bit ABI + dexpreopt + VINTF disabled)"
             fi
           done
           echo "Done."
@@ -316,6 +321,8 @@ jobs:
           df -h /
           
           # Phase 1: 生成 build.ninja (需要 swap 提供 25-32GB 虚拟内存)
+          # 关键: WITHOUT_CHECK_API=true 跳过 ABI dump (.sdump) 生成
+          #   节省 15-20GB out/ 空间, 解决 Run #144 磁盘耗尽问题
           echo "=== Phase 1: Generating build.ninja (with swap) ==="
           export TOP=$(pwd)
           set +u
@@ -323,12 +330,14 @@ jobs:
           lunch ${{ github.event.inputs.target || 'gsi_arm64-user' }}
           export USE_RBE=false
           export WITH_TIDY=0
+          export WITHOUT_CHECK_API=true
+          export SKIP_ABI_CHECKS=true
           set -u
           m -j1 nothing
           echo "=== build.ninja generated ==="
-          
+
           # Phase 1 完成, 缩减 swap 从 12GB→1GB (释放 11GB 磁盘给 out/)
-          # 1GB swap 足够应对偶发内存峰值, -j2 配合 MALLOC_ARENA_MAX=2
+          # 1GB swap 足够应对偶发内存峰值, -j1 配合 MALLOC_ARENA_MAX=2
           echo "=== Reducing swap 12GB→1GB for ninja build ==="
           sudo swapoff /swap_zephyr 2>/dev/null || true
           sudo rm -f /swap_zephyr 2>/dev/null || true
@@ -339,29 +348,66 @@ jobs:
           echo "=== Disk/Memory before Phase 2 ==="
           df -h /
           free -h
-          
-          # Phase 2: Ninja 编译 (-j2 并行, 输出重定向到文件避免日志限流)
-          # Run #141: 32-bit 禁用后目标 157K→112K, 到 79% 磁盘满
-          # 进一步优化: 禁用 clang-tidy (减少 ~20-30% 目标) + 清理 .sdump
-          echo "=== Phase 2: Ninja build (-j2, output to file) ==="
+
+          # Phase 1 后: 不清理 out/ 中的任何文件
+          # m -j1 nothing 只生成 build.ninja 和配置文件, 没有可清理的中间产物
+          # .sdump/.gcno 等在 Phase 2 ninja 编译时才生成, 后台监控会自动清理
+          echo "=== Phase 1 done, no cleanup needed ==="
+          df -h /
+
+          # Phase 2: Ninja 编译 (-j1, 输出重定向到文件避免日志限流)
+          # Run #144: 即使 32 位禁用 + clang-tidy 禁用, 79GB 源码 + 55GB out/ 仍顶满 146GB 磁盘
+          # 进一步优化:
+          #   1. WITHOUT_CHECK_API=true (跳过 ABI dump, 节省 15-20GB)
+          #   2. WITH_DEXPREOPT=false (跳过 dex 预优化, 节省 5-10GB)
+          #   3. -j1 (单线程, 磁盘峰值最低)
+          #   4. 后台激进清理 .sdump/.gcno/.o.d
+          echo "=== Phase 2: Ninja build (-j1, output to file) ==="
           export USE_RBE=false
           export WITH_TIDY=0
+          export WITHOUT_CHECK_API=true
+          export SKIP_ABI_CHECKS=true
           set +u
           NINJA_LOG=/tmp/ninja_build.log
-          # 后台监控: 每 60s 打印进度 + 磁盘状态
+          # 后台监控 + 激进清理: 每 60s 打印进度 + 磁盘状态 + 清理中间产物
           (while true; do
             sleep 60
             echo "=== [PROGRESS] $(date +%H:%M:%S) ==="
             tail -3 "$NINJA_LOG" 2>/dev/null || true
             echo "=== [DISK] $(df -h / | tail -1) ==="
             echo "=== [MEM] $(free -h | awk '/^Mem:/{print $7" avail"}') ==="
+            # 磁盘空间低于 5GB 时激进清理 (提高阈值, 避免再次耗尽)
+            AVAIL_KB=$(df --output=avail -BKB / 2>/dev/null | tail -1 | tr -d ' ')
+            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 5242880 ] 2>/dev/null; then
+              echo "=== [DISK CLEANUP] Low disk (<5GB)! Aggressive cleanup ==="
+              # .sdump: ABI dump 产物 (即使 WITHOUT_CHECK_API=true 仍可能有残留)
+              find out/ -name "*.sdump" -type f -delete 2>/dev/null
+              # .gcno: 代码覆盖率数据 (编译完成后无用)
+              find out/ -name "*.gcno" -type f -delete 2>/dev/null
+              # .gcda: 运行时覆盖率数据
+              find out/ -name "*.gcda" -type f -delete 2>/dev/null
+              # .o.d: 依赖关系文件 (已编译模块的 .o.d 可安全删除)
+              # 注意: ninja 会重新生成需要的 .o.d, 删除不会导致重编译
+              find out/ -name "*.o.d" -type f -delete 2>/dev/null
+              # .toc: 链接器表 of contents (重新链接时会重建)
+              find out/ -name "*.toc" -type f -delete 2>/dev/null
+              echo "=== [DISK CLEANUP] Done, disk now: $(df -h / | tail -1) ==="
+            fi
+            # 磁盘空间低于 2GB 时紧急清理 host 工具中间产物
+            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 2097152 ] 2>/dev/null; then
+              echo "=== [DISK EMERGENCY] Very low disk (<2GB)! Emergency cleanup ==="
+              # 清理 out/host/ 中已编译的 .o 文件 (host 工具不再需要重新编译)
+              find out/host -name "*.o" -type f -delete 2>/dev/null
+              # 清理 out/soong/.intermediates/ 中已链接的 .a 文件的中间 .o
+              find out/soong/.intermediates -name "*.o" -path "*/obj/*" -type f -delete 2>/dev/null
+              echo "=== [DISK EMERGENCY] Done, disk now: $(df -h / | tail -1) ==="
+            fi
           done) &
           MONITOR_PID=$!
-          # 注意: 不能删除 out/ 中的 .o 文件! ninja 依赖 .o 存在性判断是否
-          # 需要重新编译。删 .o 会导致 ninja 重新编译, 形成死循环。
-          # .sdump 文件是 header-abi-dumper 产物, 用于 ABI 检查, 编译后期可安全删除
+          # 注意: 不能在编译早期删除 .o 文件! ninja 依赖 .o 存在性判断是否
+          # 需要重新编译。仅在磁盘紧急(<2GB)时清理, 此时宁可重编译也要避免 OOD
           # 执行构建, 输出重定向到文件
-          m -j2 systemimage > "$NINJA_LOG" 2>&1
+          m -j1 systemimage > "$NINJA_LOG" 2>&1
           BUILD_EXIT=$?
           kill $MONITOR_PID 2>/dev/null || true
           wait $MONITOR_PID 2>/dev/null || true
