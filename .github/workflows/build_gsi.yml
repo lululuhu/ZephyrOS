@@ -359,11 +359,12 @@ jobs:
           df -h /
 
           # Phase 2: Ninja 编译 (-j4, 输出重定向到文件避免日志限流)
-          # Run #146: -j1 太慢, 6 小时 GitHub runner 硬限制内编不完 (6h0m 超时)
-          # GitHub-hosted runner job 最大 6h, timeout-minutes 无法超过此限制
-          # 改用 -j4 (runner 有 4 核 CPU), WITHOUT_CHECK_API=true 省了 15-20GB
-          # 磁盘空间, 足以应对 -j4 更高的磁盘峰值
-          # 时间预算: setup+sync ~60min + Phase1 ~45min + Phase2 ~3h = ~4.75h (< 6h)
+          # Run #146 (-j1): 6h 超时, 磁盘没满 (WITHOUT_CHECK_API 有效)
+          # Run #147 (-j4): 4h 磁盘满 (-j4 中间 .o 生成太快, 60s 清理来不及)
+          # 方案: 保持 -j4 速度, 大幅强化后台清理:
+          #   1. 检查频率 60s → 20s
+          #   2. 清理阈值 5GB → 15GB (提前清理)
+          #   3. 45 分钟后持续清理 host .o (host 工具已编译完)
           echo "=== Phase 2: Ninja build (-j4, output to file) ==="
           export USE_RBE=false
           export WITH_TIDY=0
@@ -371,49 +372,64 @@ jobs:
           export SKIP_ABI_CHECKS=true
           set +u
           NINJA_LOG=/tmp/ninja_build.log
-          # 后台监控 + 激进清理: 每 60s 打印进度 + 磁盘状态 + 清理中间产物
+          BUILD_START=$(date +%s)
+          # 后台监控 + 激进清理: 每 20s 检查 + 清理
           (while true; do
-            sleep 60
-            echo "=== [PROGRESS] $(date +%H:%M:%S) ==="
+            sleep 20
+            NOW=$(date +%s)
+            ELAPSED=$(( (NOW - BUILD_START) / 60 ))
+            echo "=== [PROGRESS] $(date +%H:%M:%S) (${ELAPSED}min) ==="
             tail -3 "$NINJA_LOG" 2>/dev/null || true
             echo "=== [DISK] $(df -h / | tail -1) ==="
             echo "=== [MEM] $(free -h | awk '/^Mem:/{print $7" avail"}') ==="
-            # 磁盘空间低于 5GB 时激进清理 (提高阈值, 避免再次耗尽)
             AVAIL_KB=$(df --output=avail -BKB / 2>/dev/null | tail -1 | tr -d ' ')
-            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 5242880 ] 2>/dev/null; then
-              echo "=== [DISK CLEANUP] Low disk (<5GB)! Aggressive cleanup ==="
-              # .sdump: ABI dump 产物 (即使 WITHOUT_CHECK_API=true 仍可能有残留)
-              find out/ -name "*.sdump" -type f -delete 2>/dev/null
-              # .gcno: 代码覆盖率数据 (编译完成后无用)
-              find out/ -name "*.gcno" -type f -delete 2>/dev/null
-              # .gcda: 运行时覆盖率数据
-              find out/ -name "*.gcda" -type f -delete 2>/dev/null
-              # .o.d: 依赖关系文件 (已编译模块的 .o.d 可安全删除)
-              # 注意: ninja 会重新生成需要的 .o.d, 删除不会导致重编译
-              find out/ -name "*.o.d" -type f -delete 2>/dev/null
-              # .toc: 链接器表 of contents (重新链接时会重建)
-              find out/ -name "*.toc" -type f -delete 2>/dev/null
-              echo "=== [DISK CLEANUP] Done, disk now: $(df -h / | tail -1) ==="
+            # 45 分钟后持续清理 host .o (host 工具已编译完成)
+            if [ -n "$ELAPSED" ] && [ "$ELAPSED" -gt 45 ] 2>/dev/null; then
+              HOST_O_SIZE=$(du -sb out/host 2>/dev/null | awk '{print $1}' || echo 0)
+              if [ -n "$HOST_O_SIZE" ] && [ "$HOST_O_SIZE" -gt 1073741824 ] 2>/dev/null; then
+                find out/host -name "*.o" -type f -delete 2>/dev/null
+                echo "=== [CLEANUP] Removed host .o (>${ELAPSED}min) ==="
+              fi
             fi
-            # 磁盘空间低于 2GB 时紧急清理 host 工具中间产物
-            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 2097152 ] 2>/dev/null; then
-              echo "=== [DISK EMERGENCY] Very low disk (<2GB)! Emergency cleanup ==="
-              # 清理 out/host/ 中已编译的 .o 文件 (host 工具不再需要重新编译)
+            # 磁盘空间低于 15GB 时清理中间产物 (提前清理, 避免 -j4 堆积)
+            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 15728640 ] 2>/dev/null; then
+              echo "=== [DISK CLEANUP] Disk <15GB! Cleaning intermediates ==="
+              find out/ -name "*.sdump" -type f -delete 2>/dev/null
+              find out/ -name "*.gcno" -type f -delete 2>/dev/null
+              find out/ -name "*.gcda" -type f -delete 2>/dev/null
+              find out/ -name "*.o.d" -type f -delete 2>/dev/null
+              find out/ -name "*.toc" -type f -delete 2>/dev/null
+              # host .o (已编译完成的 host 工具)
               find out/host -name "*.o" -type f -delete 2>/dev/null
-              # 清理 out/soong/.intermediates/ 中已链接的 .a 文件的中间 .o
+              echo "=== [DISK CLEANUP] Done: $(df -h / | tail -1) ==="
+            fi
+            # 磁盘空间低于 8GB 时紧急清理 intermediates .o
+            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 8388608 ] 2>/dev/null; then
+              echo "=== [DISK EMERGENCY] Disk <8GB! Emergency .o cleanup ==="
+              # 清理 out/soong/.intermediates/ 中已链接的 .a 对应的 .o
               find out/soong/.intermediates -name "*.o" -path "*/obj/*" -type f -delete 2>/dev/null
-              echo "=== [DISK EMERGENCY] Done, disk now: $(df -h / | tail -1) ==="
+              # 再次清理 host
+              find out/host -name "*.o" -type f -delete 2>/dev/null
+              # 清理 .a 文件中已链接进 .so 的 (保留 .so, 删 .a)
+              # 注意: 只删除已被 .so 引用的 .a, 但难以判断, 暂不执行
+              echo "=== [DISK EMERGENCY] Done: $(df -h / | tail -1) ==="
+            fi
+            # 磁盘空间低于 3GB 时终极清理 (删除 .a, 保留 .so)
+            if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 3145728 ] 2>/dev/null; then
+              echo "=== [DISK CRITICAL] Disk <3GB! Deleting .a files ==="
+              # .a 是静态库, 链接进 .so/.executable 后不再需要
+              # ninja 重新链接时需要 .a, 但当前编译中已链接的不再需要
+              find out/soong/.intermediates -name "*.a" -type f -delete 2>/dev/null
+              echo "=== [DISK CRITICAL] Done: $(df -h / | tail -1) ==="
             fi
           done) &
           MONITOR_PID=$!
-          # 注意: 不能在编译早期删除 .o 文件! ninja 依赖 .o 存在性判断是否
-          # 需要重新编译。仅在磁盘紧急(<2GB)时清理, 此时宁可重编译也要避免 OOD
-          # 执行构建, 输出重定向到文件
+          # 注意: 删除 .o 可能导致 ninja 重编译, 但 OOD 比重编译更糟
+          # 后台清理在磁盘紧张时才触发, 权衡可接受
           m -j4 systemimage > "$NINJA_LOG" 2>&1
           BUILD_EXIT=$?
           kill $MONITOR_PID 2>/dev/null || true
           wait $MONITOR_PID 2>/dev/null || true
-          # 打印最后 50 行以备检查
           echo "=== Build exit code: $BUILD_EXIT ==="
           echo "=== Last 50 lines of build log ==="
           tail -50 "$NINJA_LOG"
