@@ -308,14 +308,9 @@ jobs:
           echo "=== Removing large unnecessary source dirs ==="
           # chromium-webview 源码 (~3GB) - 系统使用 prebuilt, 源码无 Android.bp
           rm -rf ${{ env.AOSP_ROOT }}/external/chromium-webview 2>/dev/null || true
-          # CTS 兼容性测试套件 (~5GB) - GSI 编译不需要
-          rm -rf ${{ env.AOSP_ROOT }}/cts 2>/dev/null || true
-          # compatibility 兼容性相关 (~1GB)
-          rm -rf ${{ env.AOSP_ROOT }}/compatibility 2>/dev/null || true
-          # pdk 平台开发包 (~1GB)
-          rm -rf ${{ env.AOSP_ROOT }}/pdk 2>/dev/null || true
-          # tradefed 测试框架 (~1GB) - 已通过 prebuilts 提供
-          rm -rf ${{ env.AOSP_ROOT }}/tools/tradefederation 2>/dev/null || true
+          # 注意: cts/ 不能删! cts_defaults 模块被 test/ 和 packages/modules/ 引用
+          # 注意: compatibility/ 不能删! mts-target-sdk-version-current 被引用
+          # 注意: pdk/ 和 tools/tradefederation/ 需要验证依赖, 暂不删除
           
           echo "Disk after cleanup:"
           df -h /
