@@ -179,7 +179,11 @@ jobs:
           # Run #139 证实: gsi_arm64 的 "64-bit" 指设备架构, 仍编译 [arm] 32 位
           # 清空 TARGET_2ND_ARCH 使 Soong 不生成 32 位编译目标
           # 编译目标 157K→~80K, out/ 110GB→~55GB, 适配 146GB 磁盘
-          echo "=== Disabling 32-bit ABI + dexpreopt + ABI checks in BoardConfig ==="
+          echo "=== Disabling 32-bit ABI + VINTF in BoardConfig ==="
+          # 注意: WITH_DEXPREOPT=false 会导致 lunch 失败!
+          # AOSP 13 强制要求 user/userdebug 构建启用 dexpreopt
+          # (dex_preopt_config.mk:70: DEXPREOPT must be enabled for user builds)
+          # 改为只禁用 prebuilt apps 的 dexpreopt (DONT_DEXPREOPT_PREBUILTS)
           for cfg in \
             ${{ env.AOSP_ROOT }}/build/make/target/board/gsi_arm64/BoardConfig.mk \
             ${{ env.AOSP_ROOT }}/build/make/target/board/BoardConfigGsiCommon.mk; do
@@ -192,12 +196,11 @@ jobs:
               echo "TARGET_2ND_CPU_ABI :=" >> "$cfg"
               echo "TARGET_2ND_CPU_ABI2 :=" >> "$cfg"
               echo "TARGET_2ND_CPU_ABI_LIST_32_BIT :=" >> "$cfg"
-              echo "# === ZephyrOS: Disable dexpreopt (saves 5-10GB in out/) ===" >> "$cfg"
-              echo "WITH_DEXPREOPT := false" >> "$cfg"
+              echo "# === ZephyrOS: Skip dexpreopt for prebuilt apps (saves ~2GB) ===" >> "$cfg"
               echo "DONT_DEXPREOPT_PREBUILTS := true" >> "$cfg"
               echo "# === ZephyrOS: Disable VINTF manifest enforcement ===" >> "$cfg"
               echo "PRODUCT_ENFORCE_VINTF_MANIFEST := false" >> "$cfg"
-              echo "Patched $cfg (32-bit ABI + dexpreopt + VINTF disabled)"
+              echo "Patched $cfg (32-bit ABI + prebuilt dexpreopt skip + VINTF disabled)"
             fi
           done
           echo "Done."
@@ -358,10 +361,11 @@ jobs:
           # Phase 2: Ninja 编译 (-j1, 输出重定向到文件避免日志限流)
           # Run #144: 即使 32 位禁用 + clang-tidy 禁用, 79GB 源码 + 55GB out/ 仍顶满 146GB 磁盘
           # 进一步优化:
-          #   1. WITHOUT_CHECK_API=true (跳过 ABI dump, 节省 15-20GB)
-          #   2. WITH_DEXPREOPT=false (跳过 dex 预优化, 节省 5-10GB)
+          #   1. WITHOUT_CHECK_API=true (跳过 ABI dump .sdump, 节省 15-20GB)
+          #   2. DONT_DEXPREOPT_PREBUILTS=true (跳过 prebuilt app dexpreopt, 节省 ~2GB)
           #   3. -j1 (单线程, 磁盘峰值最低)
           #   4. 后台激进清理 .sdump/.gcno/.o.d
+          #   注意: WITH_DEXPREOPT=false 不可用 (AOSP 13 强制 user 构建启用 dexpreopt)
           echo "=== Phase 2: Ninja build (-j1, output to file) ==="
           export USE_RBE=false
           export WITH_TIDY=0
