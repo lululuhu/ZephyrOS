@@ -358,14 +358,12 @@ jobs:
           echo "=== Phase 1 done, keeping all source dirs ==="
           df -h /
 
-          # Phase 2: Ninja 编译 (-j4, 输出重定向到文件避免日志限流)
-          # Run #149 教训: 删除源码 → ninja 15s 报错
-          # Run #148 教训: 删除 .o → ninja 重编译恶性循环 (3h31m 比 4h 更快满)
-          # Run #147 教训: -j4 + 60s 清理 → 4h 磁盘满
-          # 新策略: 删除 .a (静态库归档), 保留 .o (避免重编译)
-          #   .a 删除后 ninja 重新归档 (从 .o, 速度快), 不重编译
-          #   .a 占 ~10-15GB, 定期删除可释放大量空间
-          echo "=== Phase 2: Ninja build (-j4, output to file) ==="
+          # Phase 2: Ninja 编译 (-j3, 输出重定向到文件避免日志限流)
+          # Run #150 (-j4 + 删 .a): 3h47m 磁盘满 (-j4 磁盘峰值仍太高)
+          # Run #146 (-j1): 6h 超时但磁盘没满 (-j1 磁盘峰值低)
+          # -j3 折中: 速度比 -j2 快 ~33%, 磁盘峰值比 -j4 低 ~25%
+          # 预计: Phase 2 ~3.5h, 总计 ~5.5h (< 6h 限制)
+          echo "=== Phase 2: Ninja build (-j3, output to file) ==="
           export USE_RBE=false
           export WITH_TIDY=0
           export WITHOUT_CHECK_API=true
@@ -418,7 +416,7 @@ jobs:
           MONITOR_PID=$!
           # 重要: 不删除 .o! 删除会导致 ninja 重编译恶性循环
           # .a 可以删除 (ninja 重新归档, 不重编译)
-          m -j4 systemimage > "$NINJA_LOG" 2>&1
+          m -j3 systemimage > "$NINJA_LOG" 2>&1
           BUILD_EXIT=$?
           kill $MONITOR_PID 2>/dev/null || true
           wait $MONITOR_PID 2>/dev/null || true
