@@ -339,12 +339,12 @@ jobs:
           m -j1 nothing
           echo "=== build.ninja generated ==="
 
-          # Phase 1 完成, 缩减 swap 从 12GB→1GB (释放 11GB 磁盘给 out/)
-          # 1GB swap 足够应对偶发内存峰值, -j1 配合 MALLOC_ARENA_MAX=2
-          echo "=== Reducing swap 12GB→1GB for ninja build ==="
+          # Phase 1 完成, 缩减 swap 从 12GB→2GB (释放 10GB 磁盘给 out/)
+          # 2GB swap 应对 -j3 内存峰值 (Run #151 runner OOM 失去通信)
+          echo "=== Reducing swap 12GB→2GB for ninja build ==="
           sudo swapoff /swap_zephyr 2>/dev/null || true
           sudo rm -f /swap_zephyr 2>/dev/null || true
-          sudo fallocate -l 1G /swap_zephyr
+          sudo fallocate -l 2G /swap_zephyr
           sudo chmod 600 /swap_zephyr
           sudo mkswap /swap_zephyr
           sudo swapon /swap_zephyr
@@ -372,41 +372,33 @@ jobs:
           set +e  # 重要: 关闭 set -e, 确保 m 命令失败后能看到错误日志
           NINJA_LOG=/tmp/ninja_build.log
           BUILD_START=$(date +%s)
-          # 后台监控: 每 30s 打印进度 + 清理
+          # 后台监控: 每 60s 打印进度 + 清理 (30s 太频繁导致 CPU 饱和)
           (while true; do
-            sleep 30
+            sleep 60
             NOW=$(date +%s)
             ELAPSED=$(( (NOW - BUILD_START) / 60 ))
             echo "=== [PROGRESS] $(date +%H:%M:%S) (${ELAPSED}min) ==="
-            tail -3 "$NINJA_LOG" 2>/dev/null || true
+            tail -2 "$NINJA_LOG" 2>/dev/null || true
             echo "=== [DISK] $(df -h / | tail -1) ==="
             echo "=== [MEM] $(free -h | awk '/^Mem:/{print $7" avail"}') ==="
             AVAIL_KB=$(df --output=avail -BKB / 2>/dev/null | tail -1 | tr -d ' ')
-            # 20 分钟后持续清理 host .o (host 工具已编译完成)
-            if [ -n "$ELAPSED" ] && [ "$ELAPSED" -gt 20 ] 2>/dev/null; then
-              find out/host -name "*.o" -type f -delete 2>/dev/null
-            fi
-            # 磁盘空间低于 12GB 时: 清理安全文件 + 删除 .a
-            # .a 删除后 ninja 重新归档 (从 .o), 不重编译, 代价小
+            # 只在磁盘低于 12GB 时才运行 find (减少 CPU 占用)
             if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 12582912 ] 2>/dev/null; then
               echo "=== [DISK CLEANUP] Disk <12GB! Cleaning safe + .a files ==="
-              # 安全文件
-              find out/ -name "*.sdump" -type f -delete 2>/dev/null
-              find out/ -name "*.gcno" -type f -delete 2>/dev/null
-              find out/ -name "*.gcda" -type f -delete 2>/dev/null
-              find out/ -name "*.o.d" -type f -delete 2>/dev/null
-              find out/ -name "*.toc" -type f -delete 2>/dev/null
-              # host .o
+              # 限制 find 范围到 .intermediates (减少扫描时间)
+              find out/soong/.intermediates -name "*.sdump" -type f -delete 2>/dev/null
+              find out/soong/.intermediates -name "*.gcno" -type f -delete 2>/dev/null
+              find out/soong/.intermediates -name "*.o.d" -type f -delete 2>/dev/null
+              find out/soong/.intermediates -name "*.toc" -type f -delete 2>/dev/null
+              # host .o (只在磁盘低时清理, 非持续)
               find out/host -name "*.o" -type f -delete 2>/dev/null
-              # .a 文件 (静态库归档, 链接进 .so 后不需要)
-              # ninja 重新归档从 .o (快), 不会重编译
+              # .a 文件 (静态库归档, ninja 重新归档不重编译)
               find out/soong/.intermediates -name "*.a" -type f -delete 2>/dev/null
               echo "=== [DISK CLEANUP] Done: $(df -h / | tail -1) ==="
             fi
-            # 磁盘空间低于 4GB 时: 删除 host bin (已编译完成的 host 工具)
+            # 磁盘空间低于 4GB 时: 删除 host bin
             if [ -n "$AVAIL_KB" ] && [ "$AVAIL_KB" -lt 4194304 ] 2>/dev/null; then
               echo "=== [DISK EMERGENCY] Disk <4GB! Deleting host bins ==="
-              # host 工具的可执行文件 (编译完成后不再需要, 除了签名工具)
               find out/host/linux-x86/bin -type f -not -name "signapk*" \
                 -not -name "apksigner*" -not -name "zipalign*" \
                 -delete 2>/dev/null
